@@ -1,6 +1,7 @@
 # Stamp Quiz App
 
-A gamified Stamp Quiz App where users answer quiz questions and earn a digital stamp for each correct answer. Stamps are saved across sessions using SharedPreferences. The app is built with Clean Architecture principles and uses Provider for state management.
+
+A gamified Stamp Quiz App where users answer quiz questions and earn a digital stamp for each correct answer. Stamps are saved across sessions using SharedPreferences. The app is built with Clean Architecture principles and uses Provider for state management. Developed using Flutter version 3.29.0.
 
 ---
 
@@ -70,7 +71,7 @@ pubspec.yaml
 ### 1. **Clone the repository**
 
 ```sh
-git clone https://github.com/yourusername/stamp_quiz_app.git
+git clone https://github.com/RalphJ4/stamp_quiz_app.git
 cd stamp_quiz_app
 ```
 
