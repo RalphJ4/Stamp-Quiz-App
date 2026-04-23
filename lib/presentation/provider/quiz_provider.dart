@@ -66,13 +66,14 @@ class QuizProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void resetQuiz() {
+  Future<void> resetQuiz() async {
     _currentIndex = 0;
     _stamps = 0;
     _answered = false;
     _selectedOption = null;
     _animateStamp = false;
-    _saveStamps();
+    await _saveStamps();
+    await loadQuestions();
     notifyListeners();
   }
 

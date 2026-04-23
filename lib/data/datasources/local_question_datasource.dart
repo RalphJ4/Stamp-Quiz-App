@@ -36,6 +36,20 @@ class LocalQuestionDataSource {
     ];
 
     await Future.delayed(const Duration(milliseconds: 200));
-    return raw.map((m) => QuestionModel.fromMap(m)).toList();
+    final questions = raw.map((m) => QuestionModel.fromMap(m)).toList();
+    questions.shuffle();
+    for (var i = 0; i < questions.length; i++) {
+      final q = questions[i];
+      final shuffledOptions = List<String>.from(q.options)..shuffle();
+      final correctOption = q.options[q.correctIndex];
+      final newCorrectIndex = shuffledOptions.indexOf(correctOption);
+      questions[i] = QuestionModel(
+        id: q.id,
+        question: q.question,
+        options: shuffledOptions,
+        correctIndex: newCorrectIndex,
+      );
+    }
+    return questions;
   }
 }

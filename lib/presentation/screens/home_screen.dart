@@ -89,7 +89,8 @@ class HomeScreen extends StatelessWidget {
                 elevation: 4,
                 textStyle: TextStyle(fontSize: 18.sp),
               ),
-              onPressed: () {
+              onPressed: () async {
+                await quizProvider.resetQuiz();
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreen()));
               },
               icon: const Icon(Icons.play_arrow, size: 28),
