@@ -80,21 +80,30 @@ class HomeScreen extends StatelessWidget {
               ),
             SizedBox(height: 2.h),
 
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 4,
-                textStyle: TextStyle(fontSize: 18.sp),
-              ),
-              onPressed: () async {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreen()));
-                await quizProvider.resetQuiz();
+            Consumer<QuizProvider>(
+              builder: (context, quizProvider, _) {
+                return ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 4,
+                    textStyle: TextStyle(fontSize: 18.sp),
+                  ),
+                  onPressed: () {
+                    if (!quizProvider.isQuizInProgress) {
+                      quizProvider.resetQuiz();
+                    }
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreen()));
+                  },
+                  icon: const Icon(Icons.play_arrow, size: 28),
+                  label: Text(
+                    quizProvider.isQuizInProgress ? 'Continue Quiz' : 'Start Quiz',
+                    style: TextStyle(fontSize: 18.sp),
+                  ),
+                );
               },
-              icon: const Icon(Icons.play_arrow, size: 28),
-              label: Text('Start Quiz', style: TextStyle(fontSize: 18.sp)),
             ),
             SizedBox(height: 2.h),
 

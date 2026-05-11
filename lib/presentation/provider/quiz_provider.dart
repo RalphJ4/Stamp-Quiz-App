@@ -33,6 +33,12 @@ class QuizProvider extends ChangeNotifier {
   bool _animateStamp = false;
   bool get animateStamp => _animateStamp;
 
+  bool _isQuizFinished = false;
+  bool get isQuizFinished => _isQuizFinished;
+
+  bool _quizStarted = false;
+  bool get isQuizInProgress => _quizStarted && !_isQuizFinished;
+
   Future<void> loadQuestions() async {
     _questions = await _getQuestions.execute();
     await _loadStamps();
@@ -41,6 +47,7 @@ class QuizProvider extends ChangeNotifier {
 
   void selectOption(int index) {
     if (_answered) return;
+    _quizStarted = true;
     _selectedOption = index;
     _answered = true;
 
@@ -66,12 +73,19 @@ class QuizProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void finishQuiz() {
+    _isQuizFinished = true;
+    notifyListeners();
+  }
+
   Future<void> resetQuiz() async {
     _currentIndex = 0;
     _stamps = 0;
     _answered = false;
     _selectedOption = null;
     _animateStamp = false;
+    _isQuizFinished = false;
+    _quizStarted = false;
     await _saveStamps();
     await loadQuestions();
     notifyListeners();

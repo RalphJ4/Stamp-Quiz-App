@@ -265,7 +265,10 @@ class _QuizScreenState extends State<QuizScreen> {
                             elevation: 3,
                           ),
                           icon: Icon(Icons.emoji_events, size: 18.sp),
-                          onPressed: () => Navigator.of(context).pop(),
+                          onPressed: () {
+                            provider.finishQuiz();
+                            Navigator.of(context).pop();
+                          },
                           label: const Text('Finish'),
                         ),
                     ],
