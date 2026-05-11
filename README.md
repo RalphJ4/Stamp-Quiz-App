@@ -71,7 +71,7 @@ pubspec.yaml
 ### 1. **Clone the repository**
 
 ```sh
-git clone https://github.com/RalphJ4/stamp_quiz_app.git
+git clone https://github.com/RalphJ4/Stamp-Quiz-App.git
 cd stamp_quiz_app
 ```
 
