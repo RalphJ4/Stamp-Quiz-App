@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quiz_app/domain/entities/question.dart';
 import 'package:quiz_app/presentation/provider/quiz_provider.dart';
 import 'package:confetti/confetti.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -122,6 +123,19 @@ class _QuizScreenState extends State<QuizScreen> {
 
           final question = provider.questions[provider.currentIndex];
 
+          final diffColors = {
+            QuestionDifficulty.easy: Colors.green,
+            QuestionDifficulty.medium: Colors.orange,
+            QuestionDifficulty.hard: Colors.red,
+          };
+          final diffLabels = {
+            QuestionDifficulty.easy: 'Easy',
+            QuestionDifficulty.medium: 'Medium',
+            QuestionDifficulty.hard: 'Hard',
+          };
+          final diffColor = diffColors[question.difficulty]!;
+          final diffLabel = diffLabels[question.difficulty]!;
+
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
             child: Column(
@@ -159,10 +173,31 @@ class _QuizScreenState extends State<QuizScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 2.h),
-                Text(
-                  'Question ${provider.currentIndex + 1}/${provider.questions.length}',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17.sp, color: Colors.deepPurple),
+                SizedBox(height: 1.h),
+                Row(
+                  children: [
+                    Text(
+                      'Question ${provider.currentIndex + 1}/${provider.questions.length}',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17.sp, color: Colors.deepPurple),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.3.h),
+                      decoration: BoxDecoration(
+                        color: diffColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: diffColor),
+                      ),
+                      child: Text(
+                        '$diffLabel  +${question.stampReward}',
+                        style: TextStyle(
+                          color: diffColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14.sp,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 1.5.h),
                 Card(

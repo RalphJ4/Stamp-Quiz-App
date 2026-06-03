@@ -6,6 +6,13 @@ import '../../data/datasources/local_question_datasource.dart';
 import '../../data/repositories/question_repository_impl.dart';
 import '../../domain/usecases/get_questions.dart';
 
+class CategoryStats {
+  final String category;
+  final int stamps;
+
+  const CategoryStats({required this.category, required this.stamps});
+}
+
 class QuizProvider extends ChangeNotifier {
   final _local = LocalQuestionDataSource();
   late final GetQuestions _getQuestions;
@@ -15,6 +22,7 @@ class QuizProvider extends ChangeNotifier {
     _getQuestions = GetQuestions(repo);
   }
 
+  List<Question> _allQuestions = [];
   List<Question> _questions = [];
   List<Question> get questions => _questions;
 
@@ -39,10 +47,54 @@ class QuizProvider extends ChangeNotifier {
   bool _quizStarted = false;
   bool get isQuizInProgress => _quizStarted && !_isQuizFinished;
 
+  QuestionCategory _selectedCategory = QuestionCategory.space;
+  QuestionCategory get selectedCategory => _selectedCategory;
+
+  int _currentStreak = 0;
+  int get currentStreak => _currentStreak;
+
+  int _bestStreak = 0;
+  int get bestStreak => _bestStreak;
+
+  int _totalCorrect = 0;
+  int get totalCorrect => _totalCorrect;
+
+  int _totalAnswered = 0;
+  int get totalAnswered => _totalAnswered;
+
   Future<void> loadQuestions() async {
-    _questions = await _getQuestions.execute();
-    await _loadStamps();
+    _allQuestions = await _getQuestions.execute();
+    await _loadStats();
+    _filterByCategory(_selectedCategory);
     notifyListeners();
+  }
+
+  void selectCategory(QuestionCategory category) {
+    _selectedCategory = category;
+    _filterByCategory(category);
+    notifyListeners();
+  }
+
+  void _filterByCategory(QuestionCategory category) {
+    _questions = _allQuestions.where((q) => q.category == category).toList();
+    _currentIndex = 0;
+    _answered = false;
+    _selectedOption = null;
+    _animateStamp = false;
+    _isQuizFinished = false;
+    _quizStarted = false;
+    notifyListeners();
+  }
+
+  int getCategoryStamps(QuestionCategory category) {
+    return 0;
+  }
+
+  List<CategoryStats> get allCategoryStats {
+    return QuestionCategory.values.map((cat) {
+      final count = _allQuestions.where((q) => q.category == cat).length;
+      return CategoryStats(category: cat.name, stamps: count);
+    }).toList();
   }
 
   void selectOption(int index) {
@@ -50,17 +102,26 @@ class QuizProvider extends ChangeNotifier {
     _quizStarted = true;
     _selectedOption = index;
     _answered = true;
+    _totalAnswered++;
 
     if (_questions[_currentIndex].correctIndex == index) {
-      _stamps++;
+      final reward = _questions[_currentIndex].stampReward;
+      _stamps += reward;
+      _currentStreak++;
+      if (_currentStreak > _bestStreak) {
+        _bestStreak = _currentStreak;
+      }
+      _totalCorrect++;
       _animateStamp = true;
-      _saveStamps();
+      _saveStats();
     } else {
+      _currentStreak = 0;
       _animateStamp = false;
     }
 
     notifyListeners();
   }
+
   void nextQuestion() {
     if (_currentIndex < _questions.length - 1) {
       _currentIndex++;
@@ -86,18 +147,28 @@ class QuizProvider extends ChangeNotifier {
     _animateStamp = false;
     _isQuizFinished = false;
     _quizStarted = false;
-    await _saveStamps();
+    _currentStreak = 0;
+    _bestStreak = 0;
+    _totalCorrect = 0;
+    _totalAnswered = 0;
+    await _saveStats();
     await loadQuestions();
     notifyListeners();
   }
 
-  Future<void> _loadStamps() async {
+  Future<void> _loadStats() async {
     final prefs = await SharedPreferences.getInstance();
+    _bestStreak = prefs.getInt('bestStreak') ?? 0;
+    _totalCorrect = prefs.getInt('totalCorrect') ?? 0;
+    _totalAnswered = prefs.getInt('totalAnswered') ?? 0;
     _stamps = prefs.getInt('stamps') ?? 0;
   }
 
-  Future<void> _saveStamps() async {
+  Future<void> _saveStats() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('stamps', _stamps);
+    await prefs.setInt('bestStreak', _bestStreak);
+    await prefs.setInt('totalCorrect', _totalCorrect);
+    await prefs.setInt('totalAnswered', _totalAnswered);
   }
 }

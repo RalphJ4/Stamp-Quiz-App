@@ -3,8 +3,9 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 
 class StampWidget extends StatefulWidget {
   final bool isEarned;
+  final Color? color;
 
-  const StampWidget({super.key, required this.isEarned});
+  const StampWidget({super.key, required this.isEarned, this.color});
 
   @override
   StampWidgetState createState() => StampWidgetState();
@@ -51,6 +52,9 @@ class StampWidgetState extends State<StampWidget> with SingleTickerProviderState
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = widget.isEarned ? (widget.color ?? Colors.deepPurple) : (widget.color ?? Colors.grey[200]!);
+    final borderColor = widget.isEarned ? (widget.color ?? Colors.deepPurple) : Colors.grey;
+
     return ScaleTransition(
       scale: _scaleAnimation,
       child: FadeTransition(
@@ -59,9 +63,12 @@ class StampWidgetState extends State<StampWidget> with SingleTickerProviderState
           width: 12.w,
           height: 12.w,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
+            border: Border.all(color: borderColor),
             borderRadius: BorderRadius.circular(60),
-            color: Colors.grey[200],
+            color: widget.isEarned ? null : bgColor,
+            gradient: widget.isEarned
+                ? RadialGradient(colors: [bgColor.withValues(alpha: 0.3), bgColor])
+                : null,
             image: widget.isEarned ? const DecorationImage(image: AssetImage('assets/images/stamp.png')) : null,
           ),
         ),

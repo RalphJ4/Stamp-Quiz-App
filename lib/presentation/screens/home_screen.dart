@@ -1,19 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:quiz_app/domain/entities/question.dart';
 import 'package:quiz_app/presentation/provider/quiz_provider.dart';
-import 'package:quiz_app/presentation/screens/quiz_screen.dart';
-import 'package:quiz_app/presentation/screens/stamp_card_screen.dart';
+import 'package:quiz_app/presentation/screens/category_selection_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  static const categoryColors = {
+    QuestionCategory.space: Color(0xFF6C63FF),
+    QuestionCategory.animals: Color(0xFFFF6B6B),
+    QuestionCategory.history: Color(0xFFFFA726),
+    QuestionCategory.science: Color(0xFF66BB6A),
+    QuestionCategory.geography: Color(0xFF42A5F5),
+  };
+
+  static const categoryIcons = {
+    QuestionCategory.space: Icons.rocket_launch,
+    QuestionCategory.animals: Icons.pets,
+    QuestionCategory.history: Icons.history_edu,
+    QuestionCategory.science: Icons.science,
+    QuestionCategory.geography: Icons.public,
+  };
+
+  static const categoryLabels = {
+    QuestionCategory.space: 'Space',
+    QuestionCategory.animals: 'Animals',
+    QuestionCategory.history: 'History',
+    QuestionCategory.science: 'Science',
+    QuestionCategory.geography: 'Geography',
+  };
+
   @override
   Widget build(BuildContext context) {
     final quizProvider = Provider.of<QuizProvider>(context);
-    final total = quizProvider.questions.length;
     final earned = quizProvider.stamps;
-    final percent = total > 0 ? earned / total : 0.0;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F4FF),
@@ -29,83 +51,165 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 3.h),
+            SizedBox(height: 2.h),
             Text(
               'Welcome, Challenger!',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Colors.deepPurple, fontSize: 22.sp),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.deepPurple,
+                fontSize: 22.sp,
+              ),
               textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 0.5.h),
+            Text(
+              'Collect stamps by answering quiz questions!',
+              style: TextStyle(fontSize: 16.sp, color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 2.h),
+
+            Container(
+              padding: EdgeInsets.all(3.w),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple[50],
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total Stamps', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '$earned',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18.sp),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 1.h),
+                  if (quizProvider.totalAnswered > 0) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Accuracy', style: TextStyle(fontSize: 15.sp, color: Colors.grey[600])),
+                        Text(
+                          '${(quizProvider.totalCorrect / quizProvider.totalAnswered * 100).toStringAsFixed(1)}%',
+                          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 0.5.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Best Streak', style: TextStyle(fontSize: 15.sp, color: Colors.grey[600])),
+                        Row(
+                          children: [
+                            Icon(Icons.local_fire_department, color: Colors.orange, size: 18.sp),
+                            SizedBox(width: 1.w),
+                            Text(
+                              '${quizProvider.bestStreak}',
+                              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            SizedBox(height: 2.h),
+
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Categories',
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+              ),
             ),
             SizedBox(height: 1.h),
-            Text(
-              'Collect all the stamps by answering quiz questions!',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 16.sp),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 3.h),
 
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                LinearProgressIndicator(
-                  value: percent,
-                  minHeight: 2.2.h,
-                  backgroundColor: Colors.deepPurple[100],
-                  color: Colors.deepPurple,
-                  borderRadius: BorderRadius.circular(12),
+            ...QuestionCategory.values.map((cat) {
+              final color = categoryColors[cat]!;
+              final icon = categoryIcons[cat]!;
+              final label = categoryLabels[cat]!;
+              final catQuestions = quizProvider.questions.where((q) => q.category == cat).length;
+
+              return Padding(
+                padding: EdgeInsets.only(bottom: 1.h),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: color.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(icon, color: color, size: 7.w),
+                      SizedBox(width: 3.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              label,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: color,
+                              ),
+                            ),
+                            SizedBox(height: 0.3.h),
+                            Text(
+                              '$catQuestions questions available',
+                              style: TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                Text(
-                  '$earned / $total Stamps',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16.sp),
-                ),
-              ],
-            ),
-            SizedBox(height: 3.h),
+              );
+            }),
 
-            Expanded(child: StampCardScreen(earnedStamps: earned, totalStamps: total)),
-            SizedBox(height: 2.h),
-
-            if (earned == total && total > 0)
-              Text(
-                'You collected all stamps! Great job!',
-                style: TextStyle(color: Colors.green[700], fontWeight: FontWeight.bold, fontSize: 18.sp),
-                textAlign: TextAlign.center,
-              )
-            else
-              Text(
-                'Keep going to collect more stamps!',
-                style: TextStyle(color: Colors.deepPurple[400], fontWeight: FontWeight.w600, fontSize: 16.sp),
-                textAlign: TextAlign.center,
-              ),
-            SizedBox(height: 2.h),
+            const Spacer(),
 
             Consumer<QuizProvider>(
               builder: (context, quizProvider, _) {
-                return ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 2.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 4,
-                    textStyle: TextStyle(fontSize: 18.sp),
-                  ),
-                  onPressed: () {
-                    if (!quizProvider.isQuizInProgress) {
-                      quizProvider.resetQuiz();
-                    }
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreen()));
-                  },
-                  icon: const Icon(Icons.play_arrow, size: 28),
-                  label: Text(
-                    quizProvider.isQuizInProgress ? 'Continue Quiz' : 'Start Quiz',
-                    style: TextStyle(fontSize: 18.sp),
+                return SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 1.8.h),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 4,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const CategorySelectionScreen()),
+                      );
+                    },
+                    icon: const Icon(Icons.play_arrow, size: 28),
+                    label: Text('Start Quiz', style: TextStyle(fontSize: 18.sp)),
                   ),
                 );
               },
             ),
-            SizedBox(height: 2.h),
+            SizedBox(height: 1.h),
 
             TextButton(
               onPressed: () {
