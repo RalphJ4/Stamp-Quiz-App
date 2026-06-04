@@ -1,32 +1,41 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
+const {onSchedule} = require("firebase-functions/v2/scheduler");
+const {initializeApp} = require("firebase-admin/app");
+const {getFirestore} = require("firebase-admin/firestore");
 const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
-const logger = require("firebase-functions/logger");
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+setGlobalOptions({maxInstances: 10});
+initializeApp();
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+const db = getFirestore();
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+exports.resetWeeklyXp = onSchedule(
+  {
+    schedule: "every sunday 00:00",
+    timeZone: "UTC",
+  },
+  async () => {
+    const snapshot = await db.collection("leaderboard").get();
+    const batch = db.batch();
+    snapshot.docs.forEach((doc) => {
+      batch.update(doc.ref, {weeklyXp: 0});
+    });
+    await batch.commit();
+    console.log(`Reset weeklyXp for ${snapshot.docs.length} users`);
+  },
+);
+
+exports.resetMonthlyXp = onSchedule(
+  {
+    schedule: "1 of month 00:00",
+    timeZone: "UTC",
+  },
+  async () => {
+    const snapshot = await db.collection("leaderboard").get();
+    const batch = db.batch();
+    snapshot.docs.forEach((doc) => {
+      batch.update(doc.ref, {monthlyXp: 0});
+    });
+    await batch.commit();
+    console.log(`Reset monthlyXp for ${snapshot.docs.length} users`);
+  },
+);

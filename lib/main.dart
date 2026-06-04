@@ -5,6 +5,8 @@ import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/presentation/provider/daily_challenge_provider.dart';
 import 'package:quiz_app/presentation/provider/duel_provider.dart';
+import 'package:quiz_app/domain/entities/leaderboard_period.dart';
+import 'package:quiz_app/presentation/provider/leaderboard_provider.dart';
 import 'package:quiz_app/presentation/provider/power_up_provider.dart';
 import 'package:quiz_app/presentation/provider/quiz_provider.dart';
 import 'package:quiz_app/presentation/screens/home_screen.dart';
@@ -95,6 +97,7 @@ class QuizApp extends StatelessWidget {
         ChangeNotifierProvider(create: (ctx) => PowerUpProvider(ctx.read<AuthModeManager>(), ctx.read<QuizProvider>())..fetchInventory()),
         ChangeNotifierProvider(create: (ctx) => DailyChallengeProvider(ctx.read<AuthModeManager>())..loadToday()),
         ChangeNotifierProvider(create: (ctx) => DuelProvider(ctx.read<AuthModeManager>())),
+        ChangeNotifierProvider(create: (ctx) => LeaderboardProvider(ctx.read<AuthModeManager>(), ctx.read<QuizProvider>())..fetchPeriod(LeaderboardPeriod.allTime)),
       ],
       child: ResponsiveSizer(
         builder: (context, orientation, screenType) {

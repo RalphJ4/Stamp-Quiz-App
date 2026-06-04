@@ -8,6 +8,7 @@ import 'package:quiz_app/presentation/screens/category_selection_screen.dart';
 import 'package:quiz_app/presentation/screens/daily_challenge_screen.dart';
 import 'package:quiz_app/presentation/screens/onboarding_screen.dart';
 import 'package:quiz_app/presentation/screens/duel_screen.dart';
+import 'package:quiz_app/presentation/screens/leaderboard_screen.dart';
 import 'package:quiz_app/presentation/screens/shop_screen.dart';
 import 'package:quiz_app/presentation/widgets/guest_banner.dart';
 import 'package:quiz_app/presentation/widgets/xp_streak_bar.dart';
@@ -57,6 +58,14 @@ class HomeScreen extends StatelessWidget {
         elevation: 0,
         toolbarHeight: 7.h,
         actions: [
+          IconButton(
+            icon: Icon(Icons.leaderboard, color: const Color(0xFFE8B86D), size: 6.w),
+            tooltip: 'Leaderboard',
+            onPressed: () {
+              _log.i('→ LeaderboardScreen');
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const LeaderboardScreen()));
+            },
+          ),
           IconButton(
             icon: Icon(Icons.shopping_bag, color: const Color(0xFFE8B86D), size: 6.w),
             tooltip: 'Power-Up Shop',
