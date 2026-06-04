@@ -176,7 +176,7 @@ class HomeScreen extends StatelessWidget {
                   if (dailyProvider.loading) return const SizedBox.shrink();
                   final available = !dailyProvider.completed && dailyProvider.challenge != null;
                   return Padding(
-                    padding: EdgeInsets.only(bottom: 2.h, left: 2.5.w, right: 2.5.w),
+                    padding: EdgeInsets.only(bottom: 2.h),
                     child: GestureDetector(
                       onTap: () {
                         _log.i('→ DailyChallengeScreen');

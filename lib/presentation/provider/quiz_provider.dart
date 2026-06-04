@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -70,6 +72,15 @@ class QuizProvider extends ChangeNotifier {
   bool _isQuizFinished = false;
   bool get isQuizFinished => _isQuizFinished;
 
+  int _hintsRemaining = 3;
+  int get hintsRemaining => _hintsRemaining;
+
+  bool _usedHint = false;
+  bool get usedHint => _usedHint;
+
+  Set<int> _eliminatedOptions = {};
+  Set<int> get eliminatedOptions => _eliminatedOptions;
+
   bool _quizStarted = false;
   bool get isQuizInProgress => _quizStarted && !_isQuizFinished;
 
@@ -112,6 +123,9 @@ class QuizProvider extends ChangeNotifier {
     _animateStamp = false;
     _isQuizFinished = false;
     _quizStarted = false;
+    _hintsRemaining = 3;
+    _usedHint = false;
+    _eliminatedOptions = {};
     notifyListeners();
   }
 
@@ -135,7 +149,8 @@ class QuizProvider extends ChangeNotifier {
 
     if (_questions[_currentIndex].correctIndex == index) {
       final reward = _questions[_currentIndex].stampReward;
-      _stamps += reward;
+      final adjustedReward = _usedHint ? max(reward ~/ 2, 1) : reward;
+      _stamps += adjustedReward;
       _currentStreak++;
       if (_currentStreak > _bestStreak) {
         _bestStreak = _currentStreak;
@@ -151,7 +166,24 @@ class QuizProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void useHint() {
+    if (_hintsRemaining <= 0 || _answered) return;
+    _hintsRemaining--;
+    _usedHint = true;
+
+    final correctIdx = _questions[_currentIndex].correctIndex;
+    final wrongIndices = List.generate(_questions[_currentIndex].options.length, (i) => i)
+        .where((i) => i != correctIdx)
+        .toList();
+    wrongIndices.shuffle();
+    _eliminatedOptions = wrongIndices.take(min(2, wrongIndices.length)).toSet();
+
+    notifyListeners();
+  }
+
   void nextQuestion() {
+    _usedHint = false;
+    _eliminatedOptions = {};
     if (_currentIndex < _questions.length - 1) {
       _currentIndex++;
     } else {
@@ -180,6 +212,9 @@ class QuizProvider extends ChangeNotifier {
     _bestStreak = 0;
     _totalCorrect = 0;
     _totalAnswered = 0;
+    _hintsRemaining = 3;
+    _usedHint = false;
+    _eliminatedOptions = {};
     await _saveStats();
     await loadQuestions();
     notifyListeners();

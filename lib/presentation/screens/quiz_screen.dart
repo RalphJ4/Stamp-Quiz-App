@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/domain/entities/question.dart';
 import 'package:quiz_app/presentation/provider/quiz_provider.dart';
+import 'package:quiz_app/presentation/widgets/hint_button.dart';
 import 'package:confetti/confetti.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -112,6 +113,7 @@ class _QuizScreenState extends State<QuizScreen> {
             Text('Quiz', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: Colors.white)),
           ],
         ),
+        actions: [const HintButton()],
         toolbarHeight: 7.h,
         backgroundColor: const Color(0xFF1A1A2E),
         elevation: 2,
@@ -215,6 +217,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 SizedBox(height: 2.h),
                 ...List.generate(question.options.length, (i) {
                   final isSelected = provider.selectedOption == i;
+                  final isEliminated = provider.eliminatedOptions.contains(i) && !provider.answered;
                   Color? tileColor;
                   if (provider.answered) {
                     if (i == question.correctIndex) {
@@ -222,6 +225,8 @@ class _QuizScreenState extends State<QuizScreen> {
                     } else if (isSelected) {
                       tileColor = Colors.red.withValues(alpha: 0.2);
                     }
+                  } else if (isEliminated) {
+                    tileColor = Colors.white10;
                   }
                   return Card(
                     elevation: isSelected ? 6 : 2,
@@ -229,7 +234,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
-                        color: tileColor ?? (isSelected ? const Color(0xFFE8B86D) : Colors.white24),
+                        color: tileColor ?? (isSelected ? const Color(0xFFE8B86D) : isEliminated ? Colors.white10 : Colors.white24),
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -240,15 +245,18 @@ class _QuizScreenState extends State<QuizScreen> {
                         question.options[i],
                         style: TextStyle(
                           fontSize: 16.5.sp,
-                          color: provider.answered
-                              ? (i == question.correctIndex ? Colors.green[300]
-                                  : isSelected ? Colors.red[300]
-                                  : Colors.white70)
-                              : Colors.white,
+                          color: isEliminated
+                              ? Colors.white24
+                              : (provider.answered
+                                  ? (i == question.correctIndex ? Colors.green[300]
+                                      : isSelected ? Colors.red[300]
+                                      : Colors.white70)
+                                  : Colors.white),
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          decoration: isEliminated ? TextDecoration.lineThrough : null,
                         ),
                       ),
-                      onTap: provider.answered ? null : () {
+                      onTap: (provider.answered || isEliminated) ? null : () {
                         provider.selectOption(i);
                         if (question.correctIndex == i) {
                           _showStampDialog(context);
