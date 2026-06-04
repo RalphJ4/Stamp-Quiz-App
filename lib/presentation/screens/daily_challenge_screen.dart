@@ -77,9 +77,10 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
       return const Center(child: Text('No challenge available', style: TextStyle(color: Colors.white70)));
     }
 
-    return Padding(
-      padding: EdgeInsets.all(4.w),
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           LinearProgressIndicator(
             value: (provider.currentIndex + 1) / (provider.challenge?.questions.length ?? 5),
@@ -164,7 +165,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
               ),
             );
           }),
-          const Spacer(),
+          SizedBox(height: 3.h),
           if (provider.answered)
             SizedBox(
               width: double.infinity,
@@ -186,7 +187,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                     : 'Complete Challenge'),
               ),
             ),
-          SizedBox(height: 2.h),
+          SizedBox(height: 3.h),
         ],
       ),
     );

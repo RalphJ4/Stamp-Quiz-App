@@ -7,7 +7,9 @@ import 'package:quiz_app/presentation/provider/quiz_provider.dart';
 import 'package:quiz_app/presentation/screens/category_selection_screen.dart';
 import 'package:quiz_app/presentation/screens/daily_challenge_screen.dart';
 import 'package:quiz_app/presentation/screens/onboarding_screen.dart';
+import 'package:quiz_app/presentation/screens/shop_screen.dart';
 import 'package:quiz_app/presentation/widgets/guest_banner.dart';
+import 'package:quiz_app/presentation/widgets/xp_streak_bar.dart';
 import 'package:quiz_app/services/auth_mode_manager.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
@@ -43,7 +45,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final quizProvider = Provider.of<QuizProvider>(context);
-    final earned = quizProvider.stamps;
     final authManager = context.watch<AuthModeManager>();
 
     return Scaffold(
@@ -55,6 +56,14 @@ class HomeScreen extends StatelessWidget {
         elevation: 0,
         toolbarHeight: 7.h,
         actions: [
+          IconButton(
+            icon: Icon(Icons.shopping_bag, color: const Color(0xFFE8B86D), size: 6.w),
+            tooltip: 'Power-Up Shop',
+            onPressed: () {
+              _log.i('→ ShopScreen');
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ShopScreen()));
+            },
+          ),
           if (authManager.isLoggedIn)
             PopupMenuButton<String>(
               icon: CircleAvatar(
@@ -111,64 +120,7 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height: 2.h),
 
-              Container(
-                padding: EdgeInsets.all(3.w),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A2E),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Total Stamps', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.white)),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF7B2FBE),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '$earned',
-                            style: TextStyle(color: const Color(0xFFE8B86D), fontWeight: FontWeight.bold, fontSize: 18.sp),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 1.h),
-                    if (quizProvider.totalAnswered > 0) ...[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Accuracy', style: TextStyle(fontSize: 15.sp, color: Colors.white54)),
-                          Text(
-                            '${(quizProvider.totalCorrect / quizProvider.totalAnswered * 100).toStringAsFixed(1)}%',
-                            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: Colors.white),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 0.5.h),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Best Streak', style: TextStyle(fontSize: 15.sp, color: Colors.white54)),
-                          Row(
-                            children: [
-                              Icon(Icons.local_fire_department, color: const Color(0xFFE8B86D), size: 18.sp),
-                              SizedBox(width: 1.w),
-                              Text(
-                                '${quizProvider.bestStreak}',
-                                style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+              const XpStreakBar(),
               SizedBox(height: 2.h),
 
               Consumer<DailyChallengeProvider>(
@@ -185,76 +137,66 @@ class HomeScreen extends StatelessWidget {
                           MaterialPageRoute(builder: (_) => const DailyChallengeScreen()),
                         );
                       },
-                      child: TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 1.0, end: available ? 1.05 : 1.0),
-                        duration: const Duration(milliseconds: 1200),
-                        builder: (context, scale, child) {
-                          return Transform.scale(
-                            scale: scale,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.5.h),
-                              
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: available
-                                      ? [const Color(0xFF7B2FBE), const Color(0xFF3D0D6B)]
-                                      : [const Color(0xFF16213E), const Color(0xFF1A1A2E)],
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Row(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 2.3.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: available
+                                ? [const Color(0xFF7B2FBE), const Color(0xFF3D0D6B)]
+                                : [const Color(0xFF16213E), const Color(0xFF1A1A2E)],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_today,
+                              color: available ? const Color(0xFFE8B86D) : Colors.white38,
+                              size: 6.w,
+                            ),
+                            SizedBox(width: 3.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(
-                                    Icons.calendar_today,
-                                    color: available ? const Color(0xFFE8B86D) : Colors.white38,
-                                    size: 6.w,
-                                  ),
-                                  SizedBox(width: 3.w),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Daily Challenge',
-                                          style: TextStyle(
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.bold,
-                                            color: available ? Colors.white : Colors.white54,
-                                          ),
-                                        ),
-                                        SizedBox(height: 0.3.h),
-                                        Text(
-                                          available
-                                              ? '${dailyProvider.challenge!.questions.length} questions — 3× stamps!'
-                                              : 'Completed — come back tomorrow!',
-                                          style: TextStyle(fontSize: 13.sp, color: Colors.white54),
-                                        ),
-                                      ],
+                                  Text(
+                                    'Daily Challenge',
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: available ? Colors.white : Colors.white54,
                                     ),
                                   ),
-                                  if (available)
-                                    Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFE8B86D),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        'PLAY',
-                                        style: TextStyle(
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: const Color(0xFF0D0D1A),
-                                        ),
-                                      ),
-                                    )
-                                  else
-                                    Icon(Icons.check_circle, color: Colors.green, size: 5.w),
+                                  SizedBox(height: 0.3.h),
+                                  Text(
+                                    available
+                                        ? '${dailyProvider.challenge!.questions.length} questions — 3× stamps!'
+                                        : 'Completed — come back tomorrow!',
+                                    style: TextStyle(fontSize: 13.sp, color: Colors.white54),
+                                  ),
                                 ],
                               ),
                             ),
-                          );
-                        },
+                            if (available)
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE8B86D),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  'PLAY',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF0D0D1A),
+                                  ),
+                                ),
+                              )
+                            else
+                              Icon(Icons.check_circle, color: Colors.green, size: 5.w),
+                          ],
+                        ),
                       ),
                     ),
                   );

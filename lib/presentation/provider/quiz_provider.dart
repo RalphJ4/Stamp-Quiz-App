@@ -3,11 +3,13 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../domain/entities/power_up.dart';
 import '../../domain/entities/question.dart';
 import '../../data/datasources/local_question_datasource.dart';
 import '../../data/repositories/question_repository_impl.dart';
 import '../../domain/usecases/get_questions.dart';
 import '../../services/auth_mode_manager.dart';
+import 'power_up_provider.dart';
 
 class CategoryStats {
   final String category;
@@ -21,12 +23,17 @@ class QuizProvider extends ChangeNotifier {
   late final GetQuestions _getQuestions;
   final AuthModeManager _authManager;
   String? _lastUserId;
+  PowerUpProvider? _powerUpProvider;
 
   QuizProvider(this._authManager) {
     final repo = QuestionRepositoryImpl(local: _local);
     _getQuestions = GetQuestions(repo);
     _authManager.addListener(_onAuthChanged);
     _loadStats();
+  }
+
+  void attachPowerUpProvider(PowerUpProvider provider) {
+    _powerUpProvider = provider;
   }
 
   @override
@@ -148,9 +155,14 @@ class QuizProvider extends ChangeNotifier {
     _totalAnswered++;
 
     if (_questions[_currentIndex].correctIndex == index) {
-      final reward = _questions[_currentIndex].stampReward;
-      final adjustedReward = _usedHint ? max(reward ~/ 2, 1) : reward;
-      _stamps += adjustedReward;
+      var reward = _questions[_currentIndex].stampReward;
+      if (_usedHint) reward = max(reward ~/ 2, 1);
+      final doubleXpActive = _powerUpProvider?.hasEffect(PowerUpType.doubleXp) ?? false;
+      if (doubleXpActive) {
+        reward *= 2;
+        _powerUpProvider!.consumeEffect(PowerUpType.doubleXp);
+      }
+      _stamps += reward;
       _currentStreak++;
       if (_currentStreak > _bestStreak) {
         _bestStreak = _currentStreak;
@@ -159,7 +171,12 @@ class QuizProvider extends ChangeNotifier {
       _animateStamp = true;
       _saveStats();
     } else {
-      _currentStreak = 0;
+      final skipActive = _powerUpProvider?.hasEffect(PowerUpType.skipQuestion) ?? false;
+      if (skipActive) {
+        _powerUpProvider!.consumeEffect(PowerUpType.skipQuestion);
+      } else {
+        _currentStreak = 0;
+      }
       _animateStamp = false;
     }
 
@@ -197,6 +214,17 @@ class QuizProvider extends ChangeNotifier {
 
   void finishQuiz() {
     _isQuizFinished = true;
+    notifyListeners();
+  }
+
+  void deductStamps(int amount) {
+    _stamps = max(_stamps - amount, 0);
+    _saveStats();
+    notifyListeners();
+  }
+
+  void addHint() {
+    _hintsRemaining++;
     notifyListeners();
   }
 
