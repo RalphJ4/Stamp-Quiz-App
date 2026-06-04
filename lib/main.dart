@@ -7,8 +7,10 @@ import 'package:quiz_app/presentation/provider/daily_challenge_provider.dart';
 import 'package:quiz_app/presentation/provider/duel_provider.dart';
 import 'package:quiz_app/domain/entities/leaderboard_period.dart';
 import 'package:quiz_app/presentation/provider/leaderboard_provider.dart';
+import 'package:quiz_app/presentation/provider/onboarding_provider.dart';
 import 'package:quiz_app/presentation/provider/power_up_provider.dart';
 import 'package:quiz_app/presentation/provider/quiz_provider.dart';
+import 'package:quiz_app/presentation/screens/gamified_onboarding_screen.dart';
 import 'package:quiz_app/presentation/screens/home_screen.dart';
 import 'package:quiz_app/presentation/screens/onboarding_screen.dart';
 import 'package:quiz_app/services/auth_mode_manager.dart';
@@ -97,6 +99,7 @@ class QuizApp extends StatelessWidget {
         ChangeNotifierProvider(create: (ctx) => PowerUpProvider(ctx.read<AuthModeManager>(), ctx.read<QuizProvider>())..fetchInventory()),
         ChangeNotifierProvider(create: (ctx) => DailyChallengeProvider(ctx.read<AuthModeManager>())..loadToday()),
         ChangeNotifierProvider(create: (ctx) => DuelProvider(ctx.read<AuthModeManager>())),
+        ChangeNotifierProvider(create: (ctx) => OnboardingProvider()..loadPreferences()),
         ChangeNotifierProvider(create: (ctx) => LeaderboardProvider(ctx.read<AuthModeManager>(), ctx.read<QuizProvider>())..fetchPeriod(LeaderboardPeriod.allTime)),
       ],
       child: ResponsiveSizer(
@@ -112,12 +115,20 @@ class QuizApp extends StatelessWidget {
                 surface: Color(0xFF1A1A2E),
               ),
             ),
-            home: Consumer<AuthModeManager>(
-              builder: (context, auth, _) {
-                if (!auth.initialized) {
+            home: Consumer2<AuthModeManager, OnboardingProvider>(
+              builder: (context, auth, onboarding, _) {
+                if (!auth.initialized || onboarding.loading) {
                   QuizApp._log.i('🔄 loading');
                   return const Scaffold(
                     body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                if (!onboarding.completed) {
+                  QuizApp._log.i('🎮 GamifiedOnboarding');
+                  return GamifiedOnboardingScreen(
+                    onComplete: () {
+                      auth.startGuestSession();
+                    },
                   );
                 }
                 if (auth.mode == AuthMode.none) {
