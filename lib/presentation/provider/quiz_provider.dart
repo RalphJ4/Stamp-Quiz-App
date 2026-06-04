@@ -223,6 +223,12 @@ class QuizProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void awardStamps(int amount) {
+    _stamps += amount;
+    _saveStats();
+    notifyListeners();
+  }
+
   void addHint() {
     _hintsRemaining++;
     notifyListeners();

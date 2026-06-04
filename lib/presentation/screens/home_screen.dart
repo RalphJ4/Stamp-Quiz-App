@@ -7,6 +7,7 @@ import 'package:quiz_app/presentation/provider/quiz_provider.dart';
 import 'package:quiz_app/presentation/screens/category_selection_screen.dart';
 import 'package:quiz_app/presentation/screens/daily_challenge_screen.dart';
 import 'package:quiz_app/presentation/screens/onboarding_screen.dart';
+import 'package:quiz_app/presentation/screens/duel_screen.dart';
 import 'package:quiz_app/presentation/screens/shop_screen.dart';
 import 'package:quiz_app/presentation/widgets/guest_banner.dart';
 import 'package:quiz_app/presentation/widgets/xp_streak_bar.dart';
@@ -117,6 +118,70 @@ class HomeScreen extends StatelessWidget {
                 'Collect stamps by answering quiz questions!',
                 style: TextStyle(fontSize: 16.sp, color: Colors.white54),
                 textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 2.h),
+
+              GestureDetector(
+                onTap: () {
+                  _log.i('→ DuelScreen');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const DuelScreen()),
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFFF6B6B), Color(0xFF7B2FBE)],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.sports_esports,
+                          color: const Color(0xFFE8B86D), size: 6.w),
+                      SizedBox(width: 3.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Duel Mode',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(height: 0.3.h),
+                            Text(
+                              'Challenge a friend in real-time!',
+                              style: TextStyle(
+                                  fontSize: 13.sp, color: Colors.white70),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 2.w, vertical: 0.5.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8B86D),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          'FIGHT',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF0D0D1A),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               SizedBox(height: 2.h),
 
