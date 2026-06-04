@@ -84,6 +84,7 @@ class AuthModeManager extends ChangeNotifier {
     final guestId = await _guestSessionService.getOrCreateSession();
     _user = AppUser(id: guestId, isGuest: true);
     _mode = AuthMode.guest;
+    _logger.w('→ HomeScreen (guest session started)');
     notifyListeners();
   }
 
@@ -139,6 +140,7 @@ class AuthModeManager extends ChangeNotifier {
     await _guestSessionService.clearSession();
     _mode = AuthMode.none;
     _user = null;
+    _logger.w('→ OnboardingScreen (signed out)');
     notifyListeners();
   }
 }

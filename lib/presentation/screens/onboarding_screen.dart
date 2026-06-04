@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/services/auth_mode_manager.dart';
 import 'package:quiz_app/presentation/screens/login_screen.dart';
 import 'package:quiz_app/presentation/screens/register_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+
+final _log = Logger();
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -45,7 +48,10 @@ class OnboardingScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     elevation: 4,
                   ),
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+                  onPressed: () {
+                    _log.i('→ LoginScreen');
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                  },
                   icon: const Icon(Icons.login, size: 22),
                   label: Text('Sign In', style: TextStyle(fontSize: 18.sp)),
                 ),
@@ -60,7 +66,10 @@ class OnboardingScreen extends StatelessWidget {
                     padding: EdgeInsets.symmetric(vertical: 1.8.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                  onPressed: () {
+                    _log.i('→ RegisterScreen');
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen()));
+                  },
                   icon: const Icon(Icons.person_add, size: 22),
                   label: Text('Register', style: TextStyle(fontSize: 18.sp)),
                 ),
@@ -76,8 +85,10 @@ class OnboardingScreen extends StatelessWidget {
                   onPressed: () {
                     final auth = context.read<AuthModeManager>();
                     if (auth.mode == AuthMode.none) {
+                      _log.i('→ HomeScreen (guest)');
                       auth.startGuestSession();
                     } else {
+                      _log.i('← pop to HomeScreen');
                       Navigator.of(context).pop();
                     }
                   },

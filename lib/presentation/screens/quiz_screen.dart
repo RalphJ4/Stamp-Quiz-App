@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/domain/entities/question.dart';
 import 'package:quiz_app/presentation/provider/quiz_provider.dart';
 import 'package:confetti/confetti.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+
+final _log = Logger();
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
@@ -86,6 +89,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     IconButton(
                       icon: Icon(Icons.check_circle, color: Colors.green, size: 7.h),
                       onPressed: () {
+                        _log.i('← pop stamp dialog');
                         Navigator.of(context).pop();
                       },
                       tooltip: 'Continue',
@@ -302,6 +306,7 @@ class _QuizScreenState extends State<QuizScreen> {
                           icon: Icon(Icons.emoji_events, size: 18.sp),
                           onPressed: () {
                             provider.finishQuiz();
+                            _log.i('← pop QuizScreen (finished)');
                             Navigator.of(context).pop();
                           },
                           label: const Text('Finish'),

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/domain/entities/question.dart';
 import 'package:quiz_app/presentation/provider/quiz_provider.dart';
 import 'package:quiz_app/presentation/screens/quiz_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+
+final _log = Logger();
 
 class CategorySelectionScreen extends StatelessWidget {
   const CategorySelectionScreen({super.key});
@@ -84,6 +87,7 @@ class CategorySelectionScreen extends StatelessWidget {
                   return GestureDetector(
                     onTap: () {
                       provider.selectCategory(category);
+                      _log.i('→ QuizScreen ($label)');
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreen()));
                     },
                     child: Container(

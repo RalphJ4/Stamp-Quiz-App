@@ -1,6 +1,7 @@
-import 'dart:developer';
+import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/presentation/provider/quiz_provider.dart';
 import 'package:quiz_app/presentation/screens/home_screen.dart';
@@ -27,7 +28,7 @@ Future<bool> _initFirebase() async {
     );
     return true;
   } catch (e) {
-    log('Firebase initialization error: $e');
+    dev.log('Firebase initialization error: $e');
     return false;
   }
 }
@@ -35,6 +36,8 @@ Future<bool> _initFirebase() async {
 class QuizApp extends StatelessWidget {
   final bool firebaseInitialized;
   const QuizApp({super.key, required this.firebaseInitialized});
+
+  static final _log = Logger();
 
   @override
   Widget build(BuildContext context) {
@@ -96,13 +99,16 @@ class QuizApp extends StatelessWidget {
             home: Consumer<AuthModeManager>(
               builder: (context, auth, _) {
                 if (!auth.initialized) {
+                  QuizApp._log.i('🔄 loading');
                   return const Scaffold(
                     body: Center(child: CircularProgressIndicator()),
                   );
                 }
                 if (auth.mode == AuthMode.none) {
+                  QuizApp._log.i('🖥 OnboardingScreen');
                   return const OnboardingScreen();
                 }
+                QuizApp._log.i('🏠 HomeScreen');
                 return const HomeScreen();
               },
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/domain/entities/question.dart';
 import 'package:quiz_app/presentation/provider/quiz_provider.dart';
@@ -7,6 +8,8 @@ import 'package:quiz_app/presentation/screens/onboarding_screen.dart';
 import 'package:quiz_app/presentation/widgets/guest_banner.dart';
 import 'package:quiz_app/services/auth_mode_manager.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+
+final _log = Logger();
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -74,7 +77,10 @@ class HomeScreen extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.login, color: Colors.amber[200], size: 6.w),
               tooltip: 'Sign in',
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OnboardingScreen())),
+              onPressed: () {
+                _log.i('→ OnboardingScreen (sign in)');
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
+              },
             ),
         ],
       ),
@@ -232,6 +238,7 @@ class HomeScreen extends StatelessWidget {
                       elevation: 4,
                     ),
                     onPressed: () {
+                      _log.i('→ CategorySelectionScreen');
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const CategorySelectionScreen()),

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/services/auth_mode_manager.dart';
 import 'package:quiz_app/presentation/screens/onboarding_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+
+final _log = Logger();
 
 class GuestBanner extends StatelessWidget {
   const GuestBanner({super.key});
@@ -14,6 +17,7 @@ class GuestBanner extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
+        _log.i('→ OnboardingScreen (guest banner)');
         Navigator.push(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
       },
       child: Container(

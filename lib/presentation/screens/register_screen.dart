@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/services/auth_mode_manager.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+
+final _log = Logger();
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -50,6 +53,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _loading = false;
       });
     } else {
+      _log.i('← pop to HomeScreen (registered)');
       Navigator.of(context).pop();
     }
   }

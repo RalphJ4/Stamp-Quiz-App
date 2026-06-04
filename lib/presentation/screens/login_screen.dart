@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/services/auth_mode_manager.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+
+final _log = Logger();
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -40,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _loading = false;
       });
     } else {
+      _log.i('← pop to HomeScreen (signed in)');
       Navigator.of(context).pop();
     }
   }
@@ -58,6 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
         _loading = false;
       });
     } else {
+      _log.i('← pop to HomeScreen (Google sign-in)');
       Navigator.of(context).pop();
     }
   }
