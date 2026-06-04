@@ -1,0 +1,13 @@
+specVersion: "v1"
+serviceId: "stamp-quiz-app"
+location: "asia-southeast1"
+schemas:
+  - source: "./schema"
+    datasource:
+      postgresql:
+        database: "fdcdb"
+        cloudSql:
+          instanceId: "stamp-quiz-app-fdc"
+          # schemaValidation: "STRICT"     # STRICT mode makes Postgres schema match Data Connect exactly.
+          # schemaValidation: "COMPATIBLE" # COMPATIBLE mode makes Postgres schema compatible with Data Connect.
+connectorDirs: ["./example"]

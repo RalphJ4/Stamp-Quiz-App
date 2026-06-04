@@ -1,0 +1,44 @@
+type User @table {
+  username: String!
+  email: String!
+  passwordHash: String!
+  createdAt: Timestamp!
+  avatarUrl: String
+  country: String
+}
+
+type Stamp @table {
+  name: String!
+  catalogNumber: String!
+  issueYear: Int!
+  country: String!
+  imageUrl: String!
+  createdAt: Timestamp!
+  description: String
+  faceValue: Float
+  currency: String
+  themes: [String]
+}
+
+type Quiz @table {
+  user: User!
+  quizDate: Timestamp!
+  score: Int!
+  category: String!
+}
+
+type Question @table {
+  quiz: Quiz!
+  stamp: Stamp!
+  questionText: String!
+  correctAnswer: String!
+  userResponse: String
+  isCorrect: Boolean!
+}
+
+type UserStamp @table {
+  user: User!
+  stamp: Stamp!
+  type: String! # e.g., "collected", "favorited"
+  createdAt: Timestamp!
+}
