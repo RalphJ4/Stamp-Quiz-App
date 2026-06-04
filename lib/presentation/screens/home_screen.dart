@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:quiz_app/domain/entities/question.dart';
 import 'package:quiz_app/presentation/provider/quiz_provider.dart';
 import 'package:quiz_app/presentation/screens/category_selection_screen.dart';
+import 'package:quiz_app/presentation/screens/onboarding_screen.dart';
+import 'package:quiz_app/presentation/widgets/guest_banner.dart';
+import 'package:quiz_app/services/auth_mode_manager.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -37,6 +40,8 @@ class HomeScreen extends StatelessWidget {
     final quizProvider = Provider.of<QuizProvider>(context);
     final earned = quizProvider.stamps;
 
+    final authManager = context.watch<AuthModeManager>();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F4FF),
       appBar: AppBar(
@@ -45,13 +50,42 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.deepPurple,
         elevation: 0,
         toolbarHeight: 7.h,
+        actions: [
+          if (authManager.isLoggedIn)
+            PopupMenuButton<String>(
+              icon: CircleAvatar(
+                radius: 3.w,
+                backgroundColor: Colors.deepPurple[300],
+                child: Icon(Icons.person, color: Colors.white, size: 5.w),
+              ),
+              onSelected: (value) {
+                if (value == 'signout') authManager.signOut();
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  enabled: false,
+                  child: Text(authManager.user?.email ?? authManager.user?.name ?? 'User'),
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem(value: 'signout', child: Text('Sign Out')),
+              ],
+            )
+          else
+            IconButton(
+              icon: Icon(Icons.login, color: Colors.amber[200], size: 6.w),
+              tooltip: 'Sign in',
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OnboardingScreen())),
+            ),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(3.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 2.h),
+            SizedBox(height: 1.h),
+            const GuestBanner(),
+            SizedBox(height: 1.5.h),
             Text(
               'Welcome, Challenger!',
               style: TextStyle(

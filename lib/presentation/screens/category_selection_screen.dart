@@ -79,7 +79,7 @@ class CategorySelectionScreen extends StatelessWidget {
                   final color = categoryColors[category]!;
                   final icon = categoryIcons[category]!;
                   final label = categoryLabels[category]!;
-                  final count = provider.questions.length;
+                  final count = provider.questionCountForCategory(category);
 
                   return GestureDetector(
                     onTap: () {

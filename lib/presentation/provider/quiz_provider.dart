@@ -5,6 +5,7 @@ import '../../domain/entities/question.dart';
 import '../../data/datasources/local_question_datasource.dart';
 import '../../data/repositories/question_repository_impl.dart';
 import '../../domain/usecases/get_questions.dart';
+import '../../services/auth_mode_manager.dart';
 
 class CategoryStats {
   final String category;
@@ -16,10 +17,35 @@ class CategoryStats {
 class QuizProvider extends ChangeNotifier {
   final _local = LocalQuestionDataSource();
   late final GetQuestions _getQuestions;
+  final AuthModeManager _authManager;
+  String? _lastUserId;
 
-  QuizProvider() {
+  QuizProvider(this._authManager) {
     final repo = QuestionRepositoryImpl(local: _local);
     _getQuestions = GetQuestions(repo);
+    _authManager.addListener(_onAuthChanged);
+    _loadStats();
+  }
+
+  @override
+  void dispose() {
+    _authManager.removeListener(_onAuthChanged);
+    super.dispose();
+  }
+
+  String get _storagePrefix {
+    final user = _authManager.user;
+    if (user == null) return 'default';
+    return '${user.isGuest ? 'guest' : 'user'}_${user.id}';
+  }
+
+  void _onAuthChanged() {
+    final user = _authManager.user;
+    final userId = user?.id;
+    if (userId != _lastUserId) {
+      _lastUserId = userId;
+      _loadStats();
+    }
   }
 
   List<Question> _allQuestions = [];
@@ -62,9 +88,12 @@ class QuizProvider extends ChangeNotifier {
   int _totalAnswered = 0;
   int get totalAnswered => _totalAnswered;
 
+  int questionCountForCategory(QuestionCategory category) {
+    return _allQuestions.where((q) => q.category == category).length;
+  }
+
   Future<void> loadQuestions() async {
     _allQuestions = await _getQuestions.execute();
-    await _loadStats();
     _filterByCategory(_selectedCategory);
     notifyListeners();
   }
@@ -158,17 +187,18 @@ class QuizProvider extends ChangeNotifier {
 
   Future<void> _loadStats() async {
     final prefs = await SharedPreferences.getInstance();
-    _bestStreak = prefs.getInt('bestStreak') ?? 0;
-    _totalCorrect = prefs.getInt('totalCorrect') ?? 0;
-    _totalAnswered = prefs.getInt('totalAnswered') ?? 0;
-    _stamps = prefs.getInt('stamps') ?? 0;
+    _bestStreak = prefs.getInt('${_storagePrefix}_bestStreak') ?? 0;
+    _totalCorrect = prefs.getInt('${_storagePrefix}_totalCorrect') ?? 0;
+    _totalAnswered = prefs.getInt('${_storagePrefix}_totalAnswered') ?? 0;
+    _stamps = prefs.getInt('${_storagePrefix}_stamps') ?? 0;
+    notifyListeners();
   }
 
   Future<void> _saveStats() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('stamps', _stamps);
-    await prefs.setInt('bestStreak', _bestStreak);
-    await prefs.setInt('totalCorrect', _totalCorrect);
-    await prefs.setInt('totalAnswered', _totalAnswered);
+    await prefs.setInt('${_storagePrefix}_stamps', _stamps);
+    await prefs.setInt('${_storagePrefix}_bestStreak', _bestStreak);
+    await prefs.setInt('${_storagePrefix}_totalCorrect', _totalCorrect);
+    await prefs.setInt('${_storagePrefix}_totalAnswered', _totalAnswered);
   }
 }
