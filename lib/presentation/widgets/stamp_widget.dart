@@ -52,8 +52,8 @@ class StampWidgetState extends State<StampWidget> with SingleTickerProviderState
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = widget.isEarned ? (widget.color ?? Colors.deepPurple) : (widget.color ?? Colors.grey[200]!);
-    final borderColor = widget.isEarned ? (widget.color ?? Colors.deepPurple) : Colors.grey;
+    final bgColor = widget.isEarned ? (widget.color ?? const Color(0xFF7B2FBE)) : const Color(0xFF16213E);
+    final borderColor = widget.isEarned ? (widget.color ?? const Color(0xFFE8B86D)) : Colors.white24;
 
     return ScaleTransition(
       scale: _scaleAnimation,

@@ -23,21 +23,21 @@ class GuestBanner extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
         decoration: BoxDecoration(
-          color: Colors.amber[50],
+          color: const Color(0xFF3D0D6B).withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.amber[300]!),
+          border: Border.all(color: const Color(0xFF7B2FBE)),
         ),
         child: Row(
           children: [
-            Icon(Icons.person_outline, color: Colors.amber[800], size: 5.w),
+            Icon(Icons.person_outline, color: const Color(0xFFE8B86D), size: 5.w),
             SizedBox(width: 2.w),
             Expanded(
               child: Text(
                 'Guest Mode — Sign in to save your progress!',
-                style: TextStyle(fontSize: 14.sp, color: Colors.amber[900]),
+                style: TextStyle(fontSize: 14.sp, color: const Color(0xFFE8B86D)),
               ),
             ),
-            Icon(Icons.arrow_forward_ios, color: Colors.amber[800], size: 4.w),
+            Icon(Icons.arrow_forward_ios, color: const Color(0xFFE8B86D), size: 4.w),
           ],
         ),
       ),

@@ -29,104 +29,100 @@ class _QuizScreenState extends State<QuizScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => Stack(
-            alignment: Alignment.center,
-            children: [
-              ConfettiWidget(
-                confettiController: _confettiController,
-                blastDirectionality: BlastDirectionality.explosive,
-                shouldLoop: false,
-                emissionFrequency: 0.08,
-                numberOfParticles: 40,
-                maxBlastForce: 25,
-                minBlastForce: 10,
-                gravity: 0.18,
-              ),
-              AlertDialog(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.8, end: 1.0),
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.elasticOut,
-                      builder:
-                          (context, scale, child) => Transform.scale(
-                            scale: scale,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: Colors.amber, blurRadius: 40, spreadRadius: 12)],
-                                border: Border.all(color: Colors.deepPurple, width: 3),
-                                color: Colors.white,
-                                image: DecorationImage(
-                                  image: AssetImage('assets/images/stamp.png'),
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                              width: 38.w,
-                              height: 38.w,
-                            ),
-                          ),
-                      child: const SizedBox.shrink(),
-                    ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      'You Earned a Stamp!',
-                      style: TextStyle(
-                        color: Colors.deepPurple,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 19.sp,
-                        shadows: [Shadow(color: Colors.white, blurRadius: 10, offset: Offset(0, 0))],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 2.h),
-                    IconButton(
-                      icon: Icon(Icons.check_circle, color: Colors.green, size: 7.h),
-                      onPressed: () {
-                        _log.i('← pop stamp dialog');
-                        Navigator.of(context).pop();
-                      },
-                      tooltip: 'Continue',
-                    ),
-                  ],
-                ),
-                actions: const [],
-              ),
-            ],
+      builder: (context) => Stack(
+        alignment: Alignment.center,
+        children: [
+          ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            shouldLoop: false,
+            emissionFrequency: 0.08,
+            numberOfParticles: 40,
+            maxBlastForce: 25,
+            minBlastForce: 10,
+            gravity: 0.18,
           ),
+          AlertDialog(
+            backgroundColor: const Color(0xFF1A1A2E),
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.8, end: 1.0),
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.elasticOut,
+                  builder: (context, scale, child) => Transform.scale(
+                    scale: scale,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [BoxShadow(color: const Color(0xFFE8B86D), blurRadius: 40, spreadRadius: 12)],
+                        border: Border.all(color: const Color(0xFF7B2FBE), width: 3),
+                        color: Colors.white,
+                        image: const DecorationImage(
+                          image: AssetImage('assets/images/stamp.png'),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      width: 38.w,
+                      height: 38.w,
+                    ),
+                  ),
+                  child: const SizedBox.shrink(),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  'You Earned a Stamp!',
+                  style: TextStyle(
+                    color: const Color(0xFFE8B86D),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 19.sp,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 2.h),
+                IconButton(
+                  icon: Icon(Icons.check_circle, color: const Color(0xFFE8B86D), size: 7.h),
+                  onPressed: () {
+                    _log.i('← pop stamp dialog');
+                    Navigator.of(context).pop();
+                  },
+                  tooltip: 'Continue',
+                ),
+              ],
+            ),
+            actions: const [],
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F4FF),
+      backgroundColor: const Color(0xFF0D0D1A),
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(Icons.emoji_events, color: Colors.amber, size: 22.sp),
+            Icon(Icons.emoji_events, color: const Color(0xFFE8B86D), size: 22.sp),
             SizedBox(width: 2.w),
-            Text('Quiz', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+            Text('Quiz', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: Colors.white)),
           ],
         ),
         toolbarHeight: 7.h,
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color(0xFF1A1A2E),
         elevation: 2,
       ),
       body: Consumer<QuizProvider>(
         builder: (context, provider, _) {
           if (provider.questions.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator(color: Color(0xFFE8B86D)));
           }
 
           final question = provider.questions[provider.currentIndex];
-
           final diffColors = {
             QuestionDifficulty.easy: Colors.green,
             QuestionDifficulty.medium: Colors.orange,
@@ -151,8 +147,8 @@ class _QuizScreenState extends State<QuizScreen> {
                       child: LinearProgressIndicator(
                         value: (provider.currentIndex + 1) / provider.questions.length,
                         minHeight: 2.2.h,
-                        backgroundColor: Colors.deepPurple[100],
-                        color: Colors.deepPurple,
+                        backgroundColor: const Color(0xFF16213E),
+                        color: const Color(0xFFE8B86D),
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
@@ -160,17 +156,17 @@ class _QuizScreenState extends State<QuizScreen> {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
                       decoration: BoxDecoration(
-                        color: Colors.amber[100],
+                        color: const Color(0xFF7B2FBE).withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.amber, width: 1),
+                        border: Border.all(color: const Color(0xFF7B2FBE), width: 1),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.stars, color: Colors.amber[800], size: 16.sp),
+                          Icon(Icons.stars, color: const Color(0xFFE8B86D), size: 16.sp),
                           SizedBox(width: 1.w),
                           Text(
                             'Level ${(provider.currentIndex + 1)}',
-                            style: TextStyle(color: Colors.amber[900], fontWeight: FontWeight.bold, fontSize: 15.sp),
+                            style: TextStyle(color: const Color(0xFFE8B86D), fontWeight: FontWeight.bold, fontSize: 15.sp),
                           ),
                         ],
                       ),
@@ -182,7 +178,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   children: [
                     Text(
                       'Question ${provider.currentIndex + 1}/${provider.questions.length}',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17.sp, color: Colors.deepPurple),
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17.sp, color: Colors.white70),
                     ),
                     const Spacer(),
                     Container(
@@ -206,13 +202,13 @@ class _QuizScreenState extends State<QuizScreen> {
                 SizedBox(height: 1.5.h),
                 Card(
                   elevation: 2,
-                  color: Colors.white,
+                  color: const Color(0xFF1A1A2E),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   child: Padding(
                     padding: EdgeInsets.all(3.w),
                     child: Text(
                       question.question,
-                      style: TextStyle(fontSize: 18.sp, color: Colors.black87, fontWeight: FontWeight.w500),
+                      style: TextStyle(fontSize: 18.sp, color: Colors.white, fontWeight: FontWeight.w500),
                     ),
                   ),
                 ),
@@ -222,19 +218,20 @@ class _QuizScreenState extends State<QuizScreen> {
                   Color? tileColor;
                   if (provider.answered) {
                     if (i == question.correctIndex) {
-                      tileColor = Colors.green[100];
+                      tileColor = Colors.green.withValues(alpha: 0.2);
                     } else if (isSelected) {
-                      tileColor = Colors.red[100];
+                      tileColor = Colors.red.withValues(alpha: 0.2);
                     }
                   }
                   return Card(
                     elevation: isSelected ? 6 : 2,
+                    color: tileColor ?? const Color(0xFF16213E),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side:
-                          isSelected
-                              ? BorderSide(color: Colors.deepPurple, width: 2)
-                              : BorderSide(color: Colors.grey[300]!),
+                      side: BorderSide(
+                        color: tileColor ?? (isSelected ? const Color(0xFFE8B86D) : Colors.white24),
+                        width: isSelected ? 2 : 1,
+                      ),
                     ),
                     child: ListTile(
                       tileColor: tileColor,
@@ -243,34 +240,27 @@ class _QuizScreenState extends State<QuizScreen> {
                         question.options[i],
                         style: TextStyle(
                           fontSize: 16.5.sp,
-                          color:
-                              provider.answered
-                                  ? (i == question.correctIndex
-                                      ? Colors.green[900]
-                                      : isSelected
-                                      ? Colors.red[900]
-                                      : Colors.black87)
-                                  : Colors.black87,
+                          color: provider.answered
+                              ? (i == question.correctIndex ? Colors.green[300]
+                                  : isSelected ? Colors.red[300]
+                                  : Colors.white70)
+                              : Colors.white,
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                         ),
                       ),
-                      onTap:
-                          provider.answered
-                              ? null
-                              : () {
-                                provider.selectOption(i);
-                                if (question.correctIndex == i) {
-                                  _showStampDialog(context);
-                                }
-                              },
-                      trailing:
-                          provider.answered
-                              ? (i == question.correctIndex
-                                  ? Icon(Icons.check_circle, color: Colors.green, size: 20.sp)
-                                  : isSelected
+                      onTap: provider.answered ? null : () {
+                        provider.selectOption(i);
+                        if (question.correctIndex == i) {
+                          _showStampDialog(context);
+                        }
+                      },
+                      trailing: provider.answered
+                          ? (i == question.correctIndex
+                              ? Icon(Icons.check_circle, color: Colors.green, size: 20.sp)
+                              : isSelected
                                   ? Icon(Icons.cancel, color: Colors.red, size: 20.sp)
                                   : null)
-                              : null,
+                          : null,
                     ),
                   );
                 }),
@@ -281,7 +271,7 @@ class _QuizScreenState extends State<QuizScreen> {
                       if (provider.currentIndex < provider.questions.length - 1)
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
+                            backgroundColor: const Color(0xFF7B2FBE),
                             foregroundColor: Colors.white,
                             padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 1.5.h),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -296,14 +286,14 @@ class _QuizScreenState extends State<QuizScreen> {
                       if (provider.currentIndex == provider.questions.length - 1)
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
+                            backgroundColor: const Color(0xFF7B2FBE),
                             foregroundColor: Colors.white,
                             padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 1.5.h),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             textStyle: TextStyle(fontSize: 16.sp),
                             elevation: 3,
                           ),
-                          icon: Icon(Icons.emoji_events, size: 18.sp),
+                          icon: Icon(Icons.emoji_events, size: 18.sp, color: const Color(0xFFE8B86D)),
                           onPressed: () {
                             provider.finishQuiz();
                             _log.i('← pop QuizScreen (finished)');
@@ -318,7 +308,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     padding: EdgeInsets.only(top: 1.h),
                     child: Text(
                       'Select an answer to submit.',
-                      style: TextStyle(fontSize: 15.sp, color: Colors.deepPurple),
+                      style: TextStyle(fontSize: 15.sp, color: Colors.white54),
                     ),
                   ),
               ],

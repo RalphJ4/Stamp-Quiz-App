@@ -3,6 +3,7 @@ import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
+import 'package:quiz_app/presentation/provider/daily_challenge_provider.dart';
 import 'package:quiz_app/presentation/provider/quiz_provider.dart';
 import 'package:quiz_app/presentation/screens/home_screen.dart';
 import 'package:quiz_app/presentation/screens/onboarding_screen.dart';
@@ -89,13 +90,21 @@ class QuizApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthModeManager()..initialize()),
         ChangeNotifierProvider(create: (ctx) => QuizProvider(ctx.read<AuthModeManager>())..loadQuestions()),
+        ChangeNotifierProvider(create: (ctx) => DailyChallengeProvider(ctx.read<AuthModeManager>())..loadToday()),
       ],
       child: ResponsiveSizer(
         builder: (context, orientation, screenType) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Stamp Quiz',
-            theme: ThemeData(primarySwatch: Colors.blue),
+            theme: ThemeData.dark().copyWith(
+              scaffoldBackgroundColor: const Color(0xFF0D0D1A),
+              colorScheme: const ColorScheme.dark(
+                primary: Color(0xFF7B2FBE),
+                secondary: Color(0xFFE8B86D),
+                surface: Color(0xFF1A1A2E),
+              ),
+            ),
             home: Consumer<AuthModeManager>(
               builder: (context, auth, _) {
                 if (!auth.initialized) {

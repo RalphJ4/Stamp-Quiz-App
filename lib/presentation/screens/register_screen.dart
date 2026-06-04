@@ -61,9 +61,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F4FF),
+      backgroundColor: const Color(0xFF0D0D1A),
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color(0xFF1A1A2E),
         foregroundColor: Colors.white,
         title: const Text('Register'),
         toolbarHeight: 7.h,
@@ -75,43 +75,79 @@ class _RegisterScreenState extends State<RegisterScreen> {
             SizedBox(height: 4.h),
             TextField(
               controller: _emailController,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: 'Email',
-                prefixIcon: const Icon(Icons.email),
+                labelStyle: const TextStyle(color: Colors.white54),
+                prefixIcon: const Icon(Icons.email, color: Color(0xFFE8B86D)),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                enabledBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  borderSide: BorderSide(color: Colors.white24),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  borderSide: BorderSide(color: Color(0xFFE8B86D)),
+                ),
+                filled: true,
+                fillColor: const Color(0xFF1A1A2E),
               ),
               keyboardType: TextInputType.emailAddress,
             ),
             SizedBox(height: 2.h),
             TextField(
               controller: _passwordController,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: 'Password',
-                prefixIcon: const Icon(Icons.lock),
+                labelStyle: const TextStyle(color: Colors.white54),
+                prefixIcon: const Icon(Icons.lock, color: Color(0xFFE8B86D)),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                enabledBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  borderSide: BorderSide(color: Colors.white24),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  borderSide: BorderSide(color: Color(0xFFE8B86D)),
+                ),
+                filled: true,
+                fillColor: const Color(0xFF1A1A2E),
               ),
               obscureText: true,
             ),
             SizedBox(height: 2.h),
             TextField(
               controller: _confirmController,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: 'Confirm Password',
-                prefixIcon: const Icon(Icons.lock_outline),
+                labelStyle: const TextStyle(color: Colors.white54),
+                prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFFE8B86D)),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                enabledBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  borderSide: BorderSide(color: Colors.white24),
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  borderSide: BorderSide(color: Color(0xFFE8B86D)),
+                ),
+                filled: true,
+                fillColor: const Color(0xFF1A1A2E),
               ),
               obscureText: true,
             ),
             if (_error != null) ...[
               SizedBox(height: 1.h),
-              Text(_error!, style: TextStyle(color: Colors.red, fontSize: 14.sp)),
+              Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 14)),
             ],
             SizedBox(height: 3.h),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: const Color(0xFF7B2FBE),
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 1.8.h),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

@@ -40,11 +40,11 @@ class CategorySelectionScreen extends StatelessWidget {
     final provider = Provider.of<QuizProvider>(context, listen: false);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F4FF),
+      backgroundColor: const Color(0xFF0D0D1A),
       appBar: AppBar(
-        title: const Text('Choose a Category'),
+        title: const Text('Choose a Category', style: TextStyle(color: Color(0xFFE8B86D))),
         centerTitle: true,
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color(0xFF1A1A2E),
         elevation: 0,
         toolbarHeight: 7.h,
       ),
@@ -59,13 +59,13 @@ class CategorySelectionScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
+                color: const Color(0xFFE8B86D),
               ),
             ),
             SizedBox(height: 1.h),
             Text(
               'Harder questions reward more stamps.',
-              style: TextStyle(fontSize: 16.sp, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 16.sp, color: Colors.white54),
             ),
             SizedBox(height: 3.h),
             Expanded(
@@ -112,7 +112,7 @@ class CategorySelectionScreen extends StatelessWidget {
                           SizedBox(height: 0.5.h),
                           Text(
                             '$count questions',
-                            style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+                            style: TextStyle(fontSize: 14.sp, color: Colors.white54),
                           ),
                         ],
                       ),

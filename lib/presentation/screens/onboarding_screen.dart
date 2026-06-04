@@ -14,27 +14,27 @@ class OnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F4FF),
+      backgroundColor: const Color(0xFF0D0D1A),
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 6.w),
           child: Column(
             children: [
               const Spacer(flex: 2),
-              Icon(Icons.collections_bookmark, size: 25.h, color: Colors.deepPurple[200]),
+              Icon(Icons.collections_bookmark, size: 25.h, color: const Color(0xFFE8B86D)),
               SizedBox(height: 3.h),
               Text(
                 'Stamp Quiz',
                 style: TextStyle(
                   fontSize: 32.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple,
+                  color: const Color(0xFFE8B86D),
                 ),
               ),
               SizedBox(height: 1.h),
               Text(
                 'Collect stamps, test your knowledge!',
-                style: TextStyle(fontSize: 16.sp, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 16.sp, color: Colors.white54),
                 textAlign: TextAlign.center,
               ),
               const Spacer(flex: 1),
@@ -42,7 +42,7 @@ class OnboardingScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
+                    backgroundColor: const Color(0xFF7B2FBE),
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 1.8.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -61,8 +61,8 @@ class OnboardingScreen extends StatelessWidget {
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.deepPurple,
-                    side: const BorderSide(color: Colors.deepPurple),
+                    foregroundColor: const Color(0xFFE8B86D),
+                    side: const BorderSide(color: Color(0xFFE8B86D)),
                     padding: EdgeInsets.symmetric(vertical: 1.8.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -79,7 +79,7 @@ class OnboardingScreen extends StatelessWidget {
                 width: double.infinity,
                 child: TextButton.icon(
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.grey[700],
+                    foregroundColor: Colors.white54,
                     padding: EdgeInsets.symmetric(vertical: 1.5.h),
                   ),
                   onPressed: () {
