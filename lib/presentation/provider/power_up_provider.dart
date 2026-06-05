@@ -36,7 +36,13 @@ class PowerUpProvider extends ChangeNotifier {
   void _onAuthChanged() {
     final uid = _authManager.user?.id;
     if (uid != null) {
-      fetchInventory();
+      fetchInventory().catchError((e) {
+        _log.e('Failed to fetch inventory: $e');
+      });
+    } else {
+      _inventory = {};
+      _activeEffects = {};
+      notifyListeners();
     }
   }
 
@@ -81,7 +87,9 @@ class PowerUpProvider extends ChangeNotifier {
     _inventory[type] = count - 1;
     if (_inventory[type]! <= 0) _inventory.remove(type);
 
-    _datasource.decrementInventory(uid, type);
+    _datasource.decrementInventory(uid, type).catchError((e) {
+      _log.e('Failed to decrement inventory: $e');
+    });
 
     switch (type) {
       case PowerUpType.extraHint:

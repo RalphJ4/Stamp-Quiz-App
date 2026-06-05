@@ -109,6 +109,16 @@ class ShopScreen extends StatelessWidget {
                             ),
                           );
                         }
+                      }).catchError((e) {
+                        _log.e('Purchase failed: $e');
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Purchase failed. Try again.'),
+                              backgroundColor: Colors.red.shade800,
+                            ),
+                          );
+                        }
                       });
                     },
                   );

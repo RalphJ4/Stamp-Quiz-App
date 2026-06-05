@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:provider/provider.dart';
+import 'package:quiz_app/domain/entities/power_up.dart';
 import 'package:quiz_app/domain/entities/question.dart';
 import 'package:quiz_app/presentation/provider/quiz_provider.dart';
+import 'package:quiz_app/presentation/provider/power_up_provider.dart';
 import 'package:quiz_app/presentation/widgets/hint_button.dart';
 import 'package:confetti/confetti.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -113,7 +115,47 @@ class _QuizScreenState extends State<QuizScreen> {
             Text('Quiz', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: Colors.white)),
           ],
         ),
-        actions: [const HintButton()],
+        actions: [
+          Consumer<PowerUpProvider>(
+            builder: (context, pu, _) {
+              if (!pu.hasActiveEffects) return const HintButton();
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...PowerUpType.values.where((t) => pu.hasEffect(t)).map((t) {
+                    return Padding(
+                      padding: EdgeInsets.only(right: 1.5.w),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 0.2.h),
+                        decoration: BoxDecoration(
+                          color: t.color.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: t.color, width: 1),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(t.icon, color: t.color, size: 14.sp),
+                            SizedBox(width: 0.5.w),
+                            Text(
+                              t == PowerUpType.skipQuestion ? 'Skip' : '2×',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                color: t.color,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                  const HintButton(),
+                ],
+              );
+            },
+          ),
+        ],
         toolbarHeight: 7.h,
         backgroundColor: const Color(0xFF1A1A2E),
         elevation: 2,
@@ -215,6 +257,83 @@ class _QuizScreenState extends State<QuizScreen> {
                   ),
                 ),
                 SizedBox(height: 2.h),
+                Consumer<PowerUpProvider>(
+                  builder: (context, pu, _) {
+                    final owned = PowerUpType.values.where((t) => pu.countOf(t) > 0 || pu.hasEffect(t)).toList();
+                    if (owned.isEmpty) return const SizedBox.shrink();
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 1.h),
+                      child: SizedBox(
+                        height: 5.5.h,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: owned.length,
+                          separatorBuilder: (_, __) => SizedBox(width: 2.w),
+                          itemBuilder: (context, i) {
+                            final type = owned[i];
+                            final active = pu.hasEffect(type);
+                            final count = pu.countOf(type);
+                            return GestureDetector(
+                              onTap: active ? null : () {
+                                final err = pu.activatePowerUp(type);
+                                if (err != null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(err), backgroundColor: Colors.red.shade800),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('${type.label} activated!'),
+                                      backgroundColor: const Color(0xFF7B2FBE),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 2.w),
+                                decoration: BoxDecoration(
+                                  color: active
+                                      ? type.color.withValues(alpha: 0.25)
+                                      : const Color(0xFF1A1A2E),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: active ? type.color : Colors.white24,
+                                    width: active ? 1.5 : 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(type.icon, color: type.color, size: 4.5.w),
+                                    SizedBox(width: 1.w),
+                                    Text(
+                                      type.label,
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: active ? type.color : Colors.white70,
+                                        fontWeight: active ? FontWeight.bold : FontWeight.normal,
+                                      ),
+                                    ),
+                                    if (active)
+                                      Text(
+                                        ' active',
+                                        style: TextStyle(fontSize: 10.sp, color: Colors.green[300]),
+                                      ),
+                                    if (!active)
+                                      Text(
+                                        ' ×$count',
+                                        style: TextStyle(fontSize: 11.sp, color: Colors.white38),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
                 ...List.generate(question.options.length, (i) {
                   final isSelected = provider.selectedOption == i;
                   final isEliminated = provider.eliminatedOptions.contains(i) && !provider.answered;

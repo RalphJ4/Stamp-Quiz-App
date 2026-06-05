@@ -25,26 +25,16 @@ class PowerUpShopDatasource {
     try {
       await _firestore.runTransaction((txn) async {
         final snapshot = await txn.get(_userDoc(uid));
-        if (!snapshot.exists) {
-          throw Exception('User document not found');
-        }
 
-        final data = snapshot.data() as Map<String, dynamic>;
-
-        final xp = (data['xp'] as int?) ?? 0;
-        if (xp < cost) {
-          throw Exception('Not enough XP');
-        }
+        final data = Map<String, dynamic>.from(
+            snapshot.exists ? (snapshot.data() as Map<String, dynamic>? ?? {}) : {});
 
         final inventoryRaw =
             Map<String, dynamic>.from(data['inventory'] as Map? ?? {});
         final currentCount = (inventoryRaw[type.firestoreKey] as int?) ?? 0;
         inventoryRaw[type.firestoreKey] = currentCount + 1;
 
-        txn.update(_userDoc(uid), {
-          'xp': xp - cost,
-          'inventory': inventoryRaw,
-        });
+        txn.set(_userDoc(uid), {'inventory': inventoryRaw}, SetOptions(merge: true));
       });
       return null;
     } catch (e) {
