@@ -42,6 +42,7 @@ class LeaderboardProvider extends ChangeNotifier {
   }
 
   void _onQuizStampsChanged() {
+    if (_authManager.isGuest) return;
     final currentStamps = _quizProvider.stamps;
     if (currentStamps == _lastSyncedStamps) return;
     _lastSyncedStamps = currentStamps;
@@ -51,6 +52,7 @@ class LeaderboardProvider extends ChangeNotifier {
   }
 
   Future<void> _pushXp() async {
+    if (_authManager.isGuest) return;
     final uid = _authManager.user?.id;
     if (uid == null) return;
     try {
@@ -69,6 +71,7 @@ class LeaderboardProvider extends ChangeNotifier {
   }
 
   Future<void> _refreshAll() async {
+    if (_authManager.isGuest) return;
     final uid = _authManager.user?.id;
     if (uid == null) return;
     try {
