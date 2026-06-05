@@ -53,8 +53,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _loading = false;
       });
     } else {
-      _log.i('← pop to HomeScreen (registered)');
-      Navigator.of(context).pop();
+      _log.i('← popUntil root → HomeScreen (registered)');
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 

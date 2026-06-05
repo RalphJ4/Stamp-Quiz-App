@@ -43,8 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
         _loading = false;
       });
     } else {
-      _log.i('← pop to HomeScreen (signed in)');
-      Navigator.of(context).pop();
+      _log.i('← popUntil root → HomeScreen (signed in)');
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 
@@ -62,8 +62,8 @@ class _LoginScreenState extends State<LoginScreen> {
         _loading = false;
       });
     } else {
-      _log.i('← pop to HomeScreen (Google sign-in)');
-      Navigator.of(context).pop();
+      _log.i('← popUntil root → HomeScreen (Google sign-in)');
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 

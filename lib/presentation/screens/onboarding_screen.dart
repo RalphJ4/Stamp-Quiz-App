@@ -85,11 +85,12 @@ class OnboardingScreen extends StatelessWidget {
                   onPressed: () {
                     final auth = context.read<AuthModeManager>();
                     if (auth.mode == AuthMode.none) {
-                      _log.i('→ HomeScreen (guest)');
+                      _log.i('auth.none → startGuestSession + popUntil');
                       auth.startGuestSession();
+                      Navigator.of(context).popUntil((route) => route.isFirst);
                     } else {
-                      _log.i('← pop to HomeScreen');
-                      Navigator.of(context).pop();
+                      _log.i('← popUntil root');
+                      Navigator.of(context).popUntil((route) => route.isFirst);
                     }
                   },
                   icon: Icon(Icons.person_outline, size: 22),
