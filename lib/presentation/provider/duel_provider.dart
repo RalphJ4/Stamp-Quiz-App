@@ -18,12 +18,17 @@ class DuelProvider extends ChangeNotifier {
   bool _loading = false;
   String? _error;
 
+  int _remainingSeconds = 60;
+  Timer? _countdownTimer;
+  Timer? _cleanupTimer;
+
   DuelProvider(this._authManager);
 
   DuelState? get state => _state;
   bool get loading => _loading;
   String? get error => _error;
   String? get currentDuelId => _currentDuelId;
+  int get remainingSeconds => _remainingSeconds;
 
   bool get isHost {
     final uid = _authManager.user?.id;
@@ -122,14 +127,80 @@ class DuelProvider extends ChangeNotifier {
     _subscription?.cancel();
     _subscription = _datasource.streamDuel(duelId).listen((snap) {
       if (snap == null) {
-        _error = 'Duel not found';
+        _error = 'Duel ended';
+        _log.i('Duel document deleted, cleaning up');
+        _cleanupTimer?.cancel();
+        _countdownTimer?.cancel();
+        _state = null;
+        _currentDuelId = null;
         notifyListeners();
         return;
       }
+      final wasActive = _state?.status == DuelStatus.active;
       _state = snap;
       _loading = false;
       notifyListeners();
+
+      if (snap.status == DuelStatus.active && !wasActive) {
+        _startCountdown();
+      }
+      if (snap.status == DuelStatus.active && wasActive && _countdownTimer == null) {
+        _startCountdown();
+      }
     });
+  }
+
+  void _startCountdown() {
+    _countdownTimer?.cancel();
+    _remainingSeconds = 60;
+    notifyListeners();
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _remainingSeconds--;
+      notifyListeners();
+
+      if (_remainingSeconds <= 0) {
+        timer.cancel();
+        _countdownTimer = null;
+        _timeUp();
+      }
+    });
+  }
+
+  Future<void> _timeUp() async {
+    _log.i('Duel timer expired');
+    final id = _currentDuelId;
+    if (id == null) return;
+
+    String? winner;
+    if (_state != null) {
+      if (_state!.hostScore > _state!.guestScore) {
+        winner = _state!.hostUid;
+      } else if (_state!.guestScore > _state!.hostScore) {
+        winner = _state!.guestUid;
+      }
+    }
+
+    try {
+      await _datasource.finishDuel(id, winner);
+      _log.i('Duel auto-finished due to timeout');
+    } catch (e) {
+      _log.e('Failed to auto-finish duel: $e');
+    }
+
+    _cleanupTimer?.cancel();
+    _cleanupTimer = Timer(const Duration(seconds: 3), () => _deleteCurrentDuel());
+  }
+
+  Future<void> _deleteCurrentDuel() async {
+    final id = _currentDuelId;
+    if (id == null) return;
+    try {
+      await _datasource.deleteDuel(id);
+      _log.i('Duel document deleted: $id');
+    } catch (e) {
+      _log.e('Failed to delete duel document: $e');
+    }
   }
 
   Future<void> submitAnswer(bool isCorrect) async {
@@ -147,28 +218,38 @@ class DuelProvider extends ChangeNotifier {
             : updated.guestScore > updated.hostScore
                 ? updated.guestUid
                 : null;
-        if (winner != null) {
-          await _datasource.finishDuel(_currentDuelId!, winner);
-        } else {
-          await _datasource.finishDuel(_currentDuelId!, uid);
-        }
+        await _datasource.finishDuel(_currentDuelId!, winner);
+
+        _cleanupTimer?.cancel();
+        _cleanupTimer = Timer(const Duration(seconds: 3), () => _deleteCurrentDuel());
       }
     }
   }
 
-  void reset() {
+  Future<void> reset() async {
+    await _deleteCurrentDuel();
+    _countdownTimer?.cancel();
+    _countdownTimer = null;
+    _cleanupTimer?.cancel();
+    _cleanupTimer = null;
     _subscription?.cancel();
     _subscription = null;
     _state = null;
     _currentDuelId = null;
     _loading = false;
     _error = null;
+    _remainingSeconds = 60;
     notifyListeners();
   }
 
   @override
   void dispose() {
+    _countdownTimer?.cancel();
+    _cleanupTimer?.cancel();
     _subscription?.cancel();
+    _cleanupTimer = null;
+    _countdownTimer = null;
+    _subscription = null;
     super.dispose();
   }
 }

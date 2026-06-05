@@ -64,11 +64,15 @@ class DuelDatasource {
     });
   }
 
-  Future<void> finishDuel(String duelId, String winnerUid) async {
+  Future<void> finishDuel(String duelId, String? winnerUid) async {
     await _duels.doc(duelId).update({
       'status': 'complete',
       'winnerUid': winnerUid,
     });
+  }
+
+  Future<void> deleteDuel(String duelId) async {
+    await _duels.doc(duelId).delete();
   }
 
   DuelState _fromSnapshot(String id, Map<String, dynamic> data) {

@@ -290,6 +290,34 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
             Navigator.of(context).pop();
           },
         ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 3.w),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.timer_outlined,
+                  color: provider.remainingSeconds <= 10
+                      ? Colors.red
+                      : const Color(0xFFE8B86D),
+                  size: 5.w,
+                ),
+                SizedBox(width: 1.w),
+                Text(
+                  '${provider.remainingSeconds}s',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: provider.remainingSeconds <= 10
+                        ? Colors.red
+                        : const Color(0xFFE8B86D),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(3.w),
