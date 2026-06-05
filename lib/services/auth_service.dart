@@ -43,4 +43,25 @@ class AuthService {
   Future<void> sendPasswordReset(String email) {
     return _auth.sendPasswordResetEmail(email: email);
   }
+
+  Future<void> updateDisplayName(String name) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user');
+    await user.updateDisplayName(name);
+    await user.reload();
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user');
+    await user.updatePassword(newPassword);
+  }
+
+  Future<void> reauthenticate(String password) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user');
+    if (user.email == null) throw Exception('No email on account');
+    final credential = EmailAuthProvider.credential(email: user.email!, password: password);
+    await user.reauthenticateWithCredential(credential);
+  }
 }

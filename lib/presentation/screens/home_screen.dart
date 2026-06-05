@@ -10,6 +10,7 @@ import 'package:quiz_app/presentation/screens/onboarding_screen.dart';
 import 'package:quiz_app/presentation/screens/duel_screen.dart';
 import 'package:quiz_app/presentation/screens/leaderboard_screen.dart';
 import 'package:quiz_app/presentation/screens/shop_screen.dart';
+import 'package:quiz_app/presentation/screens/profile_screen.dart';
 import 'package:quiz_app/presentation/widgets/guest_banner.dart';
 import 'package:quiz_app/presentation/widgets/xp_streak_bar.dart';
 import 'package:quiz_app/services/auth_mode_manager.dart';
@@ -75,23 +76,17 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           if (authManager.isLoggedIn)
-            PopupMenuButton<String>(
+            IconButton(
               icon: CircleAvatar(
                 radius: 3.w,
                 backgroundColor: const Color(0xFF7B2FBE),
                 child: Icon(Icons.person, color: Colors.white, size: 5.w),
               ),
-              onSelected: (value) {
-                if (value == 'signout') authManager.signOut();
+              tooltip: 'Profile',
+              onPressed: () {
+                _log.i('→ ProfileScreen');
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
               },
-              itemBuilder: (_) => [
-                PopupMenuItem(
-                  enabled: false,
-                  child: Text(authManager.user?.email ?? authManager.user?.name ?? 'User', style: const TextStyle(color: Colors.white70)),
-                ),
-                const PopupMenuDivider(),
-                const PopupMenuItem(value: 'signout', child: Text('Sign Out', style: TextStyle(color: Colors.white))),
-              ],
             )
           else
             IconButton(

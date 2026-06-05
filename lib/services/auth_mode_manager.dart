@@ -135,6 +135,70 @@ class AuthModeManager extends ChangeNotifier {
     }
   }
 
+  Future<String?> updateDisplayName(String name) async {
+    if (_mode != AuthMode.loggedIn) return 'Only logged-in users can change name';
+    try {
+      await _authService.updateDisplayName(name);
+      _user = AppUser(
+        id: _user!.id,
+        isGuest: false,
+        email: _user!.email,
+        name: name,
+      );
+      final uid = _authService.currentUser?.uid;
+      if (uid != null) {
+        await _firestore.collection('users').doc(uid).update({'displayName': name});
+      }
+      notifyListeners();
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future<String?> updatePassword(String currentPassword, String newPassword) async {
+    if (_mode != AuthMode.loggedIn) return 'Only logged-in users can change password';
+    try {
+      await _authService.reauthenticate(currentPassword);
+      await _authService.updatePassword(newPassword);
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future<String?> updateAvatarColor(int colorIndex) async {
+    if (_mode != AuthMode.loggedIn) return 'Only logged-in users can change avatar';
+    try {
+      final uid = _authService.currentUser?.uid;
+      if (uid == null) return 'Not authenticated';
+      await _firestore.collection('users').doc(uid).update({'avatarColor': colorIndex});
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future<int> getAvatarColor() async {
+    final uid = _authService.currentUser?.uid;
+    if (uid == null) return 0;
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      return (doc.data()?['avatarColor'] as int?) ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  Future<String?> getDisplayName() async {
+    if (_mode != AuthMode.loggedIn) return null;
+    return _user?.name;
+  }
+
+  bool get canChangePassword => _mode == AuthMode.loggedIn
+      && _authService.currentUser?.email != null
+      && _authService.currentUser?.providerData.any((p) => p.providerId == 'password') == true;
+
   Future<void> signOut() async {
     await _authService.signOut();
     await _guestSessionService.clearSession();
