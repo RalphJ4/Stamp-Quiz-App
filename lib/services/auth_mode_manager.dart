@@ -32,12 +32,14 @@ class AuthModeManager extends ChangeNotifier {
   AuthMode _mode = AuthMode.none;
   AppUser? _user;
   bool _initialized = false;
+  int _avatarIndex = 0;
 
   AuthMode get mode => _mode;
   AppUser? get user => _user;
   bool get initialized => _initialized;
   bool get isLoggedIn => _mode == AuthMode.loggedIn;
   bool get isGuest => _mode == AuthMode.guest;
+  int get avatarIndex => _avatarIndex;
 
   AuthService get authService => _authService;
   LocalStorageService get localStorage => _localStorageService;
@@ -97,11 +99,25 @@ class AuthModeManager extends ChangeNotifier {
     );
     _mode = AuthMode.loggedIn;
     _initialized = true;
+    _loadAvatarIndex();
     notifyListeners();
     _logger.w('User logged in: ${firebaseUser.email ?? firebaseUser.uid}');
     _ensureUserProfile(firebaseUser).catchError((e) {
       _logger.e('Failed to ensure user profile: $e');
     });
+  }
+
+  Future<void> _loadAvatarIndex() async {
+    final uid = _authService.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      final idx = (doc.data()?['avatarColor'] as int?) ?? 0;
+      if (idx != _avatarIndex) {
+        _avatarIndex = idx.clamp(0, 7);
+        notifyListeners();
+      }
+    } catch (_) {}
   }
 
   Future<String?> signInWithEmail(String email, String password) async {
@@ -173,6 +189,8 @@ class AuthModeManager extends ChangeNotifier {
       final uid = _authService.currentUser?.uid;
       if (uid == null) return 'Not authenticated';
       await _firestore.collection('users').doc(uid).update({'avatarColor': colorIndex});
+      _avatarIndex = colorIndex.clamp(0, 7);
+      notifyListeners();
       return null;
     } catch (e) {
       return e.toString();

@@ -18,6 +18,18 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 
 final _log = Logger();
 
+const _avatarEmojis = ['\u{1F9B8}', '\u{1F9D9}', '\u{1F3F9}', '\u{2694}\u{FE0F}', '\u{1F409}', '\u{1F98A}', '\u{1F985}', '\u{1F43A}'];
+const _avatarColors = [
+  Color(0xFF7B2FBE),
+  Color(0xFF42A5F5),
+  Color(0xFF43A047),
+  Color(0xFFE8B86D),
+  Color(0xFFE53935),
+  Color(0xFFFF9800),
+  Color(0xFF795548),
+  Color(0xFF9E9E9E),
+];
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -79,8 +91,11 @@ class HomeScreen extends StatelessWidget {
             IconButton(
               icon: CircleAvatar(
                 radius: 3.w,
-                backgroundColor: const Color(0xFF7B2FBE),
-                child: Icon(Icons.person, color: Colors.white, size: 5.w),
+                backgroundColor: _avatarColors[authManager.avatarIndex],
+                child: Text(
+                  _avatarEmojis[authManager.avatarIndex],
+                  style: TextStyle(fontSize: 4.w),
+                ),
               ),
               tooltip: 'Profile',
               onPressed: () {
