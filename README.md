@@ -56,6 +56,14 @@ Built with Clean Architecture, Provider for state management, and `responsive_si
 - Name validation, 6 preset avatar colours, shake-on-wrong tutorial question
 - Completion stored in SharedPreferences; skipped in subsequent launches
 
+### Profile & Achievements
+- **8 avatar presets:** Hero, Wizard, Archer, Knight, Dragon, Fox, Eagle, Wolf — each with a unique emoji + colour
+- **Dynamic title tiers** based on XP: Stamp Collector → Quiz Apprentice → Stamp Enthusiast → Quiz Master → Stamp Virtuoso → Quiz Legend → Grand Sage
+- **Level system:** `floor(sqrt(XP / 100)) + 1` with animated progress bar
+- **10 achievement badges:** 1st Quiz, 10 Quizzes, 100% Accuracy, 10 Streak, 50 Streak, 100 Stamps, 500 Stamps, Hint User, Daily Player, Duelist — unlocked against stats
+- **Settings toggle:** Switch between showcase view (avatar, level, stats, badges, streak) and settings view (avatar picker, name edit, password change, sign out)
+- **Sign out** with confirmation dialog
+
 ### Authentication
 - 3 modes: Email/password, Google Sign-In, or anonymous guest
 - Seamless state machine (`AuthModeManager`) bridging guest UUID and Firebase UID
@@ -122,7 +130,7 @@ lib/
       duel_screen.dart                        # Lobby entry, waiting lobby, active duel with HUD, winner announcement + confetti
       leaderboard_screen.dart                 # TabBar with 3 periods, ranked list, sticky "Your Rank" footer
       stamp_card_screen.dart                  # Stamp collection grid (earned vs total)
-      profile_screen.dart                     # User profile with stats
+      profile_screen.dart                     # Full profile: 8 avatars, level, stats, badges, streak, settings toggle, sign out
       badges_screen.dart                      # Badge collection
     widgets/
       guest_banner.dart                       # Amber banner for guest mode users
@@ -212,10 +220,11 @@ Supports Android, iOS, and Web.
 | **Shop** | Buy power-ups with stamps |
 | **Duel** | Create a lobby or join with a code — 60s real-time duel |
 | **Leaderboard** | Switch between All-Time / This Week / This Month tabs |
+| **Profile** | 8 avatar presets, level bar, stats cards, achievement badges, streak display |
 | **Stamp Card** | View all stamps earned per category |
 | **Guest Banner** | Tap to sign in and save guest progress |
 
-- **Sign Out:** Tap the profile avatar (top-right) → "Sign Out"
+- **Sign Out:** Tap the profile avatar (top-right) → Profile → gear icon → Sign Out
 - **Reset Progress:** Tap "Reset Progress" at the bottom of Home
 
 ---
