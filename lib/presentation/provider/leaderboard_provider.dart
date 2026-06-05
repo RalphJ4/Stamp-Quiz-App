@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import '../../domain/entities/leaderboard_entry.dart';
@@ -18,7 +20,12 @@ class LeaderboardProvider extends ChangeNotifier {
   LeaderboardPeriod _selectedTab = LeaderboardPeriod.allTime;
   LeaderboardEntry? _currentUserEntry;
 
-  LeaderboardProvider(this._authManager, this._quizProvider);
+  int _lastSyncedStamps = -1;
+  Timer? _refreshDebounce;
+
+  LeaderboardProvider(this._authManager, this._quizProvider) {
+    _quizProvider.addListener(_onQuizStampsChanged);
+  }
 
   List<LeaderboardEntry> get currentEntries => _entries[_selectedTab] ?? [];
   LeaderboardPeriod get selectedTab => _selectedTab;
@@ -26,6 +33,54 @@ class LeaderboardProvider extends ChangeNotifier {
   int get currentUserRank => _userRanks[_selectedTab] ?? 0;
 
   bool isLoading(LeaderboardPeriod period) => _loading[period] ?? false;
+
+  @override
+  void dispose() {
+    _refreshDebounce?.cancel();
+    _quizProvider.removeListener(_onQuizStampsChanged);
+    super.dispose();
+  }
+
+  void _onQuizStampsChanged() {
+    final currentStamps = _quizProvider.stamps;
+    if (currentStamps == _lastSyncedStamps) return;
+    _lastSyncedStamps = currentStamps;
+    _pushXp();
+    _refreshDebounce?.cancel();
+    _refreshDebounce = Timer(const Duration(seconds: 2), _refreshAll);
+  }
+
+  Future<void> _pushXp() async {
+    final uid = _authManager.user?.id;
+    if (uid == null) return;
+    try {
+      final name = _authManager.user?.name ?? _authManager.user?.email ?? 'Anonymous';
+      final totalXp = _quizProvider.stamps;
+      await _datasource.syncXp(
+        uid,
+        allTimeXp: totalXp,
+        weeklyXp: totalXp,
+        monthlyXp: totalXp,
+        displayName: name,
+      );
+    } catch (e) {
+      _log.e('Failed to push XP: $e');
+    }
+  }
+
+  Future<void> _refreshAll() async {
+    final uid = _authManager.user?.id;
+    if (uid == null) return;
+    try {
+      _currentUserEntry = await _datasource.getUserEntry(uid);
+      await fetchCurrentUserRank();
+      if (_entries[_selectedTab] != null) {
+        await fetchPeriod(_selectedTab);
+      }
+    } catch (e) {
+      _log.e('Failed to refresh leaderboard: $e');
+    }
+  }
 
   void selectTab(LeaderboardPeriod period) {
     if (_selectedTab == period) return;
@@ -63,26 +118,8 @@ class LeaderboardProvider extends ChangeNotifier {
   }
 
   Future<void> syncCurrentUser() async {
-    final uid = _authManager.user?.id;
-    if (uid == null) return;
-
-    final name = _authManager.user?.name ?? _authManager.user?.email ?? 'Anonymous';
-    final totalXp = _quizProvider.stamps;
-
-    await _datasource.syncXp(
-      uid,
-      allTimeXp: totalXp,
-      weeklyXp: totalXp,
-      monthlyXp: totalXp,
-      displayName: name,
-    );
-
-    _currentUserEntry = await _datasource.getUserEntry(uid);
-    await fetchCurrentUserRank();
-
-    if (_entries[_selectedTab] != null) {
-      await fetchPeriod(_selectedTab);
-    }
+    await _pushXp();
+    await _refreshAll();
   }
 
   void selectTabByIndex(int index) {

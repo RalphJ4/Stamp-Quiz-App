@@ -1,18 +1,58 @@
-rules_version='2'
-
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      // This rule allows anyone with your database reference to view, edit,
-      // and delete all data in your database. It is useful for getting
-      // started, but it is configured to expire after 30 days because it
-      // leaves your app open to attackers. At that time, all client
-      // requests to your database will be denied.
-      //
-      // Make sure to write security rules for your app before that time, or
-      // else all client requests to your database will be denied until you
-      // update your rules.
-      allow read, write: if request.time < timestamp.date(2026, 7, 3);
+
+    // ── Helper functions ──────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    // ── players/{uid} — user stats ────────────────────────────────────
+
+    match /players/{uid} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid)
+        && (!request.resource.data.keys().hasAny(['xp'])
+            || request.resource.data.xp >= resource.data.xp);
+      allow delete: if false;
+    }
+
+    // ── leaderboard/{uid} — lightweight XP snapshot ───────────────────
+
+    match /leaderboard/{uid} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+      allow delete: if false;
+    }
+
+    // ── dailyChallenges/{id} — daily challenge definitions ────────────
+
+    match /dailyChallenges/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ── duels/{duelId} — real-time duel documents ─────────────────────
+
+    match /duels/{duelId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && request.resource.data.hostUid == request.auth.uid;
+      allow update: if isAuthenticated()
+        && (resource.data.hostUid == request.auth.uid
+            || resource.data.guestUid == request.auth.uid);
+      allow delete: if false;
     }
   }
 }

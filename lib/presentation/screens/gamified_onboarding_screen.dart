@@ -119,8 +119,8 @@ class _GamifiedOnboardingScreenState extends State<GamifiedOnboardingScreen>
                         onSelect: (i) {
                           setState(() {
                             _tutorialSelected = i;
-                            _tutorialAnswered = true;
                             _tutorialCorrect = i == 0;
+                            if (i == 0) _tutorialAnswered = true;
                           });
                           if (i == 0) _confettiWidgetController.play();
                         },
@@ -523,30 +523,30 @@ class _TutorialStepState extends State<_TutorialStep> with SingleTickerProviderS
           AnimatedBuilder(
             animation: _shakeController,
             builder: (context, child) {
-              final offset = widget.answered && !widget.correct ? _shakeAnimation.value : 0.0;
+              final offset = widget.selectedOption != -1 && !widget.correct ? _shakeAnimation.value : 0.0;
               return Transform.translate(offset: Offset(offset, 0), child: child);
             },
-            child: Column(
-              children: List.generate(_options.length, (i) {
-                final isSelected = widget.selectedOption == i;
-                final isCorrect = i == 0;
-                Color? tileColor;
-                if (widget.answered) {
-                  if (isCorrect) {
-                    tileColor = Colors.green.withValues(alpha: 0.2);
-                  } else if (isSelected) {
-                    tileColor = Colors.red.withValues(alpha: 0.2);
-                  }
-                }
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 1.h),
-                  child: GestureDetector(
-                    onTap: widget.answered
-                        ? null
-                        : () {
-                            widget.onSelect(i);
-                            if (i != 0) _shakeController.forward(from: 0);
-                          },
+                child: Column(
+                  children: List.generate(_options.length, (i) {
+                    final isSelected = widget.selectedOption == i;
+                    final isCorrect = i == 0;
+                    Color? tileColor;
+                    if (widget.selectedOption != -1) {
+                      if (isCorrect) {
+                        tileColor = Colors.green.withValues(alpha: 0.2);
+                      } else if (isSelected) {
+                        tileColor = Colors.red.withValues(alpha: 0.2);
+                      }
+                    }
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 1.h),
+                      child: GestureDetector(
+                        onTap: widget.correct
+                            ? null
+                            : () {
+                                widget.onSelect(i);
+                                if (i != 0) _shakeController.forward(from: 0);
+                              },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
@@ -562,25 +562,25 @@ class _TutorialStepState extends State<_TutorialStep> with SingleTickerProviderS
                       child: Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              _options[i],
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                color: widget.answered
-                                    ? (isCorrect
-                                        ? Colors.green[300]
-                                        : isSelected
-                                            ? Colors.red[300]
-                                            : Colors.white70)
-                                    : Colors.white,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              child: Text(
+                                  _options[i],
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    color: widget.selectedOption != -1
+                                        ? (isCorrect
+                                            ? Colors.green[300]
+                                            : isSelected
+                                                ? Colors.red[300]
+                                                : Colors.white70)
+                                        : Colors.white,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          if (widget.answered && isCorrect)
-                            const Icon(Icons.check_circle, color: Colors.green, size: 24),
-                          if (widget.answered && isSelected && !isCorrect)
-                            const Icon(Icons.cancel, color: Colors.red, size: 24),
+                              if (widget.correct && isCorrect)
+                                const Icon(Icons.check_circle, color: Colors.green, size: 24),
+                              if (widget.selectedOption != -1 && isSelected && !isCorrect)
+                                const Icon(Icons.cancel, color: Colors.red, size: 24),
                         ],
                       ),
                     ),
@@ -589,7 +589,7 @@ class _TutorialStepState extends State<_TutorialStep> with SingleTickerProviderS
               }),
             ),
           ),
-          if (widget.answered && widget.correct) ...[
+          if (widget.correct) ...[
             SizedBox(height: 1.h),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.8.h),
@@ -631,7 +631,7 @@ class _TutorialStepState extends State<_TutorialStep> with SingleTickerProviderS
               ),
             ),
           ],
-          if (widget.answered && !widget.correct)
+          if (widget.selectedOption != -1 && !widget.correct)
             Padding(
               padding: EdgeInsets.only(top: 0.5.h),
               child: Text(
