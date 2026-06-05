@@ -20,6 +20,17 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   final ConfettiController _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+  bool _timerAutoPopped = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<QuizProvider>().startTimer();
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -166,6 +177,13 @@ class _QuizScreenState extends State<QuizScreen> {
             return const Center(child: CircularProgressIndicator(color: Color(0xFFE8B86D)));
           }
 
+          if (provider.isQuizFinished && !_timerAutoPopped) {
+            _timerAutoPopped = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) Navigator.of(context).pop();
+            });
+          }
+
           final question = provider.questions[provider.currentIndex];
           final diffColors = {
             QuestionDifficulty.easy: Colors.green,
@@ -217,9 +235,24 @@ class _QuizScreenState extends State<QuizScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 1.h),
+                SizedBox(height: 0.8.h),
                 Row(
                   children: [
+                    Icon(
+                      Icons.timer_outlined,
+                      color: provider.remainingSeconds <= 10 ? Colors.red : const Color(0xFFE8B86D),
+                      size: 16.sp,
+                    ),
+                    SizedBox(width: 1.w),
+                    Text(
+                      '${provider.remainingSeconds}s',
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                        color: provider.remainingSeconds <= 10 ? Colors.red : const Color(0xFFE8B86D),
+                      ),
+                    ),
+                    SizedBox(width: 3.w),
                     Text(
                       'Question ${provider.currentIndex + 1}/${provider.questions.length}',
                       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17.sp, color: Colors.white70),

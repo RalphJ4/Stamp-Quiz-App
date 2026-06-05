@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -38,6 +39,7 @@ class QuizProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _questionTimer?.cancel();
     _authManager.removeListener(_onAuthChanged);
     super.dispose();
   }
@@ -91,6 +93,11 @@ class QuizProvider extends ChangeNotifier {
   bool _quizStarted = false;
   bool get isQuizInProgress => _quizStarted && !_isQuizFinished;
 
+  static const int _questionTime = 30;
+  int _remainingSeconds = _questionTime;
+  Timer? _questionTimer;
+  int get remainingSeconds => _remainingSeconds;
+
   QuestionCategory _selectedCategory = QuestionCategory.space;
   QuestionCategory get selectedCategory => _selectedCategory;
 
@@ -123,6 +130,7 @@ class QuizProvider extends ChangeNotifier {
   }
 
   void _filterByCategory(QuestionCategory category) {
+    _cancelTimer();
     _questions = _allQuestions.where((q) => q.category == category).toList();
     _currentIndex = 0;
     _answered = false;
@@ -133,6 +141,7 @@ class QuizProvider extends ChangeNotifier {
     _hintsRemaining = 3;
     _usedHint = false;
     _eliminatedOptions = {};
+    _remainingSeconds = _questionTime;
     notifyListeners();
   }
 
@@ -147,8 +156,37 @@ class QuizProvider extends ChangeNotifier {
     }).toList();
   }
 
+  void startTimer() {
+    _questionTimer?.cancel();
+    _remainingSeconds = _questionTime;
+    notifyListeners();
+    _questionTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _remainingSeconds--;
+      notifyListeners();
+      if (_remainingSeconds <= 0) {
+        _questionTimer?.cancel();
+        _onTimerExpired();
+      }
+    });
+  }
+
+  void _cancelTimer() {
+    _questionTimer?.cancel();
+    _questionTimer = null;
+  }
+
+  void _onTimerExpired() {
+    if (_answered) return;
+    if (_currentIndex < _questions.length - 1) {
+      nextQuestion();
+    } else {
+      finishQuiz();
+    }
+  }
+
   void selectOption(int index) {
     if (_answered) return;
+    _cancelTimer();
     _quizStarted = true;
     _selectedOption = index;
     _answered = true;
@@ -209,6 +247,7 @@ class QuizProvider extends ChangeNotifier {
     _answered = false;
     _selectedOption = null;
     _animateStamp = false;
+    startTimer();
     notifyListeners();
   }
 
@@ -235,6 +274,7 @@ class QuizProvider extends ChangeNotifier {
   }
 
   Future<void> resetQuiz() async {
+    _cancelTimer();
     _currentIndex = 0;
     _stamps = 0;
     _answered = false;
