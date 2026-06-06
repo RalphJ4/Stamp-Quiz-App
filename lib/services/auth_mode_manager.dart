@@ -52,6 +52,7 @@ class AuthModeManager extends ChangeNotifier {
         }
         return;
       }
+      if (_initialized) return;
       final hasGuest = await _guestSessionService.hasSession();
       if (hasGuest) {
         final guestId = await _guestSessionService.getOrCreateSession();
@@ -127,6 +128,8 @@ class AuthModeManager extends ChangeNotifier {
       return null;
     } on auth.FirebaseAuthException catch (e) {
       return e.message ?? 'Sign in failed';
+    } catch (e) {
+      return 'Sign in failed: $e';
     }
   }
 
@@ -137,6 +140,8 @@ class AuthModeManager extends ChangeNotifier {
       return null;
     } on auth.FirebaseAuthException catch (e) {
       return e.message ?? 'Registration failed';
+    } catch (e) {
+      return 'Registration failed: $e';
     }
   }
 
@@ -148,6 +153,8 @@ class AuthModeManager extends ChangeNotifier {
       return null;
     } on auth.FirebaseAuthException catch (e) {
       return e.message ?? 'Google sign-in failed';
+    } catch (e) {
+      return 'Google sign-in failed: $e';
     }
   }
 

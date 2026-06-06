@@ -31,20 +31,28 @@ class _LoginScreenState extends State<LoginScreen> {
       _loading = true;
       _error = null;
     });
-    final manager = context.read<AuthModeManager>();
-    final err = await manager.signInWithEmail(
-      _emailController.text.trim(),
-      _passwordController.text,
-    );
-    if (!mounted) return;
-    if (err != null) {
+    try {
+      final manager = context.read<AuthModeManager>();
+      final err = await manager.signInWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
+      if (!mounted) return;
+      if (err != null) {
+        setState(() {
+          _error = err;
+          _loading = false;
+        });
+      } else {
+        _log.i('← popUntil root → HomeScreen (signed in)');
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _error = err;
+        _error = 'Sign in failed: $e';
         _loading = false;
       });
-    } else {
-      _log.i('← popUntil root → HomeScreen (signed in)');
-      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 
@@ -53,17 +61,25 @@ class _LoginScreenState extends State<LoginScreen> {
       _loading = true;
       _error = null;
     });
-    final manager = context.read<AuthModeManager>();
-    final err = await manager.signInWithGoogle();
-    if (!mounted) return;
-    if (err != null) {
+    try {
+      final manager = context.read<AuthModeManager>();
+      final err = await manager.signInWithGoogle();
+      if (!mounted) return;
+      if (err != null) {
+        setState(() {
+          _error = err;
+          _loading = false;
+        });
+      } else {
+        _log.i('← popUntil root → HomeScreen (Google sign-in)');
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } catch (e) {
+      if (!mounted) return;
       setState(() {
-        _error = err;
+        _error = 'Google sign-in failed: $e';
         _loading = false;
       });
-    } else {
-      _log.i('← popUntil root → HomeScreen (Google sign-in)');
-      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 

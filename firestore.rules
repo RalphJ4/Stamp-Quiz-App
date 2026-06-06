@@ -16,6 +16,15 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == uid;
     }
 
+    // ── users/{uid} — user profile (display name, email, avatar) ──────
+
+    match /users/{uid} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+      allow delete: if false;
+    }
+
     // ── players/{uid} — user stats ────────────────────────────────────
 
     match /players/{uid} {

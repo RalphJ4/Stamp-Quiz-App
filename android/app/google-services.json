@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "656543779944",
+    "firebase_url": "https://stamp-1c1f9-default-rtdb.asia-southeast1.firebasedatabase.app",
     "project_id": "stamp-1c1f9",
     "storage_bucket": "stamp-1c1f9.firebasestorage.app"
   },
@@ -13,6 +14,22 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "656543779944-4d2at98ikq2ktvub0gmga6ie62cl4p2j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.quiz_app",
+            "certificate_hash": "9afc01e7eec6d2a52635c969dca2b84ee8881984"
+          }
+        },
+        {
+          "client_id": "656543779944-mso8j0i00fo4okfvgqmojmponmu0h7le.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.quiz_app",
+            "certificate_hash": "05c351e277da525531a74893e09ac385418a382a"
+          }
+        },
         {
           "client_id": "656543779944-c391erotqnpb2m8hu8k202r40isvevfg.apps.googleusercontent.com",
           "client_type": 3
@@ -29,6 +46,13 @@
             {
               "client_id": "656543779944-c391erotqnpb2m8hu8k202r40isvevfg.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "656543779944-hgf3meaj0ef4e7idnv5aig9d0ea6nqc3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.quizApp"
+              }
             }
           ]
         }
