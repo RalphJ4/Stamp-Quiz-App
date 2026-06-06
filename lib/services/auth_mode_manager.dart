@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
 import 'guest_session_service.dart';
 import 'local_storage_service.dart';
@@ -106,6 +109,43 @@ class AuthModeManager extends ChangeNotifier {
     _ensureUserProfile(firebaseUser).catchError((e) {
       _logger.e('Failed to ensure user profile: $e');
     });
+    _migrateGuestData(firebaseUser.uid);
+  }
+
+  Future<void> _migrateGuestData(String uid) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final guestId = prefs.getString('guest_session_id');
+      if (guestId == null || guestId.isEmpty) return;
+      final prefix = 'guest_$guestId';
+      final oldStamps = prefs.getInt('${prefix}_stamps') ?? 0;
+      if (oldStamps <= 0) return;
+      final oldBestStreak = prefs.getInt('${prefix}_bestStreak') ?? 0;
+      final oldTotalCorrect = prefs.getInt('${prefix}_totalCorrect') ?? 0;
+      final oldTotalAnswered = prefs.getInt('${prefix}_totalAnswered') ?? 0;
+      final docRef = _firestore.collection('users').doc(uid);
+      await _firestore.runTransaction((tx) async {
+        final doc = await tx.get(docRef);
+        final existing = doc.data() ?? {};
+        final mergedStamps = max(oldStamps, (existing['stamps'] as num?)?.toInt() ?? 0);
+        final mergedBestStreak = max(oldBestStreak, (existing['bestStreak'] as num?)?.toInt() ?? 0);
+        final mergedTotalCorrect = max(oldTotalCorrect, (existing['totalCorrect'] as num?)?.toInt() ?? 0);
+        final mergedTotalAnswered = max(oldTotalAnswered, (existing['totalAnswered'] as num?)?.toInt() ?? 0);
+        tx.set(docRef, {
+          'stamps': mergedStamps,
+          'bestStreak': mergedBestStreak,
+          'totalCorrect': mergedTotalCorrect,
+          'totalAnswered': mergedTotalAnswered,
+        }, SetOptions(merge: true));
+      });
+      await prefs.remove('${prefix}_stamps');
+      await prefs.remove('${prefix}_bestStreak');
+      await prefs.remove('${prefix}_totalCorrect');
+      await prefs.remove('${prefix}_totalAnswered');
+      _logger.i('Migrated guest stats to Firestore user $uid');
+    } catch (e) {
+      _logger.e('Failed to migrate guest data: $e');
+    }
   }
 
   Future<void> _loadAvatarIndex() async {

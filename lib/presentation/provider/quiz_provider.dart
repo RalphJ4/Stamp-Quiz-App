@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/entities/power_up.dart';
 import '../../domain/entities/question.dart';
@@ -296,10 +297,47 @@ class QuizProvider extends ChangeNotifier {
 
   Future<void> _loadStats() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // For logged-in users, try Firestore first
+    if (_authManager.isLoggedIn) {
+      final uid = _authManager.user?.id;
+      if (uid != null) {
+        try {
+          final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+          if (doc.exists && doc.data()!.containsKey('stamps')) {
+            _stamps = (doc.data()!['stamps'] as num?)?.toInt() ?? 0;
+            _bestStreak = (doc.data()!['bestStreak'] as num?)?.toInt() ?? 0;
+            _totalCorrect = (doc.data()!['totalCorrect'] as num?)?.toInt() ?? 0;
+            _totalAnswered = (doc.data()!['totalAnswered'] as num?)?.toInt() ?? 0;
+            notifyListeners();
+            return;
+          }
+        } catch (_) {}
+      }
+    }
+
+    // Fall back to SharedPreferences
     _bestStreak = prefs.getInt('${_storagePrefix}_bestStreak') ?? 0;
     _totalCorrect = prefs.getInt('${_storagePrefix}_totalCorrect') ?? 0;
     _totalAnswered = prefs.getInt('${_storagePrefix}_totalAnswered') ?? 0;
     _stamps = prefs.getInt('${_storagePrefix}_stamps') ?? 0;
+
+    // If still zero and we just logged in, try migrating from guest data
+    if (_stamps <= 0 && _authManager.isLoggedIn) {
+      final guestId = prefs.getString('guest_session_id');
+      if (guestId != null && guestId.isNotEmpty) {
+        final guestPrefix = 'guest_$guestId';
+        final guestStamps = prefs.getInt('${guestPrefix}_stamps') ?? 0;
+        if (guestStamps > 0) {
+          _stamps = guestStamps;
+          _bestStreak = prefs.getInt('${guestPrefix}_bestStreak') ?? 0;
+          _totalCorrect = prefs.getInt('${guestPrefix}_totalCorrect') ?? 0;
+          _totalAnswered = prefs.getInt('${guestPrefix}_totalAnswered') ?? 0;
+          _saveStats();
+        }
+      }
+    }
+
     notifyListeners();
   }
 
@@ -309,5 +347,19 @@ class QuizProvider extends ChangeNotifier {
     await prefs.setInt('${_storagePrefix}_bestStreak', _bestStreak);
     await prefs.setInt('${_storagePrefix}_totalCorrect', _totalCorrect);
     await prefs.setInt('${_storagePrefix}_totalAnswered', _totalAnswered);
+
+    if (_authManager.isLoggedIn) {
+      final uid = _authManager.user?.id;
+      if (uid != null) {
+        try {
+          await FirebaseFirestore.instance.collection('users').doc(uid).set({
+            'stamps': _stamps,
+            'bestStreak': _bestStreak,
+            'totalCorrect': _totalCorrect,
+            'totalAnswered': _totalAnswered,
+          }, SetOptions(merge: true));
+        } catch (_) {}
+      }
+    }
   }
 }
