@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/entities/power_up.dart';
 import '../../domain/entities/question.dart';
+import '../../data/datasources/ai_question_datasource.dart';
 import '../../data/datasources/local_question_datasource.dart';
 import '../../data/repositories/question_repository_impl.dart';
 import '../../domain/usecases/get_questions.dart';
@@ -22,13 +23,14 @@ class CategoryStats {
 
 class QuizProvider extends ChangeNotifier {
   final _local = LocalQuestionDataSource();
+  final _ai = AiQuestionDataSource();
   late final GetQuestions _getQuestions;
   final AuthModeManager _authManager;
   String? _lastUserId;
   PowerUpProvider? _powerUpProvider;
 
   QuizProvider(this._authManager) {
-    final repo = QuestionRepositoryImpl(local: _local);
+    final repo = QuestionRepositoryImpl(local: _local, ai: _ai);
     _getQuestions = GetQuestions(repo);
     _authManager.addListener(_onAuthChanged);
     _loadStats();
