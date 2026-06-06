@@ -42,7 +42,7 @@ class _QuizScreenState extends State<QuizScreen> {
     _confettiController.play();
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (context) => Stack(
         alignment: Alignment.center,
         children: [
