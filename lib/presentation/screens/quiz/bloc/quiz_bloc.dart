@@ -31,6 +31,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
     on<QuizLoadQuestions>(_onLoadQuestions);
     on<QuizSelectCategory>(_onSelectCategory);
     on<QuizStartTimer>(_onStartTimer);
+    on<QuizPauseTimer>(_onPauseTimer);
     on<QuizTimerTick>(_onTimerTick);
     on<QuizSelectOption>(_onSelectOption);
     on<QuizNextQuestion>(_onNextQuestion);
@@ -89,6 +90,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
       eliminatedOptions: {},
       remainingSeconds: 30,
     ));
+    add(QuizStartTimer());
   }
 
   void _onStartTimer(QuizStartTimer event, Emitter<QuizState> emit) {
@@ -96,6 +98,11 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
     _questionTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       add(QuizTimerTick());
     });
+  }
+
+  void _onPauseTimer(QuizPauseTimer event, Emitter<QuizState> emit) {
+    _questionTimer?.cancel();
+    _questionTimer = null;
   }
 
   void _onTimerTick(QuizTimerTick event, Emitter<QuizState> emit) {

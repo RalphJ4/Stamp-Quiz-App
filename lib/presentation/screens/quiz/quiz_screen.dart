@@ -298,6 +298,9 @@ class QuizScreen extends StatelessWidget {
                                 return GestureDetector(
                                   onTap: active ? null : () {
                                     context.read<PowerUpBloc>().add(PowerUpActivate(type: type));
+                                    if (type == PowerUpType.timeFreeze) {
+                                      context.read<QuizBloc>().add(QuizPauseTimer());
+                                    }
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text('${type.label} activated!'),
@@ -393,6 +396,9 @@ class QuizScreen extends StatelessWidget {
                           ),
                           onTap: (state.answered || isEliminated) ? null : () {
                             context.read<QuizBloc>().add(QuizSelectOption(index: i));
+                            if (context.read<PowerUpBloc>().state.hasEffect(PowerUpType.timeFreeze)) {
+                              context.read<PowerUpBloc>().add(PowerUpConsumeEffect(type: PowerUpType.timeFreeze));
+                            }
                             if (question.correctIndex == i) {
                               _showStampDialog(context);
                             }
@@ -422,7 +428,12 @@ class QuizScreen extends StatelessWidget {
                                 elevation: 3,
                               ),
                               icon: Icon(Icons.arrow_forward, size: 18.sp),
-                              onPressed: () => context.read<QuizBloc>().add(QuizNextQuestion()),
+                              onPressed: () {
+                                if (context.read<PowerUpBloc>().state.hasEffect(PowerUpType.timeFreeze)) {
+                                  context.read<PowerUpBloc>().add(PowerUpConsumeEffect(type: PowerUpType.timeFreeze));
+                                }
+                                context.read<QuizBloc>().add(QuizNextQuestion());
+                              },
                               label: const Text('Next'),
                             ),
                           SizedBox(width: 3.w),

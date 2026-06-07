@@ -11,6 +11,8 @@ final class QuizSelectCategory extends QuizEvent {
 
 final class QuizStartTimer extends QuizEvent {}
 
+final class QuizPauseTimer extends QuizEvent {}
+
 final class QuizTimerTick extends QuizEvent {}
 
 final class QuizSelectOption extends QuizEvent {
