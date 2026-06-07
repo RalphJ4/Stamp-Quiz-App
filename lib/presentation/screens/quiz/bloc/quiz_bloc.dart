@@ -57,7 +57,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
   }
 
   int questionCountForCategory(QuestionCategory category) {
-    return state.allQuestions.where((q) => q.category == category).length;
+    return _questionCounts[category] ?? 0;
   }
 
   List<CategoryStats> get allCategoryStats {
@@ -73,9 +73,20 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
     emit(state.copyWith(allQuestions: allQuestions, questions: filtered));
   }
 
+  static const _questionCounts = {
+    QuestionCategory.space: 8,
+    QuestionCategory.animals: 6,
+    QuestionCategory.history: 6,
+    QuestionCategory.science: 6,
+    QuestionCategory.geography: 6,
+  };
+
   void _onSelectCategory(QuizSelectCategory event, Emitter<QuizState> emit) {
     _cancelTimer();
-    final filtered = state.allQuestions.where((q) => q.category == event.category).toList();
+    var filtered = state.allQuestions.where((q) => q.category == event.category).toList();
+    filtered.shuffle();
+    final count = _questionCounts[event.category]!;
+    filtered = filtered.take(min(count, filtered.length)).toList();
     emit(state.copyWith(
       selectedCategory: event.category,
       questions: filtered,
