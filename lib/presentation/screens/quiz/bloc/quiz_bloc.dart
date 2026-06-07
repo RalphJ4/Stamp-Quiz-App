@@ -92,7 +92,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
       questions: filtered,
       currentIndex: 0,
       answered: false,
-      selectedOption: null,
+      clearSelectedOption: true,
       animateStamp: false,
       isQuizFinished: false,
       quizStarted: false,
@@ -178,7 +178,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
       emit(state.copyWith(
         currentIndex: state.currentIndex + 1,
         answered: false,
-        selectedOption: null,
+        clearSelectedOption: true,
         animateStamp: false,
         usedHint: false,
         eliminatedOptions: {},

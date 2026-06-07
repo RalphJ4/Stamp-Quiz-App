@@ -357,23 +357,35 @@ class QuizScreen extends StatelessWidget {
                       final isSelected = state.selectedOption == i;
                       final isEliminated = state.eliminatedOptions.contains(i) && !state.answered;
                       Color? tileColor;
+                      Color borderColor = Colors.white24;
+                      double borderWidth = 1;
+
                       if (state.answered) {
                         if (i == question.correctIndex) {
                           tileColor = Colors.green.withValues(alpha: 0.2);
+                          borderColor = Colors.green.withValues(alpha: 0.6);
                         } else if (isSelected) {
                           tileColor = Colors.red.withValues(alpha: 0.2);
+                          borderColor = Colors.red.withValues(alpha: 0.6);
+                        } else {
+                          borderColor = Colors.white24;
                         }
                       } else if (isEliminated) {
                         tileColor = Colors.white10;
+                        borderColor = Colors.white10;
+                      } else if (isSelected) {
+                        borderColor = const Color(0xFFE8B86D);
+                        borderWidth = 2;
                       }
+
                       return Card(
-                        elevation: isSelected ? 6 : 2,
+                        elevation: isSelected && !state.answered ? 6 : 2,
                         color: tileColor ?? const Color(0xFF16213E),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                           side: BorderSide(
-                            color: tileColor ?? (isSelected ? const Color(0xFFE8B86D) : isEliminated ? Colors.white10 : Colors.white24),
-                            width: isSelected ? 2 : 1,
+                            color: borderColor,
+                            width: borderWidth,
                           ),
                         ),
                         child: ListTile(
