@@ -213,6 +213,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   void _onSignInWithEmail(AuthSignInWithEmail event, Emitter<AuthState> emit) async {
     emit(state.copyWith(clearError: true));
+    if (event.email.trim().isEmpty) {
+      emit(state.copyWith(error: 'Please enter your email address.'));
+      return;
+    }
+    if (event.password.trim().isEmpty) {
+      emit(state.copyWith(error: 'Please enter your password.'));
+      return;
+    }
     try {
       final cred = await _authService.signInWithEmail(event.email, event.password);
       _setLoggedIn(cred.user!);
@@ -225,6 +233,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   void _onRegisterWithEmail(AuthRegisterWithEmail event, Emitter<AuthState> emit) async {
     emit(state.copyWith(clearError: true));
+    if (event.email.trim().isEmpty) {
+      emit(state.copyWith(error: 'Please enter your email address.'));
+      return;
+    }
+    if (event.password.trim().isEmpty) {
+      emit(state.copyWith(error: 'Please enter a password.'));
+      return;
+    }
     try {
       final cred = await _authService.registerWithEmail(event.email, event.password);
       _setLoggedIn(cred.user!);
