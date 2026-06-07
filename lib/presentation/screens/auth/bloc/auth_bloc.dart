@@ -15,6 +15,49 @@ export 'auth_state.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
+String _friendlyAuthError(auth.FirebaseAuthException e) {
+  switch (e.code) {
+    case 'email-already-in-use':
+      return 'This email is already registered. Try signing in instead.';
+    case 'invalid-email':
+      return 'Please enter a valid email address.';
+    case 'user-not-found':
+      return 'No account found with this email. Please register first.';
+    case 'wrong-password':
+      return 'Incorrect password. Please try again.';
+    case 'weak-password':
+      return 'Password should be at least 6 characters.';
+    case 'invalid-credential':
+      return 'Invalid email or password. Please try again.';
+    case 'user-disabled':
+      return 'This account has been disabled. Contact support.';
+    case 'too-many-requests':
+      return 'Too many attempts. Please try again later.';
+    case 'operation-not-allowed':
+      return 'This sign-in method is not enabled. Contact support.';
+    case 'account-exists-with-different-credential':
+      return 'An account already exists with this email using a different sign-in method.';
+    case 'requires-recent-login':
+      return 'Please sign out and sign in again before retrying.';
+    case 'network-request-failed':
+      return 'No internet connection. Please check your network and try again.';
+    case 'invalid-action-code':
+      return 'The link you used is invalid or expired.';
+    case 'expired-action-code':
+      return 'The link you used has expired.';
+    case 'invalid-verification-code':
+      return 'The verification code is invalid.';
+    case 'invalid-verification-id':
+      return 'The verification ID is invalid.';
+    case 'provider-already-linked':
+      return 'This sign-in method is already connected to your account.';
+    case 'credential-already-in-use':
+      return 'This login is already being used by another account.';
+    default:
+      return 'Something went wrong. Please try again.';
+  }
+}
+
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final Logger _logger = Logger();
   final AuthService _authService = AuthService();
@@ -174,9 +217,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final cred = await _authService.signInWithEmail(event.email, event.password);
       _setLoggedIn(cred.user!);
     } on auth.FirebaseAuthException catch (e) {
-      emit(state.copyWith(error: e.message ?? 'Sign in failed'));
+      emit(state.copyWith(error: _friendlyAuthError(e)));
     } catch (e) {
-      emit(state.copyWith(error: 'Sign in failed: $e'));
+      emit(state.copyWith(error: 'Something went wrong. Please try again.'));
     }
   }
 
@@ -186,9 +229,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final cred = await _authService.registerWithEmail(event.email, event.password);
       _setLoggedIn(cred.user!);
     } on auth.FirebaseAuthException catch (e) {
-      emit(state.copyWith(error: e.message ?? 'Registration failed'));
-    } catch (e) {
-      emit(state.copyWith(error: 'Registration failed: $e'));
+      emit(state.copyWith(error: _friendlyAuthError(e)));
+    } catch (_) {
+      emit(state.copyWith(error: 'Something went wrong. Please try again.'));
     }
   }
 
@@ -202,9 +245,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
       _setLoggedIn(result.user!);
     } on auth.FirebaseAuthException catch (e) {
-      emit(state.copyWith(error: e.message ?? 'Google sign-in failed'));
-    } catch (e) {
-      emit(state.copyWith(error: 'Google sign-in failed: $e'));
+      emit(state.copyWith(error: _friendlyAuthError(e)));
+    } catch (_) {
+      emit(state.copyWith(error: 'Something went wrong. Please try again.'));
     }
   }
 
