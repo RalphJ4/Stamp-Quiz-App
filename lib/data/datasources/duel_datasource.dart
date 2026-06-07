@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/duel.dart';
 import '../../domain/entities/question.dart';
@@ -8,8 +10,28 @@ class DuelDatasource {
 
   CollectionReference get _duels => _firestore.collection('duels');
 
+  String _generateCode() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    final random = _random;
+    return String.fromCharCodes(
+      Iterable.generate(6, (_) => chars.codeUnitAt(random.nextInt(chars.length))),
+    );
+  }
+
+  final _random = Random();
+
   Future<String> createDuel(String hostUid, List<Question> questions) async {
-    final doc = await _duels.add({
+    const maxAttempts = 5;
+    String code;
+    int attempt = 0;
+    do {
+      code = _generateCode();
+      attempt++;
+      final existing = await _duels.doc(code).get();
+      if (!existing.exists) break;
+    } while (attempt < maxAttempts);
+
+    await _duels.doc(code).set({
       'hostUid': hostUid,
       'guestUid': null,
       'status': 'waiting',
@@ -30,7 +52,7 @@ class DuelDatasource {
       'startedAt': FieldValue.serverTimestamp(),
       'winnerUid': null,
     });
-    return doc.id;
+    return code;
   }
 
   Future<void> joinDuel(String duelId, String guestUid) async {
