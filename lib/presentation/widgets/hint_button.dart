@@ -1,56 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:quiz_app/presentation/provider/quiz_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-class HintButton extends StatefulWidget {
+class HintButton extends StatelessWidget {
   const HintButton({super.key});
 
-  @override
-  State<HintButton> createState() => _HintButtonState();
-}
-
-class _HintButtonState extends State<HintButton> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _shakeAnimation;
-  late Animation<double> _bounceAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
-
-    _shakeAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: -10.0), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: -10.0, end: 10.0), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 10.0, end: -7.0), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: -7.0, end: 7.0), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 7.0, end: 0.0), weight: 1),
-    ]).animate(_controller);
-
-    _bounceAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.4), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 1.4, end: 0.9), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.05), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 1.05, end: 1.0), weight: 2),
-    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onTap(QuizProvider provider) {
-    if (provider.hintsRemaining > 0) {
-      provider.useHint();
-      if (_controller.isAnimating) _controller.reset();
-      _controller.forward();
+  void _onTap(BuildContext context) {
+    final state = context.read<QuizBloc>().state;
+    if (state.hintsRemaining > 0) {
+      context.read<QuizBloc>().add(QuizUseHint());
       ScaffoldMessenger.of(context).showSnackBar(_buildSnackBar());
-    } else {
-      if (_controller.isAnimating) _controller.reset();
-      _controller.forward();
     }
   }
 
@@ -83,22 +43,18 @@ class _HintButtonState extends State<HintButton> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<QuizProvider>(
-      builder: (context, provider, _) {
+    return BlocBuilder<QuizBloc, QuizState>(
+      builder: (context, state) {
         return GestureDetector(
-          onTap: () => _onTap(provider),
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              final isShaking = provider.hintsRemaining == 0 && _controller.isAnimating;
-              final isBouncing = provider.hintsRemaining > 0 && _controller.isAnimating;
-
-              return Transform.translate(
-                offset: Offset(isShaking ? _shakeAnimation.value : 0, 0),
-                child: Transform.scale(
-                  scale: isBouncing ? _bounceAnimation.value : 1.0,
-                  child: child,
-                ),
+          onTap: () => _onTap(context),
+          child: TweenAnimationBuilder<double>(
+            key: ValueKey('hint_${state.hintsRemaining}'),
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 500),
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: _bounceSequence(value),
+                child: child,
               );
             },
             child: Padding(
@@ -109,7 +65,7 @@ class _HintButtonState extends State<HintButton> with SingleTickerProviderStateM
                   Icon(Icons.lightbulb_outline, color: const Color(0xFFE8B86D), size: 5.h),
                   SizedBox(width: 1.5.w),
                   ...List.generate(3, (i) {
-                    final earned = i < provider.hintsRemaining;
+                    final earned = i < state.hintsRemaining;
                     return Container(
                       width: 2.5.w,
                       height: 2.5.w,
@@ -131,5 +87,13 @@ class _HintButtonState extends State<HintButton> with SingleTickerProviderStateM
         );
       },
     );
+  }
+
+  double _bounceSequence(double t) {
+    if (t < 0.2) return 1.0 + (t / 0.2) * 0.4;
+    if (t < 0.4) return 1.4 + ((t - 0.2) / 0.2) * -0.5;
+    if (t < 0.6) return 0.9 + ((t - 0.4) / 0.2) * 0.15;
+    if (t < 0.8) return 1.05 + ((t - 0.6) / 0.2) * -0.05;
+    return 1.0;
   }
 }

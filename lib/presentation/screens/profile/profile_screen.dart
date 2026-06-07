@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:quiz_app/presentation/provider/quiz_provider.dart';
-import 'package:quiz_app/services/auth_mode_manager.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
+import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class _AvatarPreset {
@@ -31,7 +31,7 @@ class _Badge {
   final IconData icon;
   final String description;
   final Color color;
-  final bool Function(QuizProvider qp) unlocked;
+  final bool Function(QuizState qp) unlocked;
 
   const _Badge({
     required this.id,
@@ -140,111 +140,17 @@ int _levelForXp(int xp) => (sqrt(xp / 100).floor()) + 1;
 
 int _xpForLevel(int level) => level * level * 100;
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  late TextEditingController _nameController;
-  late TextEditingController _currentPasswordController;
-  late TextEditingController _newPasswordController;
-  late TextEditingController _confirmPasswordController;
-  int _selectedAvatar = 0;
-  bool _saving = false;
-  bool _passwordSaving = false;
-  bool _showSettings = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController();
-    _currentPasswordController = TextEditingController();
-    _newPasswordController = TextEditingController();
-    _confirmPasswordController = TextEditingController();
-    _loadProfile();
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _currentPasswordController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadProfile() async {
-    final auth = context.read<AuthModeManager>();
-    _nameController.text = auth.user?.name ?? '';
-    final avatarIdx = await auth.getAvatarColor();
-    if (mounted) setState(() => _selectedAvatar = avatarIdx.clamp(0, _avatarPresets.length - 1));
-  }
-
-  Future<void> _saveName() async {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) return;
-    setState(() => _saving = true);
-    final auth = context.read<AuthModeManager>();
-    final error = await auth.updateDisplayName(name);
-    if (mounted) {
-      setState(() => _saving = false);
-      _showSnack(error ?? 'Name updated!', error != null);
-    }
-  }
-
-  Future<void> _saveAvatar(int index) async {
-    setState(() => _selectedAvatar = index);
-    final auth = context.read<AuthModeManager>();
-    final error = await auth.updateAvatarColor(index);
-    if (mounted && error != null) _showSnack(error, true);
-  }
-
-  Future<void> _savePassword() async {
-    final current = _currentPasswordController.text;
-    final newPass = _newPasswordController.text;
-    final confirm = _confirmPasswordController.text;
-
-    if (current.isEmpty || newPass.isEmpty || confirm.isEmpty) {
-      _showSnack('Fill in all fields', true); return;
-    }
-    if (newPass.length < 6) {
-      _showSnack('Password must be at least 6 characters', true); return;
-    }
-    if (newPass != confirm) {
-      _showSnack('Passwords do not match', true); return;
-    }
-
-    setState(() => _passwordSaving = true);
-    final auth = context.read<AuthModeManager>();
-    final error = await auth.updatePassword(current, newPass);
-    if (mounted) {
-      setState(() => _passwordSaving = false);
-      if (error == null) {
-        _currentPasswordController.clear();
-        _newPasswordController.clear();
-        _confirmPasswordController.clear();
-      }
-      _showSnack(error ?? 'Password updated!', error != null);
-    }
-  }
-
-  void _showSnack(String msg, bool isError) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: isError ? Colors.red.shade800 : const Color(0xFF7B2FBE),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+  static final _nameFormKey = GlobalKey<FormState>();
+  static final _passwordFormKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthModeManager>();
-    final quiz = context.watch<QuizProvider>();
+    final auth = context.watch<AuthBloc>().state;
+    final quiz = context.watch<QuizBloc>().state;
+    final canChangePassword = context.read<AuthBloc>().canChangePassword;
 
     final xp = quiz.stamps;
     final level = _levelForXp(xp);
@@ -252,7 +158,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final xpForNext = _xpForLevel(level + 1);
     final progress = (xp - xpForCurrent) / (xpForNext - xpForCurrent);
     final title = _titleForXp(xp);
-    final avatar = _avatarPresets[_selectedAvatar];
+    final avatarIndex = auth.avatarIndex.clamp(0, _avatarPresets.length - 1);
+    final avatar = _avatarPresets[avatarIndex];
     final accuracy = quiz.totalAnswered > 0 ? quiz.totalCorrect / quiz.totalAnswered : 0.0;
 
     final unlockedBadges = _badges.where((b) => b.unlocked(quiz)).toList();
@@ -265,32 +172,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
         centerTitle: true,
         backgroundColor: const Color(0xFF1A1A2E),
         toolbarHeight: 7.h,
-        actions: [
-          IconButton(
-            icon: Icon(_showSettings ? Icons.close : Icons.settings, color: Colors.white54),
-            onPressed: () => setState(() => _showSettings = !_showSettings),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(4.w),
         child: Column(
           children: [
-            if (!_showSettings) ...[
-              _buildProfileHeader(auth, avatar, title),
-              SizedBox(height: 2.h),
-              _buildLevelBar(level, xp, xpForNext, progress),
-              SizedBox(height: 2.h),
-              _buildStatsRow(xp, quiz, accuracy),
-              SizedBox(height: 2.h),
-              _buildStreakDisplay(quiz),
-              SizedBox(height: 2.h),
-              _buildBadgeSection(unlockedBadges, lockedBadges),
-            ] else ...[
-              _buildSettingsSection(auth, avatar),
-            ],
+            _buildProfileHeader(auth, avatar, title),
+            SizedBox(height: 2.h),
+            _buildLevelBar(level, xp, xpForNext, progress),
+            SizedBox(height: 2.h),
+            _buildStatsRow(xp, quiz, accuracy),
+            SizedBox(height: 2.h),
+            _buildStreakDisplay(quiz),
+            SizedBox(height: 2.h),
+            _buildBadgeSection(unlockedBadges, lockedBadges),
+            SizedBox(height: 3.h),
+            _buildSettingsSection(context, auth, avatar, canChangePassword: canChangePassword),
             SizedBox(height: 4.h),
-            _buildSignOut(auth),
+            _buildSignOut(context),
             SizedBox(height: 2.h),
           ],
         ),
@@ -298,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeader(AuthModeManager auth, _AvatarPreset avatar, String title) {
+  Widget _buildProfileHeader(AuthState auth, _AvatarPreset avatar, String title) {
     return Column(
       children: [
         Container(
@@ -376,7 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildStatsRow(int xp, QuizProvider quiz, double accuracy) {
+  Widget _buildStatsRow(int xp, QuizState quiz, double accuracy) {
     return Row(
       children: [
         _statCard(Icons.monetization_on, '$xp', 'Total XP', const Color(0xFFE8B86D)),
@@ -411,7 +310,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildStreakDisplay(QuizProvider quiz) {
+  Widget _buildStreakDisplay(QuizState quiz) {
     return Container(
       padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
@@ -550,102 +449,163 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSettingsSection(AuthModeManager auth, _AvatarPreset avatar) {
+  Widget _buildSettingsSection(BuildContext context, AuthState auth, _AvatarPreset avatar, {required bool canChangePassword}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Avatar', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: const Color(0xFFE8B86D))),
         SizedBox(height: 1.h),
-        Wrap(
-          spacing: 2.w,
-          runSpacing: 1.h,
-          children: List.generate(_avatarPresets.length, (i) {
-            final p = _avatarPresets[i];
-            final selected = _selectedAvatar == i;
-            return GestureDetector(
-              onTap: () => _saveAvatar(i),
-              child: Container(
-                width: 19.w,
-                padding: EdgeInsets.symmetric(vertical: 0.8.h),
-                decoration: BoxDecoration(
-                  color: selected ? p.color.withValues(alpha: 0.25) : const Color(0xFF16213E),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: selected ? p.color : Colors.white12,
-                    width: selected ? 2 : 1,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Text(p.emoji, style: TextStyle(fontSize: 7.w)),
-                    SizedBox(height: 0.2.h),
-                    Text(p.name, style: TextStyle(fontSize: 10.sp, color: selected ? Colors.white : Colors.white54)),
-                  ],
-                ),
-              ),
-            );
-          }),
-        ),
+        _buildAvatarPicker(context),
         SizedBox(height: 3.h),
+        _buildNameForm(context, auth),
+        if (canChangePassword) ...[
+          SizedBox(height: 3.h),
+          _buildPasswordForm(context),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildAvatarPicker(BuildContext context) {
+    final auth = context.watch<AuthBloc>().state;
+    final selectedIndex = auth.avatarIndex.clamp(0, _avatarPresets.length - 1);
+
+    return Wrap(
+      spacing: 2.w,
+      runSpacing: 1.h,
+      children: List.generate(_avatarPresets.length, (i) {
+        final p = _avatarPresets[i];
+        final selected = selectedIndex == i;
+        return GestureDetector(
+          onTap: () => context.read<AuthBloc>().add(AuthUpdateAvatarColor(colorIndex: i)),
+          child: Container(
+            width: 19.w,
+            padding: EdgeInsets.symmetric(vertical: 0.8.h),
+            decoration: BoxDecoration(
+              color: selected ? p.color.withValues(alpha: 0.25) : const Color(0xFF16213E),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: selected ? p.color : Colors.white12,
+                width: selected ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              children: [
+                Text(p.emoji, style: TextStyle(fontSize: 7.w)),
+                SizedBox(height: 0.2.h),
+                Text(p.name, style: TextStyle(fontSize: 10.sp, color: selected ? Colors.white : Colors.white54)),
+              ],
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  Widget _buildNameForm(BuildContext context, AuthState auth) {
+    String? nameValue;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text('Display Name', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: const Color(0xFFE8B86D))),
         SizedBox(height: 1.h),
-        TextField(
-          controller: _nameController,
-          style: const TextStyle(color: Colors.white),
-          decoration: _inputDecoration('Enter your name'),
+        Form(
+          key: _nameFormKey,
+          child: TextFormField(
+            initialValue: auth.user?.name ?? '',
+            style: const TextStyle(color: Colors.white),
+            decoration: _inputDecoration('Enter your name'),
+            onSaved: (v) => nameValue = v,
+          ),
         ),
         SizedBox(height: 1.5.h),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
             style: _buttonStyle(),
-            onPressed: _saving ? null : _saveName,
-            child: _saving
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : const Text('Save Name'),
+            onPressed: () {
+              _nameFormKey.currentState!.save();
+              final name = (nameValue ?? '').trim();
+              if (name.isEmpty) return;
+              context.read<AuthBloc>().add(AuthUpdateDisplayName(name: name));
+              _showSnack(context, 'Name updated!', false);
+            },
+            child: const Text('Save Name'),
           ),
         ),
-        if (auth.canChangePassword) ...[
-          SizedBox(height: 3.h),
-          Text('Change Password', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: const Color(0xFFE8B86D))),
-          SizedBox(height: 1.h),
-          TextField(
-            controller: _currentPasswordController,
-            obscureText: true,
-            style: const TextStyle(color: Colors.white),
-            decoration: _inputDecoration('Current password'),
-          ),
-          SizedBox(height: 1.h),
-          TextField(
-            controller: _newPasswordController,
-            obscureText: true,
-            style: const TextStyle(color: Colors.white),
-            decoration: _inputDecoration('New password'),
-          ),
-          SizedBox(height: 1.h),
-          TextField(
-            controller: _confirmPasswordController,
-            obscureText: true,
-            style: const TextStyle(color: Colors.white),
-            decoration: _inputDecoration('Confirm new password'),
-          ),
-          SizedBox(height: 1.5.h),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: _buttonStyle(),
-              onPressed: _passwordSaving ? null : _savePassword,
-              child: _passwordSaving
-                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Update Password'),
-            ),
-          ),
-        ],
       ],
     );
   }
 
-  Widget _buildSignOut(AuthModeManager auth) {
+  Widget _buildPasswordForm(BuildContext context) {
+    String? currentPassword;
+    String? newPassword;
+    String? confirmPassword;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Change Password', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: const Color(0xFFE8B86D))),
+        SizedBox(height: 1.h),
+        Form(
+          key: _passwordFormKey,
+          child: Column(
+            children: [
+              TextFormField(
+                obscureText: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('Current password'),
+                onSaved: (v) => currentPassword = v,
+              ),
+              SizedBox(height: 1.h),
+              TextFormField(
+                obscureText: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('New password'),
+                onSaved: (v) => newPassword = v,
+              ),
+              SizedBox(height: 1.h),
+              TextFormField(
+                obscureText: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('Confirm new password'),
+                onSaved: (v) => confirmPassword = v,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 1.5.h),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: _buttonStyle(),
+            onPressed: () {
+              _passwordFormKey.currentState!.save();
+              final current = (currentPassword ?? '').trim();
+              final newPass = (newPassword ?? '').trim();
+              final confirm = (confirmPassword ?? '').trim();
+              if (current.isEmpty || newPass.isEmpty || confirm.isEmpty) {
+                _showSnack(context, 'Fill in all fields', true); return;
+              }
+              if (newPass.length < 6) {
+                _showSnack(context, 'Password must be at least 6 characters', true); return;
+              }
+              if (newPass != confirm) {
+                _showSnack(context, 'Passwords do not match', true); return;
+              }
+              context.read<AuthBloc>().add(AuthUpdatePassword(currentPassword: current, newPassword: newPass));
+              _passwordFormKey.currentState!.reset();
+              _showSnack(context, 'Password updated!', false);
+            },
+            child: const Text('Update Password'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSignOut(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
@@ -658,7 +618,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         icon: const Icon(Icons.logout, size: 20),
         onPressed: () async {
-          final auth = context.read<AuthModeManager>();
           final navigator = Navigator.of(context);
           final confirmed = await showDialog<bool>(
             context: context,
@@ -679,7 +638,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           );
           if (confirmed == true && context.mounted) {
-            auth.signOut();
+            context.read<AuthBloc>().add(AuthSignOut());
             navigator.popUntil((route) => route.isFirst);
           }
         },
@@ -713,6 +672,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: EdgeInsets.symmetric(vertical: 1.5.h),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       textStyle: TextStyle(fontSize: 16.sp),
+    );
+  }
+
+  void _showSnack(BuildContext context, String msg, bool isError) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: isError ? Colors.red.shade800 : const Color(0xFF7B2FBE),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 }

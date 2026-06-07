@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/domain/entities/power_up.dart';
-import 'package:quiz_app/presentation/provider/power_up_provider.dart';
-import 'package:quiz_app/presentation/provider/quiz_provider.dart';
+import 'package:quiz_app/presentation/screens/power_up/bloc/power_up_bloc.dart';
+import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class XpStreakBar extends StatelessWidget {
@@ -10,9 +10,9 @@ class XpStreakBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final quizProvider = context.watch<QuizProvider>();
-    final powerUpProvider = context.watch<PowerUpProvider>();
-    final hasActiveEffects = powerUpProvider.hasActiveEffects;
+    final quizBloc = context.watch<QuizBloc>();
+    final powerUpBloc = context.watch<PowerUpBloc>();
+    final hasActiveEffects = powerUpBloc.state.hasActiveEffects;
 
     return Container(
       padding: EdgeInsets.all(3.w),
@@ -38,7 +38,7 @@ class XpStreakBar extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '${quizProvider.stamps}',
+                  '${quizBloc.state.stamps}',
                   style: TextStyle(
                     color: const Color(0xFFE8B86D),
                     fontWeight: FontWeight.bold,
@@ -49,14 +49,14 @@ class XpStreakBar extends StatelessWidget {
             ],
           ),
           SizedBox(height: 1.h),
-          if (quizProvider.totalAnswered > 0) ...[
+          if (quizBloc.state.totalAnswered > 0) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Accuracy',
                     style: TextStyle(fontSize: 15.sp, color: Colors.white54)),
                 Text(
-                  '${(quizProvider.totalCorrect / quizProvider.totalAnswered * 100).toStringAsFixed(1)}%',
+                  '${(quizBloc.state.totalCorrect / quizBloc.state.totalAnswered * 100).toStringAsFixed(1)}%',
                   style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w600,
@@ -76,7 +76,7 @@ class XpStreakBar extends StatelessWidget {
                         color: const Color(0xFFE8B86D), size: 18.sp),
                     SizedBox(width: 1.w),
                     Text(
-                      '${quizProvider.bestStreak}',
+                      '${quizBloc.state.bestStreak}',
                       style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w600,
@@ -94,7 +94,7 @@ class XpStreakBar extends StatelessWidget {
             Wrap(
               spacing: 2.w,
               runSpacing: 1.h,
-              children: powerUpProvider.activeEffects.entries
+              children: powerUpBloc.state.activeEffects.entries
                   .where((e) => e.value > 0)
                   .map((entry) {
                 final type = entry.key;

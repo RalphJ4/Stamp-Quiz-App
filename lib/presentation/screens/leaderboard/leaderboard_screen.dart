@@ -1,102 +1,77 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/domain/entities/leaderboard_entry.dart';
 import 'package:quiz_app/domain/entities/leaderboard_period.dart';
-import 'package:quiz_app/presentation/provider/leaderboard_provider.dart';
-import 'package:quiz_app/services/auth_mode_manager.dart';
+import 'package:quiz_app/presentation/screens/leaderboard/bloc/leaderboard_bloc.dart';
+import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-class LeaderboardScreen extends StatefulWidget {
+class LeaderboardScreen extends StatelessWidget {
   const LeaderboardScreen({super.key});
 
   @override
-  State<LeaderboardScreen> createState() => _LeaderboardScreenState();
-}
-
-class _LeaderboardScreenState extends State<LeaderboardScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(_onTabChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<LeaderboardProvider>().syncCurrentUser();
-    });
-  }
-
-  @override
-  void dispose() {
-    _tabController.removeListener(_onTabChanged);
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  void _onTabChanged() {
-    if (!_tabController.indexIsChanging) {
-      final period = LeaderboardPeriod.values[_tabController.index];
-      context.read<LeaderboardProvider>().selectTab(period);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final provider = context.watch<LeaderboardProvider>();
+    final state = context.watch<LeaderboardBloc>().state;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
-      appBar: AppBar(
-        title: const Text('Leaderboard',
-            style: TextStyle(color: Color(0xFFE8B86D))),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF1A1A2E),
-        toolbarHeight: 7.h,
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(8.h),
-          child: Container(
-            margin: EdgeInsets.symmetric(horizontal: 4.w),
-            decoration: BoxDecoration(
-              color: const Color(0xFF16213E),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: TabBar(
-              controller: _tabController,
-              indicator: BoxDecoration(
-                color: const Color(0xFF7B2FBE),
-                borderRadius: BorderRadius.circular(12),
+    return DefaultTabController(
+        length: 3,
+        initialIndex: LeaderboardPeriod.values.indexOf(state.selectedTab),
+        child: Scaffold(
+          backgroundColor: const Color(0xFF0D0D1A),
+          appBar: AppBar(
+            title: const Text('Leaderboard',
+                style: TextStyle(color: Color(0xFFE8B86D))),
+            centerTitle: true,
+            backgroundColor: const Color(0xFF1A1A2E),
+            toolbarHeight: 7.h,
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(8.h),
+              child: Container(
+                margin: EdgeInsets.symmetric(horizontal: 4.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF16213E),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TabBar(
+                  onTap: (index) {
+                    final period = LeaderboardPeriod.values[index];
+                    context.read<LeaderboardBloc>().add(LeaderboardSelectTab(period: period));
+                  },
+                  indicator: BoxDecoration(
+                    color: const Color(0xFF7B2FBE),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.white54,
+                  labelStyle: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  tabs: LeaderboardPeriod.values.map((p) => Tab(text: p.label)).toList(),
+                ),
               ),
-              indicatorSize: TabBarIndicatorSize.tab,
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white54,
-              labelStyle: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.bold,
-              ),
-              tabs: LeaderboardPeriod.values.map((p) => Tab(text: p.label)).toList(),
             ),
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: _buildTabContent(context, state),
+                ),
+              ),
+              if (state.currentUserRank > 0) _buildYourRank(context, state),
+            ],
           ),
         ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: _buildTabContent(provider),
-            ),
-          ),
-          if (provider.currentUserRank > 0) _buildYourRank(provider),
-        ],
-      ),
     );
   }
 
-  Widget _buildTabContent(LeaderboardProvider provider) {
-    final period = provider.selectedTab;
-    final entries = provider.currentEntries;
-    final loading = provider.isLoading(period);
+  Widget _buildTabContent(BuildContext context, LeaderboardState state) {
+    final period = state.selectedTab;
+    final entries = state.currentEntries;
+    final loading = state.isLoading(period);
 
     if (loading && entries.isEmpty) {
       return const Center(
@@ -132,13 +107,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       itemCount: entries.length,
       itemBuilder: (context, index) {
         final entry = entries[index];
-        final isMe = entry.uid == context.read<AuthModeManager>().user?.id;
-        return _buildRow(entry, isMe);
+        final isMe = entry.uid == context.read<AuthBloc>().state.user?.id;
+        return _buildRow(context, entry, isMe);
       },
     );
   }
 
-  Widget _buildRow(LeaderboardEntry entry, bool isMe) {
+  Widget _buildRow(BuildContext context, LeaderboardEntry entry, bool isMe) {
     final medal = entry.rank == 1
         ? const Color(0xFFE8B86D)
         : entry.rank == 2
@@ -147,7 +122,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                 ? const Color(0xFFCD7F32)
                 : null;
 
-    final period = context.read<LeaderboardProvider>().selectedTab;
+    final period = context.read<LeaderboardBloc>().state.selectedTab;
     final xp = entry.xpForPeriod(period);
 
     return Container(
@@ -226,10 +201,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     );
   }
 
-  Widget _buildYourRank(LeaderboardProvider provider) {
-    final rank = provider.currentUserRank;
-    final entry = provider.currentUserEntry;
-    final xp = entry?.xpForPeriod(provider.selectedTab) ?? 0;
+  Widget _buildYourRank(BuildContext context, LeaderboardState state) {
+    final rank = state.currentUserRank;
+    final entry = state.currentUserEntry;
+    final xp = entry?.xpForPeriod(state.selectedTab) ?? 0;
 
     return Container(
       width: double.infinity,

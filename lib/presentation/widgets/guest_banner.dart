@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:provider/provider.dart';
-import 'package:quiz_app/services/auth_mode_manager.dart';
-import 'package:quiz_app/presentation/screens/onboarding_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
+import 'package:quiz_app/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 final _log = Logger();
@@ -12,8 +12,8 @@ class GuestBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final manager = context.watch<AuthModeManager>();
-    if (!manager.isGuest) return const SizedBox.shrink();
+    final authBloc = context.watch<AuthBloc>();
+    if (!authBloc.state.isGuest) return const SizedBox.shrink();
 
     return GestureDetector(
       onTap: () {

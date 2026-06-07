@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:provider/provider.dart';
-import 'package:quiz_app/services/auth_mode_manager.dart';
-import 'package:quiz_app/presentation/screens/login_screen.dart';
-import 'package:quiz_app/presentation/screens/register_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
+import 'package:quiz_app/presentation/screens/auth/login_screen.dart';
+import 'package:quiz_app/presentation/screens/auth/register_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 final _log = Logger();
@@ -83,10 +83,10 @@ class OnboardingScreen extends StatelessWidget {
                     padding: EdgeInsets.symmetric(vertical: 1.5.h),
                   ),
                   onPressed: () {
-                    final auth = context.read<AuthModeManager>();
-                    if (auth.mode == AuthMode.none) {
+                    final auth = context.read<AuthBloc>();
+                    if (auth.state.mode == AuthMode.none) {
                       _log.i('auth.none → startGuestSession + popUntil');
-                      auth.startGuestSession();
+                      auth.add(AuthStartGuestSession());
                       Navigator.of(context).popUntil((route) => route.isFirst);
                     } else {
                       _log.i('← popUntil root');

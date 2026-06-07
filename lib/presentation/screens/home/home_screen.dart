@@ -1,19 +1,19 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/domain/entities/question.dart';
-import 'package:quiz_app/presentation/provider/daily_challenge_provider.dart';
-import 'package:quiz_app/presentation/provider/quiz_provider.dart';
-import 'package:quiz_app/presentation/screens/category_selection_screen.dart';
-import 'package:quiz_app/presentation/screens/daily_challenge_screen.dart';
-import 'package:quiz_app/presentation/screens/onboarding_screen.dart';
-import 'package:quiz_app/presentation/screens/duel_screen.dart';
-import 'package:quiz_app/presentation/screens/leaderboard_screen.dart';
-import 'package:quiz_app/presentation/screens/shop_screen.dart';
-import 'package:quiz_app/presentation/screens/profile_screen.dart';
+import 'package:quiz_app/presentation/screens/daily_challenge/bloc/daily_challenge_bloc.dart';
+import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
+import 'package:quiz_app/presentation/screens/quiz/category_selection_screen.dart';
+import 'package:quiz_app/presentation/screens/daily_challenge/daily_challenge_screen.dart';
+import 'package:quiz_app/presentation/screens/onboarding/onboarding_screen.dart';
+import 'package:quiz_app/presentation/screens/duel/duel_screen.dart';
+import 'package:quiz_app/presentation/screens/leaderboard/leaderboard_screen.dart';
+import 'package:quiz_app/presentation/screens/power_up/shop_screen.dart';
+import 'package:quiz_app/presentation/screens/profile/profile_screen.dart';
 import 'package:quiz_app/presentation/widgets/guest_banner.dart';
 import 'package:quiz_app/presentation/widgets/xp_streak_bar.dart';
-import 'package:quiz_app/services/auth_mode_manager.dart';
+import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 final _log = Logger();
@@ -59,8 +59,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final quizProvider = Provider.of<QuizProvider>(context);
-    final authManager = context.watch<AuthModeManager>();
+    final authManager = context.watch<AuthBloc>().state;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D1A),
@@ -207,10 +206,10 @@ class HomeScreen extends StatelessWidget {
               const XpStreakBar(),
               SizedBox(height: 2.h),
 
-              Consumer<DailyChallengeProvider>(
-                builder: (context, dailyProvider, _) {
-                  if (dailyProvider.loading) return const SizedBox.shrink();
-                  final available = !dailyProvider.completed && dailyProvider.challenge != null;
+              BlocBuilder<DailyChallengeBloc, DailyChallengeState>(
+                builder: (context, dailyState) {
+                  if (dailyState.loading) return const SizedBox.shrink();
+                  final available = !dailyState.completed && dailyState.challenge != null;
                   return Padding(
                     padding: EdgeInsets.only(bottom: 2.h),
                     child: GestureDetector(
@@ -254,7 +253,7 @@ class HomeScreen extends StatelessWidget {
                                   SizedBox(height: 0.3.h),
                                   Text(
                                     available
-                                        ? '${dailyProvider.challenge!.questions.length} questions — 3× stamps!'
+                                        ? '${dailyState.challenge!.questions.length} questions — 3× stamps!'
                                         : 'Completed — come back tomorrow!',
                                     style: TextStyle(fontSize: 13.sp, color: Colors.white54),
                                   ),
@@ -300,14 +299,14 @@ class HomeScreen extends StatelessWidget {
                 final color = categoryColors[cat]!;
                 final icon = categoryIcons[cat]!;
                 final label = categoryLabels[cat]!;
-                final catQuestions = quizProvider.questionCountForCategory(cat);
+                final catQuestions = context.read<QuizBloc>().questionCountForCategory(cat);
 
                 return Padding(
                   padding: EdgeInsets.only(bottom: 1.h),
                   child: GestureDetector(
                     onTap: () {
                       _log.i('→ CategorySelectionScreen ($label)');
-                      quizProvider.selectCategory(cat);
+                      context.read<QuizBloc>().add(QuizSelectCategory(category: cat));
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const CategorySelectionScreen()),
@@ -377,7 +376,7 @@ class HomeScreen extends StatelessWidget {
               SizedBox(height: 1.h),
 
               TextButton(
-                onPressed: () => quizProvider.resetQuiz(),
+                onPressed: () => context.read<QuizBloc>().add(QuizReset()),
                 child: Text('Reset Progress', style: TextStyle(fontSize: 16.sp, color: Colors.white54)),
               ),
               SizedBox(height: 2.h),
