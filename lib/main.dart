@@ -2,22 +2,22 @@ import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:provider/provider.dart';
-import 'package:quiz_app/presentation/provider/daily_challenge_provider.dart';
-import 'package:quiz_app/presentation/provider/duel_provider.dart';
-import 'package:quiz_app/domain/entities/leaderboard_period.dart';
-import 'package:quiz_app/presentation/provider/leaderboard_provider.dart';
-import 'package:quiz_app/presentation/provider/onboarding_provider.dart';
-import 'package:quiz_app/presentation/provider/power_up_provider.dart';
-import 'package:quiz_app/presentation/provider/quiz_provider.dart';
-import 'package:quiz_app/presentation/screens/gamified_onboarding_screen.dart';
-import 'package:quiz_app/presentation/screens/home_screen.dart';
-import 'package:quiz_app/presentation/screens/onboarding_screen.dart';
-import 'package:quiz_app/services/auth_mode_manager.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'firebase_options.dart';
+import 'domain/entities/leaderboard_period.dart';
+import 'presentation/screens/auth/bloc/auth_bloc.dart';
+import 'presentation/screens/quiz/bloc/quiz_bloc.dart';
+import 'presentation/screens/power_up/bloc/power_up_bloc.dart';
+import 'presentation/screens/daily_challenge/bloc/daily_challenge_bloc.dart';
+import 'presentation/screens/duel/bloc/duel_bloc.dart';
+import 'presentation/screens/onboarding/bloc/onboarding_bloc.dart';
+import 'presentation/screens/leaderboard/bloc/leaderboard_bloc.dart';
+import 'presentation/screens/onboarding/gamified_onboarding_screen.dart';
+import 'presentation/screens/home/home_screen.dart';
+import 'presentation/screens/onboarding/onboarding_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -92,15 +92,15 @@ class QuizApp extends StatelessWidget {
   }
 
   Widget _buildApp(BuildContext context) {
-    return MultiProvider(
+    return MultiBlocProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthModeManager()..initialize()),
-        ChangeNotifierProvider(create: (ctx) => QuizProvider(ctx.read<AuthModeManager>())..loadQuestions()),
-        ChangeNotifierProvider(create: (ctx) => PowerUpProvider(ctx.read<AuthModeManager>(), ctx.read<QuizProvider>())..fetchInventory()),
-        ChangeNotifierProvider(create: (ctx) => DailyChallengeProvider(ctx.read<AuthModeManager>())..loadToday()),
-        ChangeNotifierProvider(create: (ctx) => DuelProvider(ctx.read<AuthModeManager>())),
-        ChangeNotifierProvider(create: (ctx) => OnboardingProvider()..loadPreferences()),
-        ChangeNotifierProvider(create: (ctx) => LeaderboardProvider(ctx.read<AuthModeManager>(), ctx.read<QuizProvider>())..fetchPeriod(LeaderboardPeriod.allTime)),
+        BlocProvider(create: (_) => AuthBloc()),
+        BlocProvider(create: (ctx) => QuizBloc(ctx.read<AuthBloc>())..add(QuizLoadQuestions())),
+        BlocProvider(create: (ctx) => PowerUpBloc(ctx.read<AuthBloc>(), ctx.read<QuizBloc>())..add(PowerUpFetchInventory())),
+        BlocProvider(create: (ctx) => DailyChallengeBloc(ctx.read<AuthBloc>())..add(DailyChallengeLoadToday())),
+        BlocProvider(create: (ctx) => DuelBloc(ctx.read<AuthBloc>(), ctx.read<QuizBloc>())),
+        BlocProvider(create: (ctx) => OnboardingBloc()..add(OnboardingLoadPreferences())),
+        BlocProvider(create: (ctx) => LeaderboardBloc(ctx.read<AuthBloc>(), ctx.read<QuizBloc>())..add(LeaderboardFetchPeriod(period: LeaderboardPeriod.allTime))),
       ],
       child: ResponsiveSizer(
         builder: (context, orientation, screenType) {
@@ -115,28 +115,32 @@ class QuizApp extends StatelessWidget {
                 surface: Color(0xFF1A1A2E),
               ),
             ),
-            home: Consumer2<AuthModeManager, OnboardingProvider>(
-              builder: (context, auth, onboarding, _) {
-                if (!auth.initialized || onboarding.loading) {
-                  QuizApp._log.i('🔄 loading');
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                if (!onboarding.completed) {
-                  QuizApp._log.i('🎮 GamifiedOnboarding');
-                  return GamifiedOnboardingScreen(
-                    onComplete: () {
-                      auth.startGuestSession();
-                    },
-                  );
-                }
-                if (auth.mode == AuthMode.none) {
-                  QuizApp._log.i('🖥 OnboardingScreen');
-                  return const OnboardingScreen();
-                }
-                QuizApp._log.i('🏠 HomeScreen');
-                return const HomeScreen();
+            home: BlocBuilder<OnboardingBloc, OnboardingState>(
+              builder: (context, onboarding) {
+                return BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, auth) {
+                    if (!auth.initialized || onboarding.loading) {
+                      QuizApp._log.i('🔄 loading');
+                      return const Scaffold(
+                        body: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    if (!onboarding.completed) {
+                      QuizApp._log.i('🎮 GamifiedOnboarding');
+                      return GamifiedOnboardingScreen(
+                        onComplete: () {
+                          context.read<AuthBloc>().add(AuthStartGuestSession());
+                        },
+                      );
+                    }
+                    if (auth.mode == AuthMode.none) {
+                      QuizApp._log.i('🖥 OnboardingScreen');
+                      return const OnboardingScreen();
+                    }
+                    QuizApp._log.i('🏠 HomeScreen');
+                    return const HomeScreen();
+                  },
+                );
               },
             ),
           );

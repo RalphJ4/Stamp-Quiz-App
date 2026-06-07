@@ -1,34 +1,84 @@
-import 'dart:math';
+﻿import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/domain/entities/duel.dart';
-import 'package:quiz_app/presentation/provider/duel_provider.dart';
-import 'package:quiz_app/presentation/provider/quiz_provider.dart';
-import 'package:quiz_app/services/auth_mode_manager.dart';
+import 'package:quiz_app/presentation/screens/duel/bloc/duel_bloc.dart';
+import 'package:quiz_app/presentation/screens/leaderboard/bloc/leaderboard_bloc.dart';
+import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:confetti/confetti.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 final _log = Logger();
 
-class DuelScreen extends StatefulWidget {
-  const DuelScreen({super.key});
+class _DuelJoinForm extends StatelessWidget {
+  const _DuelJoinForm();
 
   @override
-  State<DuelScreen> createState() => _DuelScreenState();
+  Widget build(BuildContext context) {
+    String code = '';
+    return Form(
+      key: GlobalKey<FormState>(),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextFormField(
+              onChanged: (v) => code = v,
+              decoration: InputDecoration(
+                hintText: 'Enter duel code',
+                hintStyle: const TextStyle(color: Colors.white38),
+                filled: true,
+                fillColor: const Color(0xFF16213E),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF7B2FBE)),
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                    horizontal: 3.w, vertical: 1.5.h),
+              ),
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+              textCapitalization: TextCapitalization.none,
+            ),
+          ),
+          SizedBox(width: 2.w),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFE8B86D),
+              foregroundColor: const Color(0xFF0D0D1A),
+              padding: EdgeInsets.symmetric(
+                  horizontal: 4.w, vertical: 1.8.h),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              final trimmed = code.trim();
+              if (trimmed.isEmpty) return;
+              _log.i('Joining duel: $trimmed');
+              context.read<DuelBloc>().add(DuelJoin(duelId: trimmed));
+            },
+            child: Text('Join', style: TextStyle(fontSize: 16.sp)),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
-  final TextEditingController _codeController = TextEditingController();
-  final ConfettiController _confettiController =
-      ConfettiController(duration: const Duration(seconds: 2));
-  late AnimationController _dotController;
+// Purely visual animation — AnimationController requires TickerProvider (StatefulWidget)
+class _WaitingDotsAnimation extends StatefulWidget {
+  const _WaitingDotsAnimation();
+  @override
+  State<_WaitingDotsAnimation> createState() => _WaitingDotsAnimationState();
+}
+class _WaitingDotsAnimationState extends State<_WaitingDotsAnimation>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _dotController = AnimationController(
+    _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat();
@@ -36,35 +86,108 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _codeController.dispose();
-    _confettiController.dispose();
-    _dotController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<DuelProvider>(
-      builder: (context, provider, _) {
-        final state = provider.state;
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(3, (i) {
+            final delay = i * 0.2;
+            final t = (_controller.value + delay) % 1.0;
+            final opacity = sin(t * pi);
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 1.5.w),
+              child: Container(
+                width: 2.5.w,
+                height: 2.5.w,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFFE8B86D)
+                      .withValues(alpha: opacity),
+                ),
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
+}
 
-        if (state == null && !provider.loading) {
-          return _buildLobbyEntry(provider);
+// Purely visual — ConfettiController requires TickerProvider (StatefulWidget)
+class _WinConfetti extends StatefulWidget {
+  final bool play;
+  const _WinConfetti({required this.play});
+  @override
+  State<_WinConfetti> createState() => _WinConfettiState();
+}
+class _WinConfettiState extends State<_WinConfetti> {
+  late ConfettiController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ConfettiController(duration: const Duration(seconds: 2));
+    if (widget.play) _controller.play();
+  }
+
+  @override
+  void didUpdateWidget(_WinConfetti old) {
+    super.didUpdateWidget(old);
+    if (widget.play && !old.play) _controller.play();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ConfettiWidget(
+      confettiController: _controller,
+      blastDirectionality: BlastDirectionality.explosive,
+      shouldLoop: false,
+      emissionFrequency: 0.05,
+      numberOfParticles: 50,
+      maxBlastForce: 30,
+      minBlastForce: 10,
+      gravity: 0.15,
+    );
+  }
+}
+
+class DuelScreen extends StatelessWidget {
+  const DuelScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DuelBloc, DuelBlocState>(
+      builder: (context, state) {
+        if (state.duel == null && !state.loading) {
+          return _buildLobbyEntry(context, state);
         }
-        if (provider.loading) {
+        if (state.loading) {
           return _buildLoading();
         }
-        if (state == null) {
-          return _buildLobbyEntry(provider);
+        if (state.duel == null) {
+          return _buildLobbyEntry(context, state);
         }
 
-        switch (state.status) {
+        switch (state.duel!.status) {
           case DuelStatus.waiting:
-            return _buildWaitingLobby(provider);
+            return _buildWaitingLobby(context, state);
           case DuelStatus.active:
-            return _buildActiveDuel(provider);
+            return _buildActiveDuel(context, state);
           case DuelStatus.complete:
-            return _buildWinner(provider);
+            return _buildWinner(context, state);
         }
       },
     );
@@ -77,7 +200,7 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildLobbyEntry(DuelProvider provider) {
+  Widget _buildLobbyEntry(BuildContext context, DuelBlocState state) {
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D1A),
       appBar: AppBar(
@@ -115,68 +238,22 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
                       borderRadius: BorderRadius.circular(12)),
                 ),
                 icon: const Icon(Icons.add),
-                onPressed: () async {
+                onPressed: () {
                   _log.i('Creating duel...');
-                  final err = await provider.createDuel();
-                  if (err != null && context.mounted) {
-                    _showError(err);
-                  }
+                  context.read<DuelBloc>().add(DuelCreate());
                 },
                 label: Text('Create Duel', style: TextStyle(fontSize: 17.sp)),
               ),
             ),
             SizedBox(height: 2.h),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _codeController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter duel code',
-                      hintStyle: const TextStyle(color: Colors.white38),
-                      filled: true,
-                      fillColor: const Color(0xFF16213E),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF7B2FBE)),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(
-                          horizontal: 3.w, vertical: 1.5.h),
-                    ),
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    textCapitalization: TextCapitalization.none,
-                  ),
-                ),
-                SizedBox(width: 2.w),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFE8B86D),
-                    foregroundColor: const Color(0xFF0D0D1A),
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 4.w, vertical: 1.8.h),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: () async {
-                    final code = _codeController.text.trim();
-                    if (code.isEmpty) return;
-                    _log.i('Joining duel: $code');
-                    final err = await provider.joinDuel(code);
-                    if (err != null && context.mounted) {
-                      _showError(err);
-                    }
-                  },
-                  child: Text('Join', style: TextStyle(fontSize: 16.sp)),
-                ),
-              ],
-            ),
+            const _DuelJoinForm(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildWaitingLobby(DuelProvider provider) {
+  Widget _buildWaitingLobby(BuildContext context, DuelBlocState state) {
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D1A),
       appBar: AppBar(
@@ -188,7 +265,7 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () {
-            provider.reset();
+            context.read<DuelBloc>().add(DuelReset());
             Navigator.of(context).pop();
           },
         ),
@@ -216,7 +293,7 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
                   border: Border.all(color: const Color(0xFF7B2FBE)),
                 ),
                 child: SelectableText(
-                  provider.currentDuelId ?? '',
+                  state.currentDuelId ?? '',
                   style: TextStyle(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.bold,
@@ -226,31 +303,7 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
                 ),
               ),
               SizedBox(height: 3.h),
-              AnimatedBuilder(
-                animation: _dotController,
-                builder: (context, _) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(3, (i) {
-                      final delay = i * 0.2;
-                      final t = (_dotController.value + delay) % 1.0;
-                      final opacity = sin(t * pi);
-                      return Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 1.5.w),
-                        child: Container(
-                          width: 2.5.w,
-                          height: 2.5.w,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFE8B86D)
-                                .withValues(alpha: opacity),
-                          ),
-                        ),
-                      );
-                    }),
-                  );
-                },
-              ),
+              const _WaitingDotsAnimation(),
               SizedBox(height: 2.h),
               Text(
                 'Waiting for player to join...',
@@ -263,17 +316,17 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildActiveDuel(DuelProvider provider) {
-    final state = provider.state!;
-    final uid = context.read<AuthModeManager>().user?.id ?? '';
-    final isMeHost = state.hostUid == uid;
-    final myProg = isMeHost ? state.hostProgress : state.guestProgress;
+  Widget _buildActiveDuel(BuildContext context, DuelBlocState state) {
+    final duel = state.duel!;
+    final uid = context.read<AuthBloc>().state.user?.id ?? '';
+    final isMeHost = duel.hostUid == uid;
+    final myProg = isMeHost ? duel.hostProgress : duel.guestProgress;
 
-    if (myProg >= state.questions.length) {
-      return _buildWaitingOthers(provider);
+    if (myProg >= duel.questions.length) {
+      return _buildWaitingOthers();
     }
 
-    final question = state.questions[myProg];
+    final question = duel.questions[myProg];
 
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D1A),
@@ -283,14 +336,14 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
         centerTitle: true,
         backgroundColor: const Color(0xFF1A1A2E),
         toolbarHeight: 7.h,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () {
-            provider.reset();
-            Navigator.of(context).pop();
-          },
-        ),
-        actions: [
+          leading: IconButton(
+            icon: const Icon(Icons.close, color: Colors.white),
+            onPressed: () {
+              context.read<DuelBloc>().add(DuelReset());
+              Navigator.of(context).pop();
+            },
+          ),
+          actions: [
           Padding(
             padding: EdgeInsets.only(right: 3.w),
             child: Row(
@@ -298,18 +351,18 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
               children: [
                 Icon(
                   Icons.timer_outlined,
-                  color: provider.remainingSeconds <= 10
+                  color: state.remainingSeconds <= 10
                       ? Colors.red
                       : const Color(0xFFE8B86D),
                   size: 5.w,
                 ),
                 SizedBox(width: 1.w),
                 Text(
-                  '${provider.remainingSeconds}s',
+                  '${state.remainingSeconds}s',
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
-                    color: provider.remainingSeconds <= 10
+                    color: state.remainingSeconds <= 10
                         ? Colors.red
                         : const Color(0xFFE8B86D),
                   ),
@@ -323,17 +376,17 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
         padding: EdgeInsets.all(3.w),
         child: Column(
           children: [
-            _buildHud(provider),
+            _buildHud(context, state),
             SizedBox(height: 1.5.h),
             LinearProgressIndicator(
-              value: (myProg + 1) / state.questions.length,
+              value: (myProg + 1) / duel.questions.length,
               backgroundColor: const Color(0xFF16213E),
               color: const Color(0xFFE8B86D),
               minHeight: 1.2.h,
             ),
             SizedBox(height: 1.h),
             Text(
-              'Your Question ${myProg + 1} of ${state.questions.length}',
+              'Your Question ${myProg + 1} of ${duel.questions.length}',
               style: TextStyle(fontSize: 14.sp, color: Colors.white54),
             ),
             SizedBox(height: 1.5.h),
@@ -371,7 +424,7 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
                     ),
                     onPressed: () {
                       final isCorrect = question.correctIndex == i;
-                      provider.submitAnswer(isCorrect);
+                      context.read<DuelBloc>().add(DuelSubmitAnswer(isCorrect: isCorrect));
                     },
                     child: Text(question.options[i],
                         style: TextStyle(fontSize: 16.sp)),
@@ -385,8 +438,8 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildHud(DuelProvider provider) {
-    final state = provider.state!;
+  Widget _buildHud(BuildContext context, DuelBlocState state) {
+    final duel = state.duel!;
 
     return Container(
       padding: EdgeInsets.all(2.w),
@@ -398,9 +451,9 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
         children: [
           _playerCard(
             label: 'You',
-            score: provider.myScore,
-            progress: provider.myProgress,
-            total: state.questions.length,
+            score: context.read<DuelBloc>().myScore,
+            progress: context.read<DuelBloc>().myProgress,
+            total: duel.questions.length,
             color: const Color(0xFF7B2FBE),
           ),
           Padding(
@@ -410,9 +463,9 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
           ),
           _playerCard(
             label: 'Opponent',
-            score: provider.opponentScore,
-            progress: provider.opponentProgress,
-            total: state.questions.length,
+            score: context.read<DuelBloc>().opponentScore,
+            progress: context.read<DuelBloc>().opponentProgress,
+            total: duel.questions.length,
             color: const Color(0xFFFF6B6B),
           ),
         ],
@@ -455,7 +508,7 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildWaitingOthers(DuelProvider provider) {
+  Widget _buildWaitingOthers() {
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D1A),
       appBar: AppBar(
@@ -482,15 +535,11 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildWinner(DuelProvider provider) {
-    final state = provider.state!;
-    final authUid = context.read<AuthModeManager>().user?.id ?? '';
-    final isWinner = state.winnerUid == authUid;
-    final isTie = state.winnerUid == null;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (isWinner || isTie) _confettiController.play();
-    });
+  Widget _buildWinner(BuildContext context, DuelBlocState state) {
+    final duel = state.duel!;
+    final authUid = context.read<AuthBloc>().state.user?.id ?? '';
+    final isWinner = duel.winnerUid == authUid;
+    final isTie = duel.winnerUid == null;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D1A),
@@ -530,7 +579,7 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
                   ),
                   SizedBox(height: 1.h),
                   Text(
-                    '${state.hostScore} - ${state.guestScore}',
+                    '${duel.hostScore} - ${duel.guestScore}',
                     style: TextStyle(
                         fontSize: 22.sp,
                         color: Colors.white,
@@ -595,8 +644,9 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
                     ),
                     icon: const Icon(Icons.home),
                     onPressed: () {
-                      _awardXp(provider);
-                      provider.reset();
+                      context.read<DuelBloc>().awardXp();
+                      context.read<LeaderboardBloc>().forceSync();
+                      context.read<DuelBloc>().add(DuelReset());
                       Navigator.of(context).pop();
                     },
                     label:
@@ -606,38 +656,8 @@ class _DuelScreenState extends State<DuelScreen> with TickerProviderStateMixin {
               ),
             ),
           ),
-          ConfettiWidget(
-            confettiController: _confettiController,
-            blastDirectionality: BlastDirectionality.explosive,
-            shouldLoop: false,
-            emissionFrequency: 0.05,
-            numberOfParticles: 50,
-            maxBlastForce: 30,
-            minBlastForce: 10,
-            gravity: 0.15,
-          ),
+          _WinConfetti(play: isWinner || isTie),
         ],
-      ),
-    );
-  }
-
-  void _awardXp(DuelProvider provider) {
-    final state = provider.state;
-    if (state == null) return;
-
-    final authUid = context.read<AuthModeManager>().user?.id ?? '';
-    final isWinner = state.winnerUid == authUid;
-
-    final quizProvider = context.read<QuizProvider>();
-    quizProvider.awardStamps(isWinner ? 50 : 20);
-  }
-
-  void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: Colors.red.shade800,
-        behavior: SnackBarBehavior.floating,
       ),
     );
   }

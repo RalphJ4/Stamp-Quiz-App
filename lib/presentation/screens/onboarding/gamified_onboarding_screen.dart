@@ -1,90 +1,116 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:quiz_app/presentation/provider/onboarding_provider.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quiz_app/presentation/screens/onboarding/bloc/onboarding_bloc.dart';
 import 'package:confetti/confetti.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-class GamifiedOnboardingScreen extends StatefulWidget {
-  final VoidCallback onComplete;
-  const GamifiedOnboardingScreen({super.key, required this.onComplete});
-
+// Purely visual repeating pulse — AnimationController requires TickerProvider (StatefulWidget)
+class _PulseEffect extends StatefulWidget {
+  final Widget Function(BuildContext context, double value) builder;
+  const _PulseEffect({required this.builder});
   @override
-  State<GamifiedOnboardingScreen> createState() => _GamifiedOnboardingScreenState();
+  State<_PulseEffect> createState() => _PulseEffectState();
 }
 
-class _GamifiedOnboardingScreenState extends State<GamifiedOnboardingScreen>
-    with TickerProviderStateMixin {
-  late PageController _pageController;
-  late AnimationController _pulseController;
-  late AnimationController _confettiController;
-  final ConfettiController _confettiWidgetController =
-      ConfettiController(duration: const Duration(seconds: 3));
-
-  int _tutorialSelected = -1;
-  bool _tutorialAnswered = false;
-  bool _tutorialCorrect = false;
+class _PulseEffectState extends State<_PulseEffect> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
-    _confettiController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    );
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
-    _pulseController.dispose();
-    _confettiController.dispose();
-    _confettiWidgetController.dispose();
+    _controller.dispose();
     super.dispose();
-  }
-
-  void _goNext() {
-    final provider = context.read<OnboardingProvider>();
-    final next = provider.currentStep + 1;
-    if (next >= provider.stepCount) return;
-    provider.nextStep();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _pageController.animateToPage(
-          next,
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
-  }
-
-  void _finish() async {
-    final provider = context.read<OnboardingProvider>();
-    await provider.completeOnboarding();
-    widget.onComplete();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<OnboardingProvider>(
-      builder: (context, provider, _) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) => widget.builder(context, _controller.value),
+    );
+  }
+}
+
+class _ShakeEffect extends StatelessWidget {
+  final int triggerKey;
+  final Widget child;
+  const _ShakeEffect({required this.triggerKey, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(triggerKey),
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 400),
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(_shakeOffset(value), 0),
+          child: child,
+        );
+      },
+      child: child,
+    );
+  }
+
+  // Maps 0→1 to the shake sequence 0→-8→8→-5→5→0
+  static double _shakeOffset(double t) {
+    if (t < 1 / 8) return _lerp(0, -8, t * 8);
+    if (t < 3 / 8) return _lerp(-8, 8, (t - 1 / 8) * 4);
+    if (t < 5 / 8) return _lerp(8, -5, (t - 3 / 8) * 4);
+    if (t < 7 / 8) return _lerp(-5, 5, (t - 5 / 8) * 4);
+    return _lerp(5, 0, (t - 7 / 8) * 8);
+  }
+
+  static double _lerp(double a, double b, double t) => a + (b - a) * t;
+}
+
+final _pageController = PageController();
+final _confettiWidgetController = ConfettiController(duration: const Duration(seconds: 3));
+
+class GamifiedOnboardingScreen extends StatelessWidget {
+  final VoidCallback onComplete;
+  const GamifiedOnboardingScreen({super.key, required this.onComplete});
+
+  void _goNext(BuildContext context) {
+    final bloc = context.read<OnboardingBloc>();
+    final next = bloc.state.currentStep + 1;
+    if (next >= bloc.state.stepCount) return;
+    bloc.add(OnboardingNextStep());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pageController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  void _finish(BuildContext context) {
+    context.read<OnboardingBloc>().add(OnboardingComplete());
+    onComplete();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<OnboardingBloc, OnboardingState>(
+      builder: (context, state) {
         return Scaffold(
           backgroundColor: const Color(0xFF0D0D1A),
           body: SafeArea(
             child: Column(
               children: [
-                if (provider.currentStep < 4)
+                if (state.currentStep < 4)
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                     child: Row(
                       children: [
                         Text(
-                          'Step ${provider.currentStep + 1} of ${provider.stepCount}',
+                          'Step ${state.currentStep + 1} of ${state.stepCount}',
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: Colors.white54,
@@ -92,7 +118,7 @@ class _GamifiedOnboardingScreenState extends State<GamifiedOnboardingScreen>
                         ),
                         const Spacer(),
                         TextButton(
-                          onPressed: _finish,
+                          onPressed: () => _finish(context),
                           child: Text(
                             'Skip',
                             style: TextStyle(
@@ -109,44 +135,28 @@ class _GamifiedOnboardingScreenState extends State<GamifiedOnboardingScreen>
                     controller: _pageController,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
-                      _WelcomeStep(pulseController: _pulseController, onNext: _goNext),
-                      _NameStep(onNext: _goNext),
-                      _AvatarStep(onNext: _goNext),
-                      _TutorialStep(
-                        selectedOption: _tutorialSelected,
-                        answered: _tutorialAnswered,
-                        correct: _tutorialCorrect,
-                        onSelect: (i) {
-                          setState(() {
-                            _tutorialSelected = i;
-                            _tutorialCorrect = i == 0;
-                            if (i == 0) _tutorialAnswered = true;
-                          });
-                          if (i == 0) _confettiWidgetController.play();
-                        },
-                        onNext: _goNext,
-                      ),
-                      _CongratulationsStep(
-                        confettiController: _confettiWidgetController,
-                        onFinish: _finish,
-                      ),
+                      _WelcomeStep(onNext: () => _goNext(context)),
+                      _NameStep(onNext: () => _goNext(context)),
+                      _AvatarStep(onNext: () => _goNext(context)),
+                      _TutorialStep(onNext: () => _goNext(context)),
+                      _CongratulationsStep(onFinish: () => _finish(context)),
                     ],
                   ),
                 ),
-                if (provider.currentStep < 4)
+                if (state.currentStep < 4)
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
-                        provider.stepCount - 1,
+                        state.stepCount - 1,
                         (i) => AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           margin: EdgeInsets.symmetric(horizontal: 1.w),
-                          width: provider.currentStep == i ? 6.w : 2.5.w,
+                          width: state.currentStep == i ? 6.w : 2.5.w,
                           height: 1.h,
                           decoration: BoxDecoration(
-                            color: provider.currentStep >= i
+                            color: state.currentStep >= i
                                 ? const Color(0xFFE8B86D)
                                 : Colors.white24,
                             borderRadius: BorderRadius.circular(4),
@@ -165,101 +175,92 @@ class _GamifiedOnboardingScreenState extends State<GamifiedOnboardingScreen>
 }
 
 class _WelcomeStep extends StatelessWidget {
-  final AnimationController pulseController;
   final VoidCallback onNext;
 
-  const _WelcomeStep({required this.pulseController, required this.onNext});
+  const _WelcomeStep({required this.onNext});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 6.w),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(flex: 2),
-          AnimatedBuilder(
-            animation: pulseController,
-            builder: (context, child) => Transform.scale(
-              scale: 0.9 + (pulseController.value * 0.1),
-              child: Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFFE8B86D).withValues(alpha: 0.3 * pulseController.value),
-                      blurRadius: 40,
-                      spreadRadius: 10,
+    return _PulseEffect(
+      builder: (context, pulse) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 6.w),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(flex: 2),
+              Transform.scale(
+                scale: 0.9 + (pulse * 0.1),
+                child: Container(
+                  width: 40.w,
+                  height: 40.w,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFE8B86D).withValues(alpha: 0.3 * pulse),
+                        blurRadius: 40,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                    image: const DecorationImage(
+                      image: AssetImage('assets/images/stamp.png'),
+                      fit: BoxFit.contain,
                     ),
-                  ],
-                  image: const DecorationImage(
-                    image: AssetImage('assets/images/stamp.png'),
-                    fit: BoxFit.contain,
                   ),
                 ),
               ),
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            'Stamp Quiz',
-            style: TextStyle(
-              fontSize: 34.sp,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFFE8B86D),
-            ),
-          ),
-          SizedBox(height: 1.h),
-          Text(
-            'Collect stamps, test your knowledge!',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16.sp, color: Colors.white54),
-          ),
-          const Spacer(flex: 2),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7B2FBE),
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 1.8.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 4,
+              SizedBox(height: 4.h),
+              Text(
+                'Stamp Quiz',
+                style: TextStyle(
+                  fontSize: 34.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFFE8B86D),
+                ),
               ),
-              icon: const Icon(Icons.arrow_forward, size: 22),
-              onPressed: onNext,
-              label: Text("Let's Start!", style: TextStyle(fontSize: 18.sp)),
-            ),
+              SizedBox(height: 1.h),
+              Text(
+                'Collect stamps, test your knowledge!',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16.sp, color: Colors.white54),
+              ),
+              const Spacer(flex: 2),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF7B2FBE),
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 1.8.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 4,
+                  ),
+                  icon: const Icon(Icons.arrow_forward, size: 22),
+                  onPressed: onNext,
+                  label: Text("Let's Start!", style: TextStyle(fontSize: 18.sp)),
+                ),
+              ),
+              SizedBox(height: 3.h),
+            ],
           ),
-          SizedBox(height: 3.h),
-        ],
-      ),
+        );
+      },
     );
   }
 }
 
-class _NameStep extends StatefulWidget {
+class _NameStep extends StatelessWidget {
   final VoidCallback onNext;
+
   const _NameStep({required this.onNext});
 
-  @override
-  State<_NameStep> createState() => _NameStepState();
-}
-
-class _NameStepState extends State<_NameStep> {
-  final _controller = TextEditingController();
-  String? _error;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  static final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
+    String? name;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 6.w),
       child: Column(
@@ -277,29 +278,33 @@ class _NameStepState extends State<_NameStep> {
             ),
           ),
           SizedBox(height: 3.h),
-          TextField(
-            controller: _controller,
-            maxLength: 20,
-            textCapitalization: TextCapitalization.words,
-            style: TextStyle(fontSize: 18.sp, color: Colors.white),
-            decoration: InputDecoration(
-              hintText: 'Enter your name',
-              hintStyle: const TextStyle(color: Colors.white38),
-              errorText: _error,
-              filled: true,
-              fillColor: const Color(0xFF16213E),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF7B2FBE)),
+          Form(
+            key: _formKey,
+            child: TextFormField(
+              initialValue: context.watch<OnboardingBloc>().state.playerName,
+              maxLength: 20,
+              textCapitalization: TextCapitalization.words,
+              style: TextStyle(fontSize: 18.sp, color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Enter your name',
+                hintStyle: const TextStyle(color: Colors.white38),
+                filled: true,
+                fillColor: const Color(0xFF16213E),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFF7B2FBE)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFE8B86D), width: 2),
+                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.8.h),
+                counterStyle: const TextStyle(color: Colors.white38),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFFE8B86D), width: 2),
-              ),
-              contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.8.h),
-              counterStyle: const TextStyle(color: Colors.white38),
+              validator: (v) => v == null || v.trim().isEmpty ? 'Please enter a name' : null,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              onSaved: (v) => name = v,
             ),
-            onChanged: (_) => setState(() => _error = null),
           ),
           SizedBox(height: 2.h),
           SizedBox(
@@ -314,13 +319,11 @@ class _NameStepState extends State<_NameStep> {
               ),
               icon: const Icon(Icons.arrow_forward, size: 22),
               onPressed: () {
-                final name = _controller.text.trim();
-                if (name.isEmpty) {
-                  setState(() => _error = 'Please enter a name');
-                  return;
-                }
-                context.read<OnboardingProvider>().setPlayerName(name);
-                widget.onNext();
+                if (!_formKey.currentState!.validate()) return;
+                _formKey.currentState!.save();
+                final trimmed = (name ?? '').trim();
+                context.read<OnboardingBloc>().add(OnboardingSetPlayerName(name: trimmed));
+                onNext();
               },
               label: Text('Next', style: TextStyle(fontSize: 18.sp)),
             ),
@@ -338,8 +341,8 @@ class _AvatarStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<OnboardingProvider>();
-    final colors = OnboardingProvider.presetColors;
+    final state = context.watch<OnboardingBloc>().state;
+    final colors = OnboardingState.presetColors;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 6.w),
@@ -353,11 +356,11 @@ class _AvatarStep extends StatelessWidget {
             height: 20.h,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: provider.avatarColor,
+              color: state.avatarColor,
               border: Border.all(color: const Color(0xFFE8B86D), width: 3),
               boxShadow: [
                 BoxShadow(
-                  color: provider.avatarColor.withValues(alpha: 0.4),
+                  color: state.avatarColor.withValues(alpha: 0.4),
                   blurRadius: 30,
                   spreadRadius: 5,
                 ),
@@ -365,8 +368,8 @@ class _AvatarStep extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                (provider.playerName.isNotEmpty
-                        ? provider.playerName[0]
+                (state.playerName.isNotEmpty
+                        ? state.playerName[0]
                         : '?')
                     .toUpperCase(),
                 style: TextStyle(
@@ -392,9 +395,9 @@ class _AvatarStep extends StatelessWidget {
             runSpacing: 2.h,
             alignment: WrapAlignment.center,
             children: colors.map((color) {
-              final selected = provider.avatarColor.toARGB32() == color.toARGB32();
+              final selected = state.avatarColor.toARGB32() == color.toARGB32();
               return GestureDetector(
-                onTap: () => provider.setAvatarColor(color),
+                onTap: () => context.read<OnboardingBloc>().add(OnboardingSetAvatarColor(color: color)),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   width: selected ? 14.w : 12.w,
@@ -440,52 +443,21 @@ class _AvatarStep extends StatelessWidget {
   }
 }
 
-class _TutorialStep extends StatefulWidget {
-  final int selectedOption;
-  final bool answered;
-  final bool correct;
-  final ValueChanged<int> onSelect;
+class _TutorialStep extends StatelessWidget {
   final VoidCallback onNext;
 
-  const _TutorialStep({
-    required this.selectedOption,
-    required this.answered,
-    required this.correct,
-    required this.onSelect,
-    required this.onNext,
-  });
-
-  @override
-  State<_TutorialStep> createState() => _TutorialStepState();
-}
-
-class _TutorialStepState extends State<_TutorialStep> with SingleTickerProviderStateMixin {
-  late AnimationController _shakeController;
-  late Animation<double> _shakeAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _shakeController = AnimationController(duration: const Duration(milliseconds: 400), vsync: this);
-    _shakeAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: -8.0), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: -8.0, end: 8.0), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 8.0, end: -5.0), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: -5.0, end: 5.0), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 5.0, end: 0.0), weight: 1),
-    ]).animate(_shakeController);
-  }
-
-  @override
-  void dispose() {
-    _shakeController.dispose();
-    super.dispose();
-  }
+  const _TutorialStep({required this.onNext});
 
   static const _options = ['Inverted Jenny', 'Flying Dolphin', 'Space Penguin', 'Rainbow Rocket'];
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<OnboardingBloc>().state;
+    final selectedOption = state.tutorialSelectedIndex;
+    final correct = state.tutorialCorrect;
+    final answered = state.tutorialAnswered;
+    final wrongAttempts = state.tutorialWrongAttempts;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 4.w),
       child: Column(
@@ -520,33 +492,29 @@ class _TutorialStepState extends State<_TutorialStep> with SingleTickerProviderS
             ),
           ),
           SizedBox(height: 1.5.h),
-          AnimatedBuilder(
-            animation: _shakeController,
-            builder: (context, child) {
-              final offset = widget.selectedOption != -1 && !widget.correct ? _shakeAnimation.value : 0.0;
-              return Transform.translate(offset: Offset(offset, 0), child: child);
-            },
-                child: Column(
-                  children: List.generate(_options.length, (i) {
-                    final isSelected = widget.selectedOption == i;
-                    final isCorrect = i == 0;
-                    Color? tileColor;
-                    if (widget.selectedOption != -1) {
-                      if (isCorrect) {
-                        tileColor = Colors.green.withValues(alpha: 0.2);
-                      } else if (isSelected) {
-                        tileColor = Colors.red.withValues(alpha: 0.2);
-                      }
-                    }
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: 1.h),
-                      child: GestureDetector(
-                        onTap: widget.correct
-                            ? null
-                            : () {
-                                widget.onSelect(i);
-                                if (i != 0) _shakeController.forward(from: 0);
-                              },
+          _ShakeEffect(
+            triggerKey: wrongAttempts,
+            child: Column(
+              children: List.generate(_options.length, (i) {
+                final isSelected = selectedOption == i;
+                final isCorrect = i == 0;
+                Color? tileColor;
+                if (selectedOption != -1) {
+                  if (isCorrect) {
+                    tileColor = Colors.green.withValues(alpha: 0.2);
+                  } else if (isSelected) {
+                    tileColor = Colors.red.withValues(alpha: 0.2);
+                  }
+                }
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 1.h),
+                  child: GestureDetector(
+                    onTap: correct
+                        ? null
+                        : () {
+                            context.read<OnboardingBloc>().add(OnboardingTutorialSelect(index: i));
+                            if (i == 0) _confettiWidgetController.play();
+                          },
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
@@ -562,25 +530,25 @@ class _TutorialStepState extends State<_TutorialStep> with SingleTickerProviderS
                       child: Row(
                         children: [
                           Expanded(
-                              child: Text(
-                                  _options[i],
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    color: widget.selectedOption != -1
-                                        ? (isCorrect
-                                            ? Colors.green[300]
-                                            : isSelected
-                                                ? Colors.red[300]
-                                                : Colors.white70)
-                                        : Colors.white,
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                  ),
-                                ),
+                            child: Text(
+                              _options[i],
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                color: selectedOption != -1
+                                    ? (isCorrect
+                                        ? Colors.green[300]
+                                        : isSelected
+                                            ? Colors.red[300]
+                                            : Colors.white70)
+                                    : Colors.white,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                               ),
-                              if (widget.correct && isCorrect)
-                                const Icon(Icons.check_circle, color: Colors.green, size: 24),
-                              if (widget.selectedOption != -1 && isSelected && !isCorrect)
-                                const Icon(Icons.cancel, color: Colors.red, size: 24),
+                            ),
+                          ),
+                          if (correct && isCorrect)
+                            const Icon(Icons.check_circle, color: Colors.green, size: 24),
+                          if (selectedOption != -1 && isSelected && !isCorrect)
+                            const Icon(Icons.cancel, color: Colors.red, size: 24),
                         ],
                       ),
                     ),
@@ -589,7 +557,7 @@ class _TutorialStepState extends State<_TutorialStep> with SingleTickerProviderS
               }),
             ),
           ),
-          if (widget.correct) ...[
+          if (answered) ...[
             SizedBox(height: 1.h),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.8.h),
@@ -604,7 +572,7 @@ class _TutorialStepState extends State<_TutorialStep> with SingleTickerProviderS
                   const Icon(Icons.monetization_on, color: Color(0xFFE8B86D), size: 20),
                   SizedBox(width: 2.w),
                   Text(
-                    '+1 XP  •  Streak +1',
+                    '+1 XP  \u2022  Streak +1',
                     style: TextStyle(
                       fontSize: 15.sp,
                       color: const Color(0xFFE8B86D),
@@ -626,16 +594,16 @@ class _TutorialStepState extends State<_TutorialStep> with SingleTickerProviderS
                   elevation: 4,
                 ),
                 icon: const Icon(Icons.arrow_forward, size: 22),
-                onPressed: widget.onNext,
+                onPressed: onNext,
                 label: Text('Nice! Continue', style: TextStyle(fontSize: 18.sp)),
               ),
             ),
           ],
-          if (widget.selectedOption != -1 && !widget.correct)
+          if (selectedOption != -1 && !correct)
             Padding(
               padding: EdgeInsets.only(top: 0.5.h),
               child: Text(
-                'Not quite — try again!',
+                'Not quite \u2014 try again!',
                 style: TextStyle(fontSize: 15.sp, color: Colors.orange),
               ),
             ),
@@ -646,41 +614,14 @@ class _TutorialStepState extends State<_TutorialStep> with SingleTickerProviderS
   }
 }
 
-class _CongratulationsStep extends StatefulWidget {
-  final ConfettiController confettiController;
+class _CongratulationsStep extends StatelessWidget {
   final VoidCallback onFinish;
 
-  const _CongratulationsStep({
-    required this.confettiController,
-    required this.onFinish,
-  });
-
-  @override
-  State<_CongratulationsStep> createState() => _CongratulationsStepState();
-}
-
-class _CongratulationsStepState extends State<_CongratulationsStep>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _scaleController;
-  late Animation<double> _scaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _scaleController = AnimationController(duration: const Duration(milliseconds: 800), vsync: this);
-    _scaleAnimation = CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut);
-    _scaleController.forward();
-    widget.confettiController.play();
-  }
-
-  @override
-  void dispose() {
-    _scaleController.dispose();
-    super.dispose();
-  }
+  const _CongratulationsStep({required this.onFinish});
 
   @override
   Widget build(BuildContext context) {
+    _confettiWidgetController.play();
     return Stack(
       children: [
         Padding(
@@ -689,8 +630,13 @@ class _CongratulationsStepState extends State<_CongratulationsStep>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(flex: 2),
-              ScaleTransition(
-                scale: _scaleAnimation,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.elasticOut,
+                builder: (context, value, child) {
+                  return Transform.scale(scale: value, child: child);
+                },
                 child: Container(
                   width: 35.w,
                   height: 35.w,
@@ -758,7 +704,7 @@ class _CongratulationsStepState extends State<_CongratulationsStep>
                     elevation: 6,
                   ),
                   icon: const Icon(Icons.rocket_launch, size: 24),
-                  onPressed: widget.onFinish,
+                  onPressed: onFinish,
                   label: Text('Start Your Adventure', style: TextStyle(fontSize: 18.sp)),
                 ),
               ),
@@ -769,7 +715,7 @@ class _CongratulationsStepState extends State<_CongratulationsStep>
         Align(
           alignment: Alignment.topCenter,
           child: ConfettiWidget(
-            confettiController: widget.confettiController,
+            confettiController: _confettiWidgetController,
             blastDirectionality: BlastDirectionality.explosive,
             shouldLoop: false,
             emissionFrequency: 0.04,

@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/domain/entities/question.dart';
-import 'package:quiz_app/presentation/provider/quiz_provider.dart';
-import 'package:quiz_app/presentation/screens/quiz_screen.dart';
+import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
+import 'package:quiz_app/presentation/screens/quiz/quiz_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 final _log = Logger();
@@ -37,7 +37,7 @@ class CategorySelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<QuizProvider>(context, listen: false);
+    final bloc = context.read<QuizBloc>();
 
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D1A),
@@ -82,11 +82,11 @@ class CategorySelectionScreen extends StatelessWidget {
                   final color = categoryColors[category]!;
                   final icon = categoryIcons[category]!;
                   final label = categoryLabels[category]!;
-                  final count = provider.questionCountForCategory(category);
+                  final count = bloc.questionCountForCategory(category);
 
                   return GestureDetector(
                     onTap: () {
-                      provider.selectCategory(category);
+                      bloc.add(QuizSelectCategory(category: category));
                       _log.i('→ QuizScreen ($label)');
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreen()));
                     },

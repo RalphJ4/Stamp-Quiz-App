@@ -37,7 +37,7 @@ extension PowerUpTypeMeta on PowerUpType {
   String get description {
     switch (this) {
       case PowerUpType.timeFreeze:
-        return '+10 seconds on timed questions';
+        return 'Pauses the timer for the current question';
       case PowerUpType.doubleXp:
         return 'Next correct answer gives 2× XP';
       case PowerUpType.extraHint:

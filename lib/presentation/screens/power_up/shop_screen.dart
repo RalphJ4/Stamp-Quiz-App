@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/domain/entities/power_up.dart';
-import 'package:quiz_app/presentation/provider/power_up_provider.dart';
-import 'package:quiz_app/presentation/provider/quiz_provider.dart';
+import 'package:quiz_app/presentation/screens/power_up/bloc/power_up_bloc.dart';
+import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 final _log = Logger();
@@ -13,10 +13,10 @@ class ShopScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final powerUpProvider = context.watch<PowerUpProvider>();
-    final quizProvider = context.watch<QuizProvider>();
-    final balance = quizProvider.stamps;
-    final inventory = powerUpProvider.inventory;
+    final powerUpState = context.watch<PowerUpBloc>().state;
+    final quizState = context.watch<QuizBloc>().state;
+    final balance = quizState.stamps;
+    final inventory = powerUpState.inventory;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0D0D1A),
@@ -89,37 +89,17 @@ class ShopScreen extends StatelessWidget {
                     canAfford: canAfford,
                     onPurchase: () {
                       _log.i('Purchasing ${type.label}');
-                      powerUpProvider.purchasePowerUp(type).then((error) {
-                        if (error != null && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(error),
-                              backgroundColor: Colors.red.shade800,
-                            ),
-                          );
-                        } else if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${type.label} purchased!'),
-                              backgroundColor: const Color(0xFF7B2FBE),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                          );
-                        }
-                      }).catchError((e) {
-                        _log.e('Purchase failed: $e');
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Purchase failed. Try again.'),
-                              backgroundColor: Colors.red.shade800,
-                            ),
-                          );
-                        }
-                      });
+                      context.read<PowerUpBloc>().add(PowerUpPurchase(type: type));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${type.label} purchased!'),
+                          backgroundColor: const Color(0xFF7B2FBE),
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      );
                     },
                   );
                 }).toList(),
