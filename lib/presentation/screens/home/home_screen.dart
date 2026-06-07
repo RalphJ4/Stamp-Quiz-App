@@ -8,6 +8,7 @@ import 'package:quiz_app/presentation/screens/quiz/category_selection_screen.dar
 import 'package:quiz_app/presentation/screens/daily_challenge/daily_challenge_screen.dart';
 import 'package:quiz_app/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:quiz_app/presentation/screens/duel/duel_screen.dart';
+import 'package:quiz_app/presentation/screens/leaderboard/bloc/leaderboard_bloc.dart';
 import 'package:quiz_app/presentation/screens/leaderboard/leaderboard_screen.dart';
 import 'package:quiz_app/presentation/screens/power_up/shop_screen.dart';
 import 'package:quiz_app/presentation/screens/profile/profile_screen.dart';
@@ -74,6 +75,7 @@ class HomeScreen extends StatelessWidget {
             icon: Icon(Icons.leaderboard, color: const Color(0xFFE8B86D), size: 6.w),
             tooltip: 'Leaderboard',
             onPressed: () {
+              context.read<LeaderboardBloc>().forceSync();
               _log.i('→ LeaderboardScreen');
               Navigator.push(context, MaterialPageRoute(builder: (_) => const LeaderboardScreen()));
             },
