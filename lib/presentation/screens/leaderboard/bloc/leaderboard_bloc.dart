@@ -23,6 +23,12 @@ class LeaderboardBloc extends Bloc<LeaderboardEvent, LeaderboardState> {
   StreamSubscription<AuthState>? _authSubscription;
   StreamSubscription<QuizState>? _quizSubscription;
 
+  /// Forces a full leaderboard sync regardless of [_lastSyncedStamps].
+  void forceSync() {
+    _lastSyncedStamps = -1;
+    add(LeaderboardCheckAndSync());
+  }
+
   LeaderboardBloc(this._authBloc, this._quizBloc) : super(const LeaderboardState()) {
     on<LeaderboardFetchPeriod>(_onFetchPeriod);
     on<LeaderboardSelectTab>(_onSelectTab);

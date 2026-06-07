@@ -5,6 +5,7 @@ import 'package:logger/logger.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/domain/entities/duel.dart';
 import 'package:quiz_app/presentation/screens/duel/bloc/duel_bloc.dart';
+import 'package:quiz_app/presentation/screens/leaderboard/bloc/leaderboard_bloc.dart';
 import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:confetti/confetti.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -644,6 +645,7 @@ class DuelScreen extends StatelessWidget {
                     icon: const Icon(Icons.home),
                     onPressed: () {
                       context.read<DuelBloc>().awardXp();
+                      context.read<LeaderboardBloc>().forceSync();
                       context.read<DuelBloc>().add(DuelReset());
                       Navigator.of(context).pop();
                     },

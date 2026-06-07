@@ -24,6 +24,7 @@ class DuelBloc extends Bloc<DuelEvent, DuelBlocState> {
   StreamSubscription<domain.DuelState?>? _subscription;
   Timer? _countdownTimer;
   Timer? _cleanupTimer;
+  int? _pendingXpAward;
 
   DuelBloc(this._authBloc, this._quizBloc) : super(const DuelBlocState()) {
     on<DuelCreate>(_onCreate);
@@ -122,6 +123,14 @@ class DuelBloc extends Bloc<DuelEvent, DuelBlocState> {
       emit(state.copyWith(duel: null, currentDuelId: null, error: 'Duel ended'));
       return;
     }
+
+    if (event.duel!.status == domain.DuelStatus.complete && _pendingXpAward == null) {
+      final uid = _authBloc.state.user?.id;
+      if (uid != null) {
+        _pendingXpAward = event.duel!.winnerUid == uid ? 50 : 20;
+      }
+    }
+
     final wasActive = state.duel?.status == domain.DuelStatus.active;
     emit(state.copyWith(duel: event.duel, loading: false));
 
@@ -174,6 +183,9 @@ class DuelBloc extends Bloc<DuelEvent, DuelBlocState> {
       _log.e('Failed to auto-finish duel: $e');
     }
 
+    final myUid = _authBloc.state.user?.id;
+    _pendingXpAward = myUid != null ? (winner == myUid ? 50 : 20) : null;
+
     _cleanupTimer?.cancel();
     _cleanupTimer = Timer(const Duration(seconds: 3), () => _deleteCurrentDuel());
   }
@@ -206,6 +218,9 @@ class DuelBloc extends Bloc<DuelEvent, DuelBlocState> {
                 : null;
         await _datasource.finishDuel(state.currentDuelId!, winner);
 
+        final myUid = _authBloc.state.user?.id;
+        _pendingXpAward = myUid != null ? (winner == myUid ? 50 : 20) : null;
+
         _cleanupTimer?.cancel();
         _cleanupTimer = Timer(const Duration(seconds: 3), () => _deleteCurrentDuel());
       }
@@ -213,6 +228,7 @@ class DuelBloc extends Bloc<DuelEvent, DuelBlocState> {
   }
 
   void _onReset(DuelReset event, Emitter<DuelBlocState> emit) async {
+    _pendingXpAward = null;
     await _deleteCurrentDuel();
     _countdownTimer?.cancel();
     _countdownTimer = null;
@@ -224,14 +240,14 @@ class DuelBloc extends Bloc<DuelEvent, DuelBlocState> {
   }
 
   void awardXp() {
-    final uid = _authBloc.state.user?.id;
-    if (uid == null || state.duel == null) return;
-    final isWinner = state.duel!.winnerUid == uid;
-    _quizBloc.add(QuizAwardStamps(amount: isWinner ? 50 : 20));
+    if (_pendingXpAward == null) return;
+    _quizBloc.add(QuizAwardStamps(amount: _pendingXpAward!));
+    _pendingXpAward = null;
   }
 
   @override
   Future<void> close() {
+    _pendingXpAward = null;
     _countdownTimer?.cancel();
     _cleanupTimer?.cancel();
     _subscription?.cancel();
