@@ -375,12 +375,6 @@ class HomeScreen extends StatelessWidget {
                   label: Text('Start Quiz', style: TextStyle(fontSize: 18.sp)),
                 ),
               ),
-              SizedBox(height: 1.h),
-
-              TextButton(
-                onPressed: () => context.read<QuizBloc>().add(QuizReset()),
-                child: Text('Reset Progress', style: TextStyle(fontSize: 16.sp, color: Colors.white54)),
-              ),
               SizedBox(height: 2.h),
             ],
           ),

@@ -40,7 +40,6 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
     on<QuizDeductStamps>(_onDeductStamps);
     on<QuizAwardStamps>(_onAwardStamps);
     on<QuizAddHint>(_onAddHint);
-    on<QuizReset>(_onReset);
 
     _authSubscription = _authBloc.stream.listen((authState) {
       if (authState.initialized) {
@@ -234,13 +233,6 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
     emit(state.copyWith(hintsRemaining: state.hintsRemaining + 1));
   }
 
-  void _onReset(QuizReset event, Emitter<QuizState> emit) async {
-    _cancelTimer();
-    emit(const QuizState());
-    await _saveStats();
-    add(QuizLoadQuestions());
-  }
-
   Future<void> _loadStats() async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -315,28 +307,6 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
         }
       }
     });
-  }
-
-  Future<void> _saveStats() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('${_storagePrefix}_stamps', state.stamps);
-    await prefs.setInt('${_storagePrefix}_bestStreak', state.bestStreak);
-    await prefs.setInt('${_storagePrefix}_totalCorrect', state.totalCorrect);
-    await prefs.setInt('${_storagePrefix}_totalAnswered', state.totalAnswered);
-
-    if (_authBloc.state.isLoggedIn) {
-      final uid = _authBloc.state.user?.id;
-      if (uid != null) {
-        try {
-          await FirebaseFirestore.instance.collection('users').doc(uid).set({
-            'stamps': state.stamps,
-            'bestStreak': state.bestStreak,
-            'totalCorrect': state.totalCorrect,
-            'totalAnswered': state.totalAnswered,
-          }, SetOptions(merge: true));
-        } catch (_) {}
-      }
-    }
   }
 
   @override

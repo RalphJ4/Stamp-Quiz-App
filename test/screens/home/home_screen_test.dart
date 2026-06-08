@@ -53,6 +53,5 @@ void main() {
     expect(find.text('Science'), findsOneWidget);
     expect(find.text('Geography'), findsOneWidget);
     expect(find.text('Start Quiz'), findsOneWidget);
-    expect(find.text('Reset Progress'), findsOneWidget);
   });
 }

@@ -38,4 +38,3 @@ final class QuizAwardStamps extends QuizEvent {
 
 final class QuizAddHint extends QuizEvent {}
 
-final class QuizReset extends QuizEvent {}
