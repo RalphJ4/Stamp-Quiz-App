@@ -9,7 +9,7 @@ class DailyChallengeDatasource {
   final LocalQuestionDataSource _local = LocalQuestionDataSource();
 
   String get _todayKey {
-    final now = DateTime.now();
+    final now = DateTime.now().subtract(const Duration(hours: 8));
     return '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
   }
 

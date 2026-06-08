@@ -54,8 +54,9 @@ class DailyChallengeState extends Equatable {
 
   String get timeUntilReset {
     final now = DateTime.now();
-    final tomorrow = DateTime(now.year, now.month, now.day + 1);
-    final diff = tomorrow.difference(now);
+    final todayReset = DateTime(now.year, now.month, now.day, 8, 0);
+    final target = now.isBefore(todayReset) ? todayReset : DateTime(now.year, now.month, now.day + 1, 8, 0);
+    final diff = target.difference(now);
     final hours = diff.inHours;
     final minutes = diff.inMinutes.remainder(60);
     final seconds = diff.inSeconds.remainder(60);
