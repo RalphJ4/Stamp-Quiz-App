@@ -223,7 +223,7 @@ class HomeScreen extends StatelessWidget {
                         );
                       },
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 2.3.w, vertical: 2.h),
+                        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: available
@@ -297,60 +297,57 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height: 1.h),
 
-              ...QuestionCategory.values.map((cat) {
-                final color = categoryColors[cat]!;
-                final icon = categoryIcons[cat]!;
-                final label = categoryLabels[cat]!;
-                final catQuestions = context.read<QuizBloc>().questionCountForCategory(cat);
+              Wrap(
+                spacing: 2.w,
+                runSpacing: 1.5.h,
+                children: QuestionCategory.values.map((cat) {
+                  final color = categoryColors[cat]!;
+                  final icon = categoryIcons[cat]!;
+                  final label = categoryLabels[cat]!;
+                  final catQuestions = context.read<QuizBloc>().questionCountForCategory(cat);
 
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 1.h),
-                  child: GestureDetector(
-                    onTap: () {
-                      _log.i('→ CategorySelectionScreen ($label)');
-                      context.read<QuizBloc>().add(QuizSelectCategory(category: cat));
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const CategorySelectionScreen()),
-                      );
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
-                      decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: color.withValues(alpha: 0.3)),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(icon, color: color, size: 7.w),
-                          SizedBox(width: 3.w),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  label,
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: color,
-                                  ),
-                                ),
-                                SizedBox(height: 0.3.h),
-                                Text(
-                                  '$catQuestions questions available',
-                                  style: TextStyle(fontSize: 13.sp, color: Colors.white54),
-                                ),
-                              ],
+                  return SizedBox(
+                    width: (100.w - 3.w * 2 - 2.w) / 2,
+                    child: GestureDetector(
+                      onTap: () {
+                        _log.i('→ CategorySelectionScreen ($label)');
+                        context.read<QuizBloc>().add(QuizSelectCategory(category: cat));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const CategorySelectionScreen()),
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.5.h),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: color.withValues(alpha: 0.3)),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(icon, color: color, size: 7.w),
+                            SizedBox(height: 0.5.h),
+                            Text(
+                              label,
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.bold,
+                                color: color,
+                              ),
                             ),
-                          ),
-                        ],
+                            SizedBox(height: 0.3.h),
+                            Text(
+                              '$catQuestions questions',
+                              style: TextStyle(fontSize: 11.sp, color: Colors.white54),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              }),
+                  );
+                }).toList(),
+              ),
 
               SizedBox(height: 2.h),
 
