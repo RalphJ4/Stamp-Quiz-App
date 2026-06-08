@@ -15,12 +15,14 @@ class DailyChallengeBloc extends Bloc<DailyChallengeEvent, DailyChallengeState> 
   Timer? _countdownTimer;
   StreamSubscription<AuthState>? _authSubscription;
 
-  DailyChallengeBloc(this._authBloc) : super(const DailyChallengeState()) {
+  DailyChallengeBloc(this._authBloc, {bool skipTimer = false}) : super(const DailyChallengeState()) {
     on<DailyChallengeLoadToday>(_onLoadToday);
     on<DailyChallengeSelectOption>(_onSelectOption);
     on<DailyChallengeNextQuestion>(_onNextQuestion);
 
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    if (!skipTimer) {
+      _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    }
 
     _authSubscription = _authBloc.stream.listen((authState) {
       if (authState.initialized) {

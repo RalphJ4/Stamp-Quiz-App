@@ -65,7 +65,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LocalStorageService _localStorageService = LocalStorageService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  AuthBloc() : super(const AuthState()) {
+  AuthBloc({bool skipInit = false}) : super(const AuthState()) {
     on<AuthInitialize>(_onInitialize);
     on<AuthStartGuestSession>(_onStartGuestSession);
     on<AuthSignInWithEmail>(_onSignInWithEmail);
@@ -77,7 +77,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthUpdateAvatarColor>(_onUpdateAvatarColor);
     on<AuthGetAvatarColor>(_onGetAvatarColor);
     on<AuthClearError>(_onClearError);
-    _init();
+    if (!skipInit) {
+      _init();
+    }
   }
 
   AuthService get authService => _authService;

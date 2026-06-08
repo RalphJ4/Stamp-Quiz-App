@@ -24,7 +24,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
   Timer? _questionTimer;
   StreamSubscription<AuthState>? _authSubscription;
 
-  QuizBloc(this._authBloc) : super(const QuizState()) {
+  QuizBloc(this._authBloc, {bool skipLoad = false}) : super(const QuizState()) {
     final repo = QuestionRepositoryImpl(local: _local);
     _getQuestions = GetQuestions(repo);
 
@@ -47,7 +47,9 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
         _loadStats();
       }
     });
-    _loadStats();
+    if (!skipLoad) {
+      _loadStats();
+    }
   }
 
   String get _storagePrefix {
