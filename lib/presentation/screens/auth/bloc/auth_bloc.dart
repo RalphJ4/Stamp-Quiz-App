@@ -1,6 +1,7 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
 import 'dart:math';
+import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logger/logger.dart';
@@ -10,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../services/auth_service.dart';
 import '../../../../services/guest_session_service.dart';
 import '../../../../services/local_storage_service.dart';
+import '../../../../services/notification_service.dart';
 export 'auth_event.dart';
 export 'auth_state.dart';
 import 'auth_event.dart';
@@ -129,6 +131,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _ensureUserProfile(auth.User firebaseUser) async {
     final docRef = _firestore.collection('users').doc(firebaseUser.uid);
     final doc = await docRef.get();
+    final fcmToken = NotificationService.currentToken;
     if (!doc.exists) {
       await docRef.set({
         'uid': firebaseUser.uid,
@@ -136,9 +139,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         'email': firebaseUser.email ?? '',
         'createdAt': FieldValue.serverTimestamp(),
         'lastLogin': FieldValue.serverTimestamp(),
+        if (fcmToken != null) 'fcmToken': fcmToken,
       });
     } else {
-      await docRef.update({'lastLogin': FieldValue.serverTimestamp()});
+      await docRef.update({
+        'lastLogin': FieldValue.serverTimestamp(),
+        if (fcmToken != null) 'fcmToken': fcmToken,
+      });
     }
   }
 

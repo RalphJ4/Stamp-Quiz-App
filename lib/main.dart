@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
@@ -5,9 +6,11 @@ import 'package:logger/logger.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'firebase_options.dart';
 import 'domain/entities/leaderboard_period.dart';
+import 'services/notification_service.dart';
 import 'presentation/screens/auth/bloc/auth_bloc.dart';
 import 'presentation/screens/quiz/bloc/quiz_bloc.dart';
 import 'presentation/screens/power_up/bloc/power_up_bloc.dart';
@@ -19,9 +22,20 @@ import 'presentation/screens/onboarding/gamified_onboarding_screen.dart';
 import 'presentation/screens/home/home_screen.dart';
 import 'presentation/screens/onboarding/onboarding_screen.dart';
 
+/// Called when a push notification arrives while the app is terminated.
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  Logger().i('Background message: ${message.messageId}');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final firebaseInitialized = await _initFirebase();
+  if (firebaseInitialized) {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    await NotificationService.init();
+  }
   await Hive.initFlutter();
   await Hive.openBox('quiz_cache');
   await Hive.openBox('score_history');
@@ -102,50 +116,89 @@ class QuizApp extends StatelessWidget {
         BlocProvider(create: (ctx) => OnboardingBloc()..add(OnboardingLoadPreferences())),
         BlocProvider(create: (ctx) => LeaderboardBloc(ctx.read<AuthBloc>(), ctx.read<QuizBloc>())..add(LeaderboardFetchPeriod(period: LeaderboardPeriod.allTime))),
       ],
-      child: ResponsiveSizer(
-        builder: (context, orientation, screenType) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'Stamp Quiz',
-            theme: ThemeData.dark().copyWith(
-              scaffoldBackgroundColor: const Color(0xFF0D0D1A),
-              colorScheme: const ColorScheme.dark(
-                primary: Color(0xFF7B2FBE),
-                secondary: Color(0xFFE8B86D),
-                surface: Color(0xFF1A1A2E),
-              ),
-            ),
-            home: BlocBuilder<OnboardingBloc, OnboardingState>(
-              builder: (context, onboarding) {
-                return BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, auth) {
-                    if (!auth.initialized || onboarding.loading) {
-                      QuizApp._log.i('🔄 loading');
-                      return const Scaffold(
-                        body: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-                    if (!onboarding.completed) {
-                      QuizApp._log.i('🎮 GamifiedOnboarding');
-                      return GamifiedOnboardingScreen(
-                        onComplete: () {
-                          context.read<AuthBloc>().add(AuthStartGuestSession());
-                        },
-                      );
-                    }
-                    if (auth.mode == AuthMode.none) {
-                      QuizApp._log.i('🖥 OnboardingScreen');
-                      return const OnboardingScreen();
-                    }
-                    QuizApp._log.i('🏠 HomeScreen');
-                    return const HomeScreen();
-                  },
-                );
-              },
-            ),
-          );
-        },
+      child: _NotificationListenerWidget(
+        key: const ValueKey('notification_listener'),
       ),
+    );
+  }
+}
+
+/// Listens for FCM messages and notification taps.
+class _NotificationListenerWidget extends StatefulWidget {
+  const _NotificationListenerWidget({super.key});
+
+  @override
+  State<_NotificationListenerWidget> createState() => _NotificationListenerWidgetState();
+}
+
+class _NotificationListenerWidgetState extends State<_NotificationListenerWidget> {
+  StreamSubscription<RemoteMessage>? _foregroundSub;
+  StreamSubscription<RemoteMessage>? _tapSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _foregroundSub = FirebaseMessaging.onMessage.listen(NotificationService.showLocalNotification);
+    _tapSub = FirebaseMessaging.onMessageOpenedApp.listen((msg) {
+      NotificationService.handleNotificationTap(msg.data['route']);
+    });
+    FirebaseMessaging.instance.getInitialMessage().then((msg) {
+      if (msg != null) NotificationService.handleNotificationTap(msg.data['route']);
+    });
+  }
+
+  @override
+  void dispose() {
+    _foregroundSub?.cancel();
+    _tapSub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ResponsiveSizer(
+      builder: (context, orientation, screenType) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Stamp Quiz',
+          theme: ThemeData.dark().copyWith(
+            scaffoldBackgroundColor: const Color(0xFF0D0D1A),
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFF7B2FBE),
+              secondary: Color(0xFFE8B86D),
+              surface: Color(0xFF1A1A2E),
+            ),
+          ),
+          home: BlocBuilder<OnboardingBloc, OnboardingState>(
+            builder: (context, onboarding) {
+              return BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, auth) {
+                  if (!auth.initialized || onboarding.loading) {
+                    QuizApp._log.i('🔄 loading');
+                    return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (!onboarding.completed) {
+                    QuizApp._log.i('🎮 GamifiedOnboarding');
+                    return GamifiedOnboardingScreen(
+                      onComplete: () {
+                        context.read<AuthBloc>().add(AuthStartGuestSession());
+                      },
+                    );
+                  }
+                  if (auth.mode == AuthMode.none) {
+                    QuizApp._log.i('🖥 OnboardingScreen');
+                    return const OnboardingScreen();
+                  }
+                  QuizApp._log.i('🏠 HomeScreen');
+                  return const HomeScreen();
+                },
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
