@@ -124,15 +124,69 @@ final _badges = [
     color: Color(0xFF795548),
     unlocked: (qp) => qp.totalAnswered >= 100,
   ),
+  _Badge(
+    id: 'rising_star',
+    name: 'Rising Star',
+    icon: Icons.trending_up,
+    description: 'Earn 250 total XP',
+    color: Color(0xFFFF9800),
+    unlocked: (qp) => qp.stamps >= 250,
+  ),
+  _Badge(
+    id: 'perfectionist',
+    name: 'Perfectionist',
+    icon: Icons.star,
+    description: 'Perfect accuracy over 10+ answers',
+    color: Color(0xFFE8B86D),
+    unlocked: (qp) => qp.totalAnswered >= 10 && qp.totalCorrect == qp.totalAnswered,
+  ),
+  _Badge(
+    id: 'eagle_eye',
+    name: 'Eagle Eye',
+    icon: Icons.visibility,
+    description: '90%+ accuracy over 30+ answers',
+    color: Color(0xFF42A5F5),
+    unlocked: (qp) => qp.totalAnswered >= 30 && qp.totalCorrect / qp.totalAnswered >= 0.9,
+  ),
+  _Badge(
+    id: 'legendary_streak',
+    name: 'Legendary Streak',
+    icon: Icons.local_fire_department,
+    description: 'Reach a streak of 20',
+    color: Color(0xFFE53935),
+    unlocked: (qp) => qp.bestStreak >= 20,
+  ),
+  _Badge(
+    id: 'marathon',
+    name: 'Marathon Runner',
+    icon: Icons.directions_run,
+    description: 'Answer 500 questions',
+    color: Color(0xFF7B2FBE),
+    unlocked: (qp) => qp.totalAnswered >= 500,
+  ),
+  _Badge(
+    id: 'high_roller',
+    name: 'High Roller',
+    icon: Icons.diamond,
+    description: 'Earn 5000 total XP',
+    color: Color(0xFFFFD700),
+    unlocked: (qp) => qp.stamps >= 5000,
+  ),
 ];
 
 String _titleForXp(int xp) {
+  if (xp >= 100000) return 'Legendary Sage';
+  if (xp >= 50000) return 'Master of Quizzes';
+  if (xp >= 25000) return 'Quiz Overlord';
+  if (xp >= 15000) return 'Eternal Scholar';
   if (xp >= 10000) return 'Grand Sage';
+  if (xp >= 7500) return 'Elite Trivia';
   if (xp >= 5000) return 'Wisdom Keeper';
   if (xp >= 2500) return 'Knowledge Seeker';
   if (xp >= 1000) return 'Trivia Master';
   if (xp >= 500) return 'XP Hunter';
   if (xp >= 100) return 'Quiz Apprentice';
+  if (xp >= 50) return 'Curious Mind';
   return 'Stamp Collector';
 }
 
