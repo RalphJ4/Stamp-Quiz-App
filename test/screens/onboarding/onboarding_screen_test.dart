@@ -11,7 +11,7 @@ import '../../test_helpers.dart';
 void main() {
   setUpAll(() async => setupFirebase());
 
-  Widget _wrapApp(Widget child) {
+  Widget wrapApp(Widget child) {
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
         return BlocProvider<AuthBloc>.value(
@@ -23,7 +23,7 @@ void main() {
   }
 
   testWidgets('renders title and auth buttons', (tester) async {
-    await tester.pumpWidget(_wrapApp(const OnboardingScreen()));
+    await tester.pumpWidget(wrapApp(const OnboardingScreen()));
     await tester.pump();
 
     expect(find.text('Stamp Quiz'), findsOneWidget);
@@ -33,7 +33,7 @@ void main() {
   });
 
   testWidgets('tap Sign In navigates to LoginScreen', (tester) async {
-    await tester.pumpWidget(_wrapApp(const OnboardingScreen()));
+    await tester.pumpWidget(wrapApp(const OnboardingScreen()));
     await tester.pump();
 
     await tester.tap(find.text('Sign In'));
@@ -43,7 +43,7 @@ void main() {
   });
 
   testWidgets('tap Register navigates to RegisterScreen', (tester) async {
-    await tester.pumpWidget(_wrapApp(const OnboardingScreen()));
+    await tester.pumpWidget(wrapApp(const OnboardingScreen()));
     await tester.pump();
 
     await tester.tap(find.text('Register'));

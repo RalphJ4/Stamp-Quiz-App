@@ -10,7 +10,7 @@ import '../../test_helpers.dart';
 void main() {
   setUpAll(() async => setupFirebase());
 
-  Widget _buildTestApp() {
+  Widget buildTestApp() {
     final authBloc = FakeAuthBloc()..emit(AuthState(
       initialized: true,
       mode: AuthMode.loggedIn,
@@ -32,7 +32,7 @@ void main() {
   }
 
   testWidgets('renders profile screen with sections', (tester) async {
-    await tester.pumpWidget(_buildTestApp());
+    await tester.pumpWidget(buildTestApp());
     await tester.pump();
 
     expect(find.text('Profile'), findsOneWidget);

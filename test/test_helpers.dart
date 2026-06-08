@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/test.dart'
     as firebase_core_test;
@@ -7,17 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
-import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_state.dart';
 import 'package:quiz_app/presentation/screens/power_up/bloc/power_up_bloc.dart';
-import 'package:quiz_app/presentation/screens/power_up/bloc/power_up_state.dart';
 import 'package:quiz_app/presentation/screens/daily_challenge/bloc/daily_challenge_bloc.dart';
-import 'package:quiz_app/presentation/screens/daily_challenge/bloc/daily_challenge_state.dart';
 import 'package:quiz_app/presentation/screens/duel/bloc/duel_bloc.dart';
-import 'package:quiz_app/presentation/screens/duel/bloc/duel_state.dart';
 import 'package:quiz_app/presentation/screens/onboarding/bloc/onboarding_bloc.dart';
-import 'package:quiz_app/presentation/screens/onboarding/bloc/onboarding_state.dart';
 import 'package:quiz_app/presentation/screens/leaderboard/bloc/leaderboard_bloc.dart';
-import 'package:quiz_app/presentation/screens/leaderboard/bloc/leaderboard_state.dart';
 import 'package:quiz_app/domain/entities/question.dart';
 
 /// Initialize Firebase for tests before any test runs.

@@ -12,7 +12,7 @@ import '../../test_helpers.dart';
 void main() {
   setUpAll(() async => setupFirebase());
 
-  Widget _buildTestApp() {
+  Widget buildTestApp() {
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
         return MaterialApp(
@@ -31,7 +31,7 @@ void main() {
   }
 
   testWidgets('renders lobby entry screen', (tester) async {
-    await tester.pumpWidget(_buildTestApp());
+    await tester.pumpWidget(buildTestApp());
     await tester.pump();
 
     expect(find.text('Duel Mode'), findsOneWidget);

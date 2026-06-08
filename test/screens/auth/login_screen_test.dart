@@ -9,7 +9,7 @@ import '../../test_helpers.dart';
 void main() {
   setUpAll(() async => setupFirebase());
 
-  Widget _wrapApp(Widget child) {
+  Widget wrapApp(Widget child) {
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
         return BlocProvider<AuthBloc>.value(
@@ -22,7 +22,7 @@ void main() {
 
   testWidgets('renders email and password fields and sign-in buttons',
       (tester) async {
-    await tester.pumpWidget(_wrapApp(const LoginScreen()));
+    await tester.pumpWidget(wrapApp(const LoginScreen()));
     await tester.pump();
 
     expect(find.text('Email'), findsOneWidget);

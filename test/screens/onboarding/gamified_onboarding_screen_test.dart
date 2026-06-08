@@ -9,7 +9,7 @@ import '../../test_helpers.dart';
 void main() {
   setUpAll(() async => setupFirebase());
 
-  Widget _wrapApp(Widget child) {
+  Widget wrapApp(Widget child) {
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
         return MaterialApp(
@@ -25,7 +25,7 @@ void main() {
   testWidgets('renders welcome step initially', (tester) async {
     tester.view.physicalSize = const Size(1200, 2000);
     addTearDown(() => tester.view.resetPhysicalSize());
-    await tester.pumpWidget(_wrapApp(GamifiedOnboardingScreen(onComplete: () {})));
+    await tester.pumpWidget(wrapApp(GamifiedOnboardingScreen(onComplete: () {})));
     await tester.pump();
 
     expect(find.text('Stamp Quiz'), findsOneWidget);

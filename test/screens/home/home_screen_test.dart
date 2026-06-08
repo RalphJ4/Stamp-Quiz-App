@@ -6,7 +6,6 @@ import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
 import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:quiz_app/presentation/screens/power_up/bloc/power_up_bloc.dart';
 import 'package:quiz_app/presentation/screens/daily_challenge/bloc/daily_challenge_bloc.dart';
-import 'package:quiz_app/presentation/screens/daily_challenge/bloc/daily_challenge_state.dart';
 import 'package:quiz_app/presentation/screens/duel/bloc/duel_bloc.dart';
 import 'package:quiz_app/presentation/screens/onboarding/bloc/onboarding_bloc.dart';
 import 'package:quiz_app/presentation/screens/leaderboard/bloc/leaderboard_bloc.dart';
@@ -16,7 +15,7 @@ import '../../test_helpers.dart';
 void main() {
   setUpAll(() async => setupFirebase());
 
-  Widget _buildTestApp() {
+  Widget buildTestApp() {
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
         return MultiBlocProvider(
@@ -40,7 +39,7 @@ void main() {
   }
 
   testWidgets('renders home screen with title and categories', (tester) async {
-    await tester.pumpWidget(_buildTestApp());
+    await tester.pumpWidget(buildTestApp());
     await tester.pump();
 
     expect(find.text('Stamp Quiz'), findsOneWidget);

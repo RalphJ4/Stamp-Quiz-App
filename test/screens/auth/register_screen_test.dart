@@ -9,7 +9,7 @@ import '../../test_helpers.dart';
 void main() {
   setUpAll(() async => setupFirebase());
 
-  Widget _wrapApp(Widget child) {
+  Widget wrapApp(Widget child) {
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
         return BlocProvider<AuthBloc>.value(
@@ -21,17 +21,17 @@ void main() {
   }
 
   testWidgets('renders registration form fields', (tester) async {
-    await tester.pumpWidget(_wrapApp(const RegisterScreen()));
-    await tester.pump();
+await tester.pumpWidget(wrapApp(const RegisterScreen()));
+await tester.pump();
 
-    expect(find.text('Email'), findsOneWidget);
+expect(find.text('Email'), findsOneWidget);
     expect(find.text('Password'), findsOneWidget);
     expect(find.text('Confirm Password'), findsOneWidget);
     expect(find.text('Register'), findsAtLeastNWidgets(1));
   });
 
   testWidgets('shows error when passwords do not match', (tester) async {
-    await tester.pumpWidget(_wrapApp(const RegisterScreen()));
+    await tester.pumpWidget(wrapApp(const RegisterScreen()));
     await tester.pump();
 
     await tester.enterText(find.byType(TextFormField).at(1), 'password123');
@@ -44,7 +44,7 @@ void main() {
   });
 
   testWidgets('shows error when password is too short', (tester) async {
-    await tester.pumpWidget(_wrapApp(const RegisterScreen()));
+    await tester.pumpWidget(wrapApp(const RegisterScreen()));
     await tester.pump();
 
     await tester.enterText(find.byType(TextFormField).at(1), '12345');

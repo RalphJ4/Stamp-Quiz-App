@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
-import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_state.dart';
 import 'package:quiz_app/presentation/screens/quiz/quiz_screen.dart';
 import 'package:quiz_app/presentation/screens/power_up/bloc/power_up_bloc.dart';
 import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
@@ -13,7 +12,7 @@ import '../../test_helpers.dart';
 void main() {
   setUpAll(() async => setupFirebase());
 
-  Widget _buildTestApp(QuizState? quizState) {
+  Widget buildTestApp(QuizState? quizState) {
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
         return MultiBlocProvider(
@@ -31,7 +30,7 @@ void main() {
   }
 
   testWidgets('shows loading when questions empty', (tester) async {
-    await tester.pumpWidget(_buildTestApp(const QuizState()));
+    await tester.pumpWidget(buildTestApp(const QuizState()));
     await tester.pump();
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -49,7 +48,7 @@ void main() {
       ),
     ];
 
-    await tester.pumpWidget(_buildTestApp(QuizState(
+    await tester.pumpWidget(buildTestApp(QuizState(
       questions: sampleQuestions,
       allQuestions: sampleQuestions,
       quizStarted: true,
