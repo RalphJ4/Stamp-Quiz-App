@@ -128,7 +128,6 @@ class DailyChallengeScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
-                        color: tileColor ?? (isSelected ? const Color(0xFFE8B86D) : Colors.white24),
                         color: tileColor ?? Colors.white24,
                         width: 1,
                       ),
