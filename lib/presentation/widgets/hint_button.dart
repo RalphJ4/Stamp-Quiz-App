@@ -6,22 +6,56 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 class HintButton extends StatelessWidget {
   const HintButton({super.key});
 
+  bool _canUseHint(QuizState state) =>
+    state.hintsRemaining > 0 && state.stamps >= QuizBloc.hintCost;
+
   void _onTap(BuildContext context) {
     final state = context.read<QuizBloc>().state;
-    if (state.hintsRemaining > 0) {
-      context.read<QuizBloc>().add(QuizUseHint());
-      ScaffoldMessenger.of(context).showSnackBar(_buildSnackBar());
+    if (!_canUseHint(state)) {
+      if (state.hintsRemaining > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(_insufficientSnackBar());
+      }
+      return;
     }
+    context.read<QuizBloc>().add(QuizUseHint());
+    ScaffoldMessenger.of(context).showSnackBar(_usedSnackBar());
   }
 
-  SnackBar _buildSnackBar() {
+  SnackBar _usedSnackBar() {
     return SnackBar(
       content: Row(
         children: [
           Icon(Icons.lightbulb_outline, color: const Color(0xFFE8B86D), size: 5.w),
           SizedBox(width: 2.w),
           Text(
-            'Hint used! \u20135 XP penalty',
+            'Hint used! \u20135 XP',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+      backgroundColor: const Color(0xFF1A1A2E),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Color(0xFF7B2FBE), width: 1),
+      ),
+      duration: const Duration(seconds: 2),
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+    );
+  }
+
+  SnackBar _insufficientSnackBar() {
+    return SnackBar(
+      content: Row(
+        children: [
+          Icon(Icons.error_outline, color: const Color(0xFFE8B86D), size: 5.w),
+          SizedBox(width: 2.w),
+          Text(
+            'Not enough stamps! Need ${QuizBloc.hintCost} XP to use a hint.',
             style: TextStyle(
               color: Colors.white,
               fontSize: 15.sp,
@@ -45,15 +79,18 @@ class HintButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<QuizBloc, QuizState>(
       builder: (context, state) {
+        final canUse = _canUseHint(state);
+        final iconColor = canUse ? const Color(0xFFE8B86D) : Colors.white38;
+        final dotColor = canUse ? const Color(0xFFE8B86D) : Colors.white38;
         return GestureDetector(
-          onTap: () => _onTap(context),
+          onTap: canUse ? () => _onTap(context) : () => _onTap(context),
           child: TweenAnimationBuilder<double>(
-            key: ValueKey('hint_${state.hintsRemaining}'),
+            key: ValueKey('hint_${state.hintsRemaining}_${state.stamps ~/ QuizBloc.hintCost}'),
             tween: Tween(begin: 0.0, end: 1.0),
             duration: const Duration(milliseconds: 500),
             builder: (context, value, child) {
               return Transform.scale(
-                scale: _bounceSequence(value),
+                scale: canUse ? _bounceSequence(value) : 1.0,
                 child: child,
               );
             },
@@ -62,7 +99,7 @@ class HintButton extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.lightbulb_outline, color: const Color(0xFFE8B86D), size: 5.h),
+                  Icon(Icons.lightbulb_outline, color: iconColor, size: 5.h),
                   SizedBox(width: 1.5.w),
                   ...List.generate(3, (i) {
                     final earned = i < state.hintsRemaining;
@@ -72,9 +109,9 @@ class HintButton extends StatelessWidget {
                       margin: EdgeInsets.symmetric(horizontal: 0.3.w),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: earned ? const Color(0xFFE8B86D) : Colors.transparent,
+                        color: earned ? dotColor : Colors.transparent,
                         border: Border.all(
-                          color: earned ? const Color(0xFFE8B86D) : Colors.white38,
+                          color: earned ? dotColor : Colors.white38,
                           width: 1.5,
                         ),
                       ),

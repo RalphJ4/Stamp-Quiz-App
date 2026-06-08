@@ -195,20 +195,27 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
     emit(state.copyWith(isQuizFinished: true));
   }
 
+  static const int hintCost = 5;
+
   void _onUseHint(QuizUseHint event, Emitter<QuizState> emit) {
     if (state.hintsRemaining <= 0 || state.answered) return;
+    if (state.stamps < hintCost) return;
+
     final correctIdx = state.questions[state.currentIndex].correctIndex;
     final wrongIndices = List.generate(state.questions[state.currentIndex].options.length, (i) => i)
         .where((i) => i != correctIdx)
         .toList();
     wrongIndices.shuffle();
     final eliminated = wrongIndices.take(min(2, wrongIndices.length)).toSet();
+    final newStamps = state.stamps - hintCost;
 
     emit(state.copyWith(
+      stamps: newStamps,
       hintsRemaining: state.hintsRemaining - 1,
       usedHint: true,
       eliminatedOptions: eliminated,
     ));
+    _saveStatsSilent(newStamps, state.bestStreak, state.totalCorrect, state.totalAnswered);
   }
 
   void _onDeductStamps(QuizDeductStamps event, Emitter<QuizState> emit) {
