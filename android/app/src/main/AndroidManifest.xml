@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="Stamp Quiz App"
+        android:label="Stamp Quiz"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
