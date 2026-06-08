@@ -39,3 +39,5 @@ final class AuthUpdateAvatarColor extends AuthEvent {
 final class AuthGetAvatarColor extends AuthEvent {}
 
 final class AuthClearError extends AuthEvent {}
+
+final class AuthClearSuccess extends AuthEvent {}

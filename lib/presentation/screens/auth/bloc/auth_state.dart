@@ -25,6 +25,7 @@ class AuthState extends Equatable {
   final bool initialized;
   final int avatarIndex;
   final String? error;
+  final bool passwordUpdateSuccess;
 
   const AuthState({
     this.mode = AuthMode.none,
@@ -32,6 +33,7 @@ class AuthState extends Equatable {
     this.initialized = false,
     this.avatarIndex = 0,
     this.error,
+    this.passwordUpdateSuccess = false,
   });
 
   bool get isLoggedIn => mode == AuthMode.loggedIn;
@@ -44,6 +46,7 @@ class AuthState extends Equatable {
     int? avatarIndex,
     String? error,
     bool clearError = false,
+    bool? passwordUpdateSuccess,
   }) {
     return AuthState(
       mode: mode ?? this.mode,
@@ -51,9 +54,10 @@ class AuthState extends Equatable {
       initialized: initialized ?? this.initialized,
       avatarIndex: avatarIndex ?? this.avatarIndex,
       error: clearError ? null : (error ?? this.error),
+      passwordUpdateSuccess: passwordUpdateSuccess ?? this.passwordUpdateSuccess,
     );
   }
 
   @override
-  List<Object?> get props => [mode, user, initialized, avatarIndex, error];
+  List<Object?> get props => [mode, user, initialized, avatarIndex, error, passwordUpdateSuccess];
 }

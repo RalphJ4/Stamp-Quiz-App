@@ -580,7 +580,7 @@ class ProfileScreen extends StatelessWidget {
           width: double.infinity,
           child: ElevatedButton(
             style: _buttonStyle(),
-            onPressed: () {
+            onPressed: () async {
               _passwordFormKey.currentState!.save();
               final current = (currentPassword ?? '').trim();
               final newPass = (newPassword ?? '').trim();
@@ -594,9 +594,33 @@ class ProfileScreen extends StatelessWidget {
               if (newPass != confirm) {
                 _showSnack(context, 'Passwords do not match', true); return;
               }
-              context.read<AuthBloc>().add(AuthUpdatePassword(currentPassword: current, newPassword: newPass));
-              _passwordFormKey.currentState!.reset();
-              _showSnack(context, 'Password updated!', false);
+
+              final messenger = ScaffoldMessenger.of(context);
+              final authBloc = context.read<AuthBloc>();
+              messenger.showSnackBar(SnackBar(
+                content: const Text('Updating password...'),
+                backgroundColor: const Color(0xFF7B2FBE),
+                duration: const Duration(seconds: 30),
+                behavior: SnackBarBehavior.floating,
+              ));
+
+              authBloc.add(AuthUpdatePassword(currentPassword: current, newPassword: newPass));
+
+              await authBloc.stream
+                .firstWhere((s) => s.passwordUpdateSuccess || s.error != null);
+
+              if (!context.mounted) return;
+              messenger.hideCurrentSnackBar();
+
+              final authState = authBloc.state;
+              if (authState.passwordUpdateSuccess) {
+                _passwordFormKey.currentState!.reset();
+                _showSnack(context, 'Password updated!', false);
+                authBloc.add(AuthClearSuccess());
+              } else if (authState.error != null) {
+                _showSnack(context, authState.error!, true);
+                authBloc.add(AuthClearError());
+              }
             },
             child: const Text('Update Password'),
           ),

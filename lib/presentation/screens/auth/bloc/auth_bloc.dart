@@ -79,6 +79,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthUpdateAvatarColor>(_onUpdateAvatarColor);
     on<AuthGetAvatarColor>(_onGetAvatarColor);
     on<AuthClearError>(_onClearError);
+    on<AuthClearSuccess>(_onClearSuccess);
     if (!skipInit) {
       _init();
     }
@@ -220,6 +221,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(state.copyWith(clearError: true));
   }
 
+  void _onClearSuccess(AuthClearSuccess event, Emitter<AuthState> emit) {
+    emit(state.copyWith(passwordUpdateSuccess: false));
+  }
+
   void _onSignInWithEmail(AuthSignInWithEmail event, Emitter<AuthState> emit) async {
     emit(state.copyWith(clearError: true));
     if (event.email.trim().isEmpty) {
@@ -306,11 +311,35 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   void _onUpdatePassword(AuthUpdatePassword event, Emitter<AuthState> emit) async {
     if (state.mode != AuthMode.loggedIn) return;
+    emit(state.copyWith(clearError: true));
     try {
       await _authService.reauthenticate(event.currentPassword);
       await _authService.updatePassword(event.newPassword);
+      emit(state.copyWith(passwordUpdateSuccess: true));
+    } on auth.FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'wrong-password':
+        case 'invalid-credential':
+          emit(state.copyWith(error: 'Current password is incorrect.'));
+          break;
+        case 'weak-password':
+          emit(state.copyWith(error: 'New password is too weak. Use at least 6 characters.'));
+          break;
+        case 'requires-recent-login':
+          emit(state.copyWith(error: 'Please sign out and sign in again, then retry.'));
+          break;
+        case 'too-many-requests':
+          emit(state.copyWith(error: 'Too many attempts. Please try again later.'));
+          break;
+        case 'network-request-failed':
+          emit(state.copyWith(error: 'No internet connection. Check your network.'));
+          break;
+        default:
+          emit(state.copyWith(error: _friendlyAuthError(e)));
+      }
     } catch (e) {
       _logger.e(e.toString());
+      emit(state.copyWith(error: 'Something went wrong. Please try again.'));
     }
   }
 
