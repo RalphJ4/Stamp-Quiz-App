@@ -34,7 +34,11 @@ void main() async {
   final firebaseInitialized = await _initFirebase();
   if (firebaseInitialized) {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    await NotificationService.init();
+    try {
+      await NotificationService.init();
+    } catch (e) {
+      dev.log('NotificationService init failed: $e');
+    }
   }
   await Hive.initFlutter();
   await Hive.openBox('quiz_cache');
