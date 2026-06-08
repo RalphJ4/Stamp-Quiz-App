@@ -11,7 +11,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'firebase_options.dart';
 import 'domain/entities/leaderboard_period.dart';
 import 'services/notification_service.dart';
-import 'presentation/theme/app_colors.dart';
 import 'presentation/theme/app_theme.dart';
 import 'presentation/screens/auth/bloc/auth_bloc.dart';
 import 'presentation/screens/quiz/bloc/quiz_bloc.dart';
@@ -165,10 +164,16 @@ class _NotificationListenerWidgetState extends State<_NotificationListenerWidget
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
         return MaterialApp(
+          navigatorKey: NotificationService.navigatorKey,
           debugShowCheckedModeBanner: false,
           title: 'Stamp Quiz',
           theme: AppTheme.dark,
-          home: BlocBuilder<OnboardingBloc, OnboardingState>(
+          home: BlocListener<QuizBloc, QuizState>(
+            listenWhen: (prev, curr) => prev.stamps != curr.stamps || prev.totalAnswered != curr.totalAnswered || prev.bestStreak != curr.bestStreak,
+            listener: (context, state) {
+              NotificationService.checkAndNotifyAchievements(state);
+            },
+            child: BlocBuilder<OnboardingBloc, OnboardingState>(
             builder: (context, onboarding) {
               return BlocBuilder<AuthBloc, AuthState>(
                 builder: (context, auth) {
@@ -196,6 +201,7 @@ class _NotificationListenerWidgetState extends State<_NotificationListenerWidget
               );
             },
           ),
+        ),
         );
       },
     );
