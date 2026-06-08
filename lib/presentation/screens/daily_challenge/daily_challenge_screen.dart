@@ -129,7 +129,8 @@ class DailyChallengeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
                         color: tileColor ?? (isSelected ? const Color(0xFFE8B86D) : Colors.white24),
-                        width: isSelected ? 2 : 1,
+                        color: tileColor ?? Colors.white24,
+                        width: 1,
                       ),
                     ),
                     child: ListTile(
