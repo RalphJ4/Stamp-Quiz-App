@@ -13,12 +13,14 @@ Built with Clean Architecture, **BLoC** for state management, and `responsive_si
 - **Randomized selection:** Each quiz draws a fixed question count (8 for Space, 6 for others) randomly from the full pool — every quiz feels different
 - **Per-question countdown timer** (30s) — auto-advances on expiry, auto-finishes on last question
 - **Time Freeze** power-up pauses the timer for the current question (consumed on answer)
-- **Stamp rewards:** 1–3 stamps per correct answer based on difficulty; penalty when using hint (reward halved)
+- **Stamp rewards:** 1–3 stamps per correct answer based on difficulty
+- **Hint penalty:** Using a hint costs 5 stamps and halves the reward on the next correct answer
 - **Streak tracking:** Current and best streak persisted across sessions
 - **Confetti animation** on correct answer with stamp-earning dialog
 
 ### Hint System
-- 3 free hints per quiz session; each eliminates 2 wrong options
+- Each press costs **5 stamps** (deducted from balance); eliminates 2 wrong options
+- Correct answer after using a hint: stamp reward is halved
 - **Extra Hint** power-up restores a hint mid-quiz
 
 ### Power-Up Shop
@@ -36,8 +38,9 @@ Built with Clean Architecture, **BLoC** for state management, and `responsive_si
 - Effects consumed on use (one-time per question)
 
 ### Daily Challenges
-- Fresh 5-question set every day (date-keyed in Firestore)
+- Fresh 5-question set every day (date-keyed in Firestore, resets at **8:00 AM PHT**)
 - Completion tracked per user; daily streak persisted in SharedPreferences
+- **Daily reminder notification** scheduled at 8:00 AM PHT
 
 ### Multiplayer Duel Mode
 - Create or join a real-time duel via **6-character shareable code**
@@ -62,23 +65,31 @@ Built with Clean Architecture, **BLoC** for state management, and `responsive_si
 
 ### Profile & Achievements
 - **8 avatar presets:** Hero, Wizard, Archer, Knight, Dragon, Fox, Eagle, Wolf — each with a unique emoji + colour
-- **Dynamic title tiers** based on XP: Stamp Collector → Quiz Apprentice → Stamp Enthusiast → Quiz Master → Stamp Virtuoso → Quiz Legend → Grand Sage
+- **13 dynamic title tiers** based on XP: Stamp Collector → Curious Mind → Quiz Apprentice → XP Hunter → Trivia Master → Knowledge Seeker → Wisdom Keeper → Elite Trivia → Grand Sage → Eternal Scholar → Quiz Overlord → Master of Quizzes → Legendary Sage
 - **Level system:** `floor(sqrt(XP / 100)) + 1` with animated progress bar
-- **10 achievement badges:** 1st Quiz, 10 Quizzes, 100% Accuracy, 10 Streak, 50 Streak, 100 Stamps, 500 Stamps, Hint User, Daily Player, Duelist — unlocked against stats
-- **Settings toggle:** Switch between showcase view (avatar, level, stats, badges, streak) and settings view (avatar picker, name edit, password change, sign out)
-- **Sign out** with confirmation dialog
+- **17 achievement badges:** First Stamp, On Fire, Streak Master, Double Digits, Century, Quiz Whiz, Scholar, Legend, Sharpshooter, Grinder, Rising Star, Perfectionist, Eagle Eye, Legendary Streak, Marathon Runner, High Roller — unlocked against stats
+- **Long-press any badge** to view its name, description, and unlock status in a dialog
+- **Avatar picker**, display name editing, password change, and sign out with confirmation dialog
 
 ### Authentication
 - 3 modes: Email/password, Google Sign-In, or anonymous guest
-- **Human-friendly error messages:** Firebase auth errors (wrong password, user not found, etc.) mapped to clear, user-facing copy
 - **Blank field validation:** Client-side check for empty email/password before Firebase call
 - Per-user stat isolation in SharedPreferences via storage prefix
 
 ### Visual Theme
 - Dark palette: backgrounds `#0D0D1A` / `#1A1A2E` / `#16213E`
-- Gold accent `#E8B86D`, purple `#7B2FBE`
+- Gold accent `#E8B86D` (`AppColors.secondary`), purple `#7B2FBE` (`AppColors.primary`)
+- **All colours centralized** in `AppColors` constants (30+ named entries) — backgrounds, primary/secondary, categories, difficulties, medals, stats, badge gold
+- **AppTheme.dark** theme configuration extracted from `main.dart` into `app_theme.dart`
 - All sizing via `responsive_sizer` (`.w`, `.h`, `.sp`)
 - **Animations:** Correct answer pulse, wrong answer shake, stamp counter bounce, rank change highlight on leaderboard
+
+### Notifications
+- **Firebase Cloud Messaging (FCM)** — foreground local notifications + background handler via `flutter_local_notifications`
+- **Daily challenge reminder** scheduled at 8:00 AM PHT using `timezone` + `zonedSchedule`
+- **Streak reminder** at 6:00 PM daily: "Don't Lose Your Streak!"
+- **Achievement unlock notifications** — fires a local notification when a new badge is earned; tracked via `SharedPreferences` to avoid re-notifying
+- **Notification tap navigation** — tapping a daily challenge notification navigates to the daily challenge screen; tapping a leaderboard notification navigates to the leaderboard
 
 ---
 
@@ -115,50 +126,54 @@ lib/
     repositories/
       question_repository_impl.dart           # Repository impl delegating to local datasource
 
-  presentation/
-    screens/
-      auth/
-        bloc/                                 # AuthBloc — login/register/guest state machine
-        login_screen.dart                     # Email/password + Google sign-in form
-        register_screen.dart                  # Registration form with validation
-      daily_challenge/
-        bloc/                                 # DailyChallengeBloc — daily set loading/completion
-        daily_challenge_screen.dart           # Daily challenge card list with countdown
-      duel/
-        bloc/                                 # DuelBloc — create/join/stream/submit/finish + XP reward
-        duel_screen.dart                      # Lobby entry, waiting lobby, active duel with HUD
-      home/
-        bloc/                                 # OnboardingBloc — wizard state, shared prefs persistence
-        home_screen.dart                      # Main hub: stats, daily challenge, duel, category grid, XpStreakBar
-      leaderboard/
-        bloc/                                 # LeaderboardBloc — 3-tab lazy loading, auto-XP sync, forceSync
-        leaderboard_screen.dart               # TabBar with 3 periods, ranked list, sticky "Your Rank"
-      onboarding/
-        gamified_onboarding_screen.dart       # 5-step PageView (Welcome/Name/Avatar/Tutorial/Congratulations)
-        onboarding_screen.dart                # Legacy landing page: Sign In / Register / Guest
-      power_up/
-        bloc/                                 # PowerUpBloc — inventory, activate/consume lifecycle
-        shop_screen.dart                      # 2x2 power-up grid with purchase/owned/locked states
-      profile/
-        profile_screen.dart                   # Full profile: 8 avatars, level, stats, badges, streak
-        badges_screen.dart                    # Badge collection
-        stamp_card_screen.dart                # Stamp collection grid (earned vs total)
-      quiz/
-        bloc/                                 # QuizBloc — questions, stamps, streaks, timer, hints, pause/resume
-        category_selection_screen.dart        # Grid of 5 coloured category tiles
-        quiz_screen.dart                      # Quiz UI: timer, progress bar, options, hints, power-ups, confetti
-    widgets/
-      guest_banner.dart                       # Amber banner for guest mode users
-      stamp_widget.dart                       # Single stamp circle with entrance animation
-      hint_button.dart                        # Animated hint button
-      xp_streak_bar.dart                      # Stats bar: stamps, accuracy, best streak + power-up pills
-      level_up_overlay.dart                   # Level-up modal overlay
-      badge_unlock_sheet.dart                 # Badge unlock bottom sheet
+    presentation/
+      theme/
+        app_colors.dart                       # 30+ named colour constants
+        app_theme.dart                        # AppTheme.dark configuration
+      screens/
+        auth/
+          bloc/                                 # AuthBloc — login/register/guest state machine
+          login_screen.dart                     # Email/password + Google sign-in form
+          register_screen.dart                  # Registration form with validation
+        daily_challenge/
+          bloc/                                 # DailyChallengeBloc — daily set loading/completion
+          daily_challenge_screen.dart           # Daily challenge card list with countdown
+        duel/
+          bloc/                                 # DuelBloc — create/join/stream/submit/finish + XP reward
+          duel_screen.dart                      # Lobby entry, waiting lobby, active duel with HUD
+        home/
+          bloc/                                 # OnboardingBloc — wizard state, shared prefs persistence
+          home_screen.dart                      # Main hub: stats, daily challenge, duel, category grid, XpStreakBar
+        leaderboard/
+          bloc/                                 # LeaderboardBloc — 3-tab lazy loading, auto-XP sync, forceSync
+          leaderboard_screen.dart               # TabBar with 3 periods, ranked list, sticky "Your Rank"
+        onboarding/
+          gamified_onboarding_screen.dart       # 5-step PageView (Welcome/Name/Avatar/Tutorial/Congratulations)
+          onboarding_screen.dart                # Legacy landing page: Sign In / Register / Guest
+        power_up/
+          bloc/                                 # PowerUpBloc — inventory, activate/consume lifecycle
+          shop_screen.dart                      # 2x2 power-up grid with purchase/owned/locked states
+        profile/
+          profile_screen.dart                   # Full profile: 8 avatars, level, stats, badges (17), streak
+          badges_screen.dart                    # Badge collection
+          stamp_card_screen.dart                # Stamp collection grid (earned vs total)
+        quiz/
+          bloc/                                 # QuizBloc — questions, stamps, streaks, timer, hints, pause/resume
+          category_selection_screen.dart        # Grid of 5 coloured category tiles (2-column Wrap)
+          quiz_screen.dart                      # Quiz UI: timer, progress bar, options, hints, power-ups, confetti
+      widgets/
+        guest_banner.dart                       # Amber banner for guest mode users
+        stamp_widget.dart                       # Single stamp circle with entrance animation
+        hint_button.dart                        # Animated hint button (costs 5 stamps)
+        xp_streak_bar.dart                      # Stats bar: stamps, accuracy, best streak + power-up pills
+        level_up_overlay.dart                   # Level-up modal overlay
+        badge_unlock_sheet.dart                 # Badge unlock bottom sheet
 
   services/
     auth_service.dart                         # Firebase Auth wrapper (email, Google, sign-out, reset)
     guest_session_service.dart                # Guest session UUID persistence via SharedPreferences
     local_storage_service.dart                # Hive abstraction for quiz cache & score history
+    notification_service.dart                 # FCM init, daily reminder, streak reminder, achievement notifications
 
 functions/
   index.js                                    # Cloud Functions: scheduled weekly/monthly XP reset
@@ -234,12 +249,11 @@ Supports Android, iOS, and Web.
 | **Shop** | Buy power-ups with stamps |
 | **Duel** | Create a lobby or join with a code — 60s real-time duel |
 | **Leaderboard** | Tap the leaderboard icon to force-refresh; switch between All-Time / This Week / This Month tabs |
-| **Profile** | 8 avatar presets, level bar, stats cards, achievement badges, streak display |
+| **Profile** | 8 avatar presets, level bar, stats cards, 17 achievement badges (long-press for details), streak display |
 | **Stamp Card** | View all stamps earned per category |
 | **Guest Banner** | Tap to sign in and save guest progress |
 
-- **Sign Out:** Tap the profile avatar (top-right) → Profile → gear icon → Sign Out
-- **Reset Progress:** Tap "Reset Progress" at the bottom of Home
+- **Sign Out:** Tap the profile avatar (top-right) → Profile → scroll down → Sign Out
 
 ---
 
@@ -260,6 +274,9 @@ Supports Android, iOS, and Web.
 | `logger` | ^2.5.0 | Structured logging for navigation & errors |
 | `uuid` | ^4.5.1 | Guest session ID generation |
 | `connectivity_plus` | ^6.1.4 | Network connectivity monitoring |
+| `firebase_messaging` | ^15.2.4 | Push notifications (FCM) |
+| `flutter_local_notifications` | ^18.0.1 | Foreground local notification display |
+| `timezone` | ^0.10.0 | Timezone-aware daily challenge reminder scheduling |
 
 ---
 

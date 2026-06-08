@@ -51,8 +51,4 @@ abstract final class AppColors {
   // ── Misc ──
   static const errorSnackbar = Color(0xFF800000);
   static const successSnackbar = Color(0xFF7B2FBE);
-
-  // ── Shimmer ──
-  static const shimmerBase = Color(0xFF2A2A3E);
-  static const shimmerHighlight = Color(0xFF4A4A6E);
 }
