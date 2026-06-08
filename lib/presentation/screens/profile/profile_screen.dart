@@ -240,7 +240,7 @@ class ProfileScreen extends StatelessWidget {
             SizedBox(height: 2.h),
             _buildStreakDisplay(quiz),
             SizedBox(height: 2.h),
-            _buildBadgeSection(unlockedBadges, lockedBadges),
+            _buildBadgeSection(context, unlockedBadges, lockedBadges),
             SizedBox(height: 3.h),
             _buildSettingsSection(context, auth, avatar, canChangePassword: canChangePassword),
             SizedBox(height: 4.h),
@@ -416,7 +416,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBadgeSection(List<_Badge> unlocked, List<_Badge> locked) {
+  Widget _buildBadgeSection(BuildContext context, List<_Badge> unlocked, List<_Badge> locked) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -457,20 +457,20 @@ class ProfileScreen extends StatelessWidget {
             spacing: 2.w,
             runSpacing: 1.5.h,
             children: [
-              ...unlocked.map((b) => _badgeChip(b, true)),
-              ...locked.map((b) => _badgeChip(b, false)),
+              ...unlocked.map((b) => _badgeChip(b, true, context)),
+              ...locked.map((b) => _badgeChip(b, false, context)),
             ],
           ),
       ],
     );
   }
 
-  Widget _badgeChip(_Badge badge, bool unlocked) {
-    return Tooltip(
-      message: '${badge.name}\n${badge.description}',
+  Widget _badgeChip(_Badge badge, bool unlocked, BuildContext context) {
+    return GestureDetector(
+      onLongPress: () => _showBadgeInfo(context, badge, unlocked),
       child: Container(
         width: 20.w,
-        padding: EdgeInsets.symmetric(vertical: 1.h),
+        padding: EdgeInsets.symmetric(vertical: 1.h, horizontal: 1.w),
         decoration: BoxDecoration(
           color: unlocked ? badge.color.withValues(alpha: 0.15) : AppColors.surfaceDark,
           borderRadius: BorderRadius.circular(12),
@@ -480,6 +480,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               badge.icon,
@@ -500,6 +501,51 @@ class ProfileScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showBadgeInfo(BuildContext context, _Badge badge, bool unlocked) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(badge.icon, color: unlocked ? badge.color : Colors.white24, size: 28),
+            SizedBox(width: 3.w),
+            Expanded(
+              child: Text(
+                badge.name,
+                style: TextStyle(color: unlocked ? badge.color : Colors.white38, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              badge.description,
+              style: TextStyle(fontSize: 14.sp, color: Colors.white70),
+            ),
+            if (!unlocked) ...[
+              SizedBox(height: 1.h),
+              Text(
+                'Locked',
+                style: TextStyle(fontSize: 12.sp, color: Colors.white38, fontStyle: FontStyle.italic),
+              ),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
