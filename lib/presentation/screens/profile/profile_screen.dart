@@ -154,8 +154,8 @@ class ProfileScreen extends StatelessWidget {
 
     final xp = quiz.stamps;
     final level = _levelForXp(xp);
-    final xpForCurrent = _xpForLevel(level);
-    final xpForNext = _xpForLevel(level + 1);
+    final xpForCurrent = _xpForLevel(level - 1);
+    final xpForNext = _xpForLevel(level);
     final progress = (xp - xpForCurrent) / (xpForNext - xpForCurrent);
     final title = _titleForXp(xp);
     final avatarIndex = auth.avatarIndex.clamp(0, _avatarPresets.length - 1);
