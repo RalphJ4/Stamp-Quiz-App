@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/domain/entities/question.dart';
@@ -16,15 +16,16 @@ import 'package:quiz_app/presentation/widgets/guest_banner.dart';
 import 'package:quiz_app/presentation/widgets/xp_streak_bar.dart';
 import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 final _log = Logger();
 
 const _avatarEmojis = ['\u{1F9B8}', '\u{1F9D9}', '\u{1F3F9}', '\u{2694}\u{FE0F}', '\u{1F409}', '\u{1F98A}', '\u{1F985}', '\u{1F43A}'];
 const _avatarColors = [
-  Color(0xFF7B2FBE),
+  AppColors.primary,
   Color(0xFF42A5F5),
   Color(0xFF43A047),
-  Color(0xFFE8B86D),
+  AppColors.secondary,
   Color(0xFFE53935),
   Color(0xFFFF9800),
   Color(0xFF795548),
@@ -63,16 +64,16 @@ class HomeScreen extends StatelessWidget {
     final authManager = context.watch<AuthBloc>().state;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Stamp Quiz', style: TextStyle(color: Color(0xFFE8B86D))),
+        title: const Text('Stamp Quiz', style: TextStyle(color: AppColors.secondary)),
         centerTitle: true,
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: AppColors.surface,
         elevation: 0,
         toolbarHeight: 7.h,
         actions: [
           IconButton(
-            icon: Icon(Icons.leaderboard, color: const Color(0xFFE8B86D), size: 6.w),
+            icon: Icon(Icons.leaderboard, color: AppColors.secondary, size: 6.w),
             tooltip: 'Leaderboard',
             onPressed: () {
               context.read<LeaderboardBloc>().forceSync();
@@ -81,7 +82,7 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: Icon(Icons.shopping_bag, color: const Color(0xFFE8B86D), size: 6.w),
+            icon: Icon(Icons.shopping_bag, color: AppColors.secondary, size: 6.w),
             tooltip: 'Power-Up Shop',
             onPressed: () {
               _log.i('→ ShopScreen');
@@ -106,7 +107,7 @@ class HomeScreen extends StatelessWidget {
             )
           else
             IconButton(
-              icon: Icon(Icons.login, color: const Color(0xFFE8B86D), size: 6.w),
+              icon: Icon(Icons.login, color: AppColors.secondary, size: 6.w),
               tooltip: 'Sign in',
               onPressed: () {
                 _log.i('→ OnboardingScreen (sign in)');
@@ -128,7 +129,7 @@ class HomeScreen extends StatelessWidget {
                 'Welcome, Challenger!',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFFE8B86D),
+                  color: AppColors.secondary,
                   fontSize: 22.sp,
                 ),
                 textAlign: TextAlign.center,
@@ -153,14 +154,14 @@ class HomeScreen extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Color(0xFFFF6B6B), Color(0xFF7B2FBE)],
+                      colors: [Color(0xFFFF6B6B), AppColors.primary],
                     ),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
                     children: [
                       Icon(Icons.sports_esports,
-                          color: const Color(0xFFE8B86D), size: 6.w),
+                          color: AppColors.secondary, size: 6.w),
                       SizedBox(width: 3.w),
                       Expanded(
                         child: Column(
@@ -187,7 +188,7 @@ class HomeScreen extends StatelessWidget {
                         padding: EdgeInsets.symmetric(
                             horizontal: 2.w, vertical: 0.5.h),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE8B86D),
+                          color: AppColors.secondary,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -195,7 +196,7 @@ class HomeScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF0D0D1A),
+                            color: AppColors.background,
                           ),
                         ),
                       ),
@@ -227,8 +228,8 @@ class HomeScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: available
-                                ? [const Color(0xFF7B2FBE), const Color(0xFF3D0D6B)]
-                                : [const Color(0xFF16213E), const Color(0xFF1A1A2E)],
+                                ? [AppColors.primary, const Color(0xFF3D0D6B)]
+                                : [AppColors.surfaceDark, AppColors.surface],
                           ),
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -236,7 +237,7 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.calendar_today,
-                              color: available ? const Color(0xFFE8B86D) : Colors.white38,
+                              color: available ? AppColors.secondary : Colors.white38,
                               size: 6.w,
                             ),
                             SizedBox(width: 3.w),
@@ -266,7 +267,7 @@ class HomeScreen extends StatelessWidget {
                               Container(
                                 padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFE8B86D),
+                                  color: AppColors.secondary,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -274,7 +275,7 @@ class HomeScreen extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF0D0D1A),
+                                    color: AppColors.background,
                                   ),
                                 ),
                               )
@@ -292,7 +293,7 @@ class HomeScreen extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Categories',
-                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: const Color(0xFFE8B86D)),
+                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: AppColors.secondary),
                 ),
               ),
               SizedBox(height: 1.h),
@@ -355,7 +356,7 @@ class HomeScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7B2FBE),
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 1.8.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

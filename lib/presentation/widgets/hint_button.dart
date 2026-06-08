@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 class HintButton extends StatelessWidget {
   const HintButton({super.key});
@@ -25,7 +26,7 @@ class HintButton extends StatelessWidget {
     return SnackBar(
       content: Row(
         children: [
-          Icon(Icons.lightbulb_outline, color: const Color(0xFFE8B86D), size: 5.w),
+          Icon(Icons.lightbulb_outline, color: AppColors.secondary, size: 5.w),
           SizedBox(width: 2.w),
           Text(
             'Hint used! \u20135 XP',
@@ -37,11 +38,11 @@ class HintButton extends StatelessWidget {
           ),
         ],
       ),
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: AppColors.surface,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFF7B2FBE), width: 1),
+        side: const BorderSide(color: AppColors.primary, width: 1),
       ),
       duration: const Duration(seconds: 2),
       margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
@@ -52,7 +53,7 @@ class HintButton extends StatelessWidget {
     return SnackBar(
       content: Row(
         children: [
-          Icon(Icons.error_outline, color: const Color(0xFFE8B86D), size: 5.w),
+          Icon(Icons.error_outline, color: AppColors.secondary, size: 5.w),
           SizedBox(width: 2.w),
           Text(
             'Not enough stamps! Need ${QuizBloc.hintCost} XP to use a hint.',
@@ -64,11 +65,11 @@ class HintButton extends StatelessWidget {
           ),
         ],
       ),
-      backgroundColor: const Color(0xFF1A1A2E),
+      backgroundColor: AppColors.surface,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFF7B2FBE), width: 1),
+        side: const BorderSide(color: AppColors.primary, width: 1),
       ),
       duration: const Duration(seconds: 2),
       margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
@@ -80,8 +81,8 @@ class HintButton extends StatelessWidget {
     return BlocBuilder<QuizBloc, QuizState>(
       builder: (context, state) {
         final canUse = _canUseHint(state);
-        final iconColor = canUse ? const Color(0xFFE8B86D) : Colors.white38;
-        final dotColor = canUse ? const Color(0xFFE8B86D) : Colors.white38;
+        final iconColor = canUse ? AppColors.secondary : Colors.white38;
+        final dotColor = canUse ? AppColors.secondary : Colors.white38;
         return GestureDetector(
           onTap: canUse ? () => _onTap(context) : () => _onTap(context),
           child: TweenAnimationBuilder<double>(

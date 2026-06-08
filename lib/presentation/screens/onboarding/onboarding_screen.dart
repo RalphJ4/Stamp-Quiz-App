@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:quiz_app/presentation/screens/auth/login_screen.dart';
 import 'package:quiz_app/presentation/screens/auth/register_screen.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 final _log = Logger();
@@ -14,21 +15,21 @@ class OnboardingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 6.w),
           child: Column(
             children: [
               const Spacer(flex: 2),
-              Icon(Icons.collections_bookmark, size: 25.h, color: const Color(0xFFE8B86D)),
+              Icon(Icons.collections_bookmark, size: 25.h, color: AppColors.secondary),
               SizedBox(height: 3.h),
               Text(
                 'Stamp Quiz',
                 style: TextStyle(
                   fontSize: 32.sp,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFFE8B86D),
+                  color: AppColors.secondary,
                 ),
               ),
               SizedBox(height: 1.h),
@@ -42,7 +43,7 @@ class OnboardingScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7B2FBE),
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 1.8.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -61,8 +62,8 @@ class OnboardingScreen extends StatelessWidget {
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFE8B86D),
-                    side: const BorderSide(color: Color(0xFFE8B86D)),
+                    foregroundColor: AppColors.secondary,
+                    side: const BorderSide(color: AppColors.secondary),
                     padding: EdgeInsets.symmetric(vertical: 1.8.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -105,3 +106,4 @@ class OnboardingScreen extends StatelessWidget {
     );
   }
 }
+

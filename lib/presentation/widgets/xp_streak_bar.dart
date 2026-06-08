@@ -4,6 +4,7 @@ import 'package:quiz_app/domain/entities/power_up.dart';
 import 'package:quiz_app/presentation/screens/power_up/bloc/power_up_bloc.dart';
 import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 class XpStreakBar extends StatelessWidget {
   const XpStreakBar({super.key});
@@ -17,7 +18,7 @@ class XpStreakBar extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -34,13 +35,13 @@ class XpStreakBar extends StatelessWidget {
                 padding:
                     EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7B2FBE),
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '${quizBloc.state.stamps}',
                   style: TextStyle(
-                    color: const Color(0xFFE8B86D),
+                    color: AppColors.secondary,
                     fontWeight: FontWeight.bold,
                     fontSize: 18.sp,
                   ),
@@ -73,7 +74,7 @@ class XpStreakBar extends StatelessWidget {
                 Row(
                   children: [
                     Icon(Icons.local_fire_department,
-                        color: const Color(0xFFE8B86D), size: 18.sp),
+                        color: AppColors.secondary, size: 18.sp),
                     SizedBox(width: 1.w),
                     Text(
                       '${quizBloc.state.bestStreak}',

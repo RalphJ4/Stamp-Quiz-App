@@ -5,6 +5,7 @@ import 'package:quiz_app/domain/entities/leaderboard_period.dart';
 import 'package:quiz_app/presentation/screens/leaderboard/bloc/leaderboard_bloc.dart';
 import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 class LeaderboardScreen extends StatelessWidget {
   const LeaderboardScreen({super.key});
@@ -17,19 +18,19 @@ class LeaderboardScreen extends StatelessWidget {
         length: 3,
         initialIndex: LeaderboardPeriod.values.indexOf(state.selectedTab),
         child: Scaffold(
-          backgroundColor: const Color(0xFF0D0D1A),
+          backgroundColor: AppColors.background,
           appBar: AppBar(
             title: const Text('Leaderboard',
-                style: TextStyle(color: Color(0xFFE8B86D))),
+                style: TextStyle(color: AppColors.secondary)),
             centerTitle: true,
-            backgroundColor: const Color(0xFF1A1A2E),
+            backgroundColor: AppColors.surface,
             toolbarHeight: 7.h,
             bottom: PreferredSize(
               preferredSize: Size.fromHeight(8.h),
               child: Container(
                 margin: EdgeInsets.symmetric(horizontal: 4.w),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF16213E),
+                  color: AppColors.surfaceDark,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: TabBar(
@@ -38,7 +39,7 @@ class LeaderboardScreen extends StatelessWidget {
                     context.read<LeaderboardBloc>().add(LeaderboardSelectTab(period: period));
                   },
                   indicator: BoxDecoration(
-                    color: const Color(0xFF7B2FBE),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
@@ -75,7 +76,7 @@ class LeaderboardScreen extends StatelessWidget {
 
     if (loading && entries.isEmpty) {
       return const Center(
-        child: CircularProgressIndicator(color: Color(0xFFE8B86D)),
+        child: CircularProgressIndicator(color: AppColors.secondary),
       );
     }
 
@@ -115,7 +116,7 @@ class LeaderboardScreen extends StatelessWidget {
 
   Widget _buildRow(BuildContext context, LeaderboardEntry entry, bool isMe) {
     final medal = entry.rank == 1
-        ? const Color(0xFFE8B86D)
+        ? AppColors.secondary
         : entry.rank == 2
             ? const Color(0xFFC0C0C0)
             : entry.rank == 3
@@ -130,11 +131,11 @@ class LeaderboardScreen extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
       decoration: BoxDecoration(
         color: isMe
-            ? const Color(0xFF7B2FBE).withValues(alpha: 0.2)
-            : const Color(0xFF1A1A2E),
+            ? AppColors.primary.withValues(alpha: 0.2)
+            : AppColors.surface,
         borderRadius: BorderRadius.circular(12),
         border: isMe
-            ? Border.all(color: const Color(0xFF7B2FBE), width: 1.5)
+            ? Border.all(color: AppColors.primary, width: 1.5)
             : null,
       ),
       child: Row(
@@ -156,14 +157,14 @@ class LeaderboardScreen extends StatelessWidget {
           CircleAvatar(
             radius: 3.w,
             backgroundColor: isMe
-                ? const Color(0xFFE8B86D)
-                : const Color(0xFF7B2FBE),
+                ? AppColors.secondary
+                : AppColors.primary,
             child: Text(
               entry.displayName.isNotEmpty
                   ? entry.displayName[0].toUpperCase()
                   : '?',
               style: TextStyle(
-                color: const Color(0xFF0D0D1A),
+                color: AppColors.background,
                 fontWeight: FontWeight.bold,
                 fontSize: 14.sp,
               ),
@@ -175,7 +176,7 @@ class LeaderboardScreen extends StatelessWidget {
               isMe ? '${entry.displayName} (You)' : entry.displayName,
               style: TextStyle(
                 fontSize: 15.sp,
-                color: isMe ? const Color(0xFFE8B86D) : Colors.white,
+                color: isMe ? AppColors.secondary : Colors.white,
                 fontWeight: isMe ? FontWeight.bold : FontWeight.normal,
               ),
               overflow: TextOverflow.ellipsis,
@@ -184,14 +185,14 @@ class LeaderboardScreen extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.3.h),
             decoration: BoxDecoration(
-              color: const Color(0xFFE8B86D).withValues(alpha: 0.15),
+              color: AppColors.secondary.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               '$xp XP',
               style: TextStyle(
                 fontSize: 13.sp,
-                color: const Color(0xFFE8B86D),
+                color: AppColors.secondary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -210,9 +211,9 @@ class LeaderboardScreen extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.5.h),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppColors.surface,
         border: const Border(
-          top: BorderSide(color: Color(0xFF7B2FBE), width: 1.5),
+          top: BorderSide(color: AppColors.primary, width: 1.5),
         ),
       ),
       child: SafeArea(
@@ -222,7 +223,7 @@ class LeaderboardScreen extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
               decoration: BoxDecoration(
-                color: const Color(0xFF7B2FBE),
+                color: AppColors.primary,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -247,14 +248,14 @@ class LeaderboardScreen extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.3.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFE8B86D).withValues(alpha: 0.15),
+                color: AppColors.secondary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 '$xp XP',
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: const Color(0xFFE8B86D),
+                  color: AppColors.secondary,
                   fontWeight: FontWeight.bold,
                 ),
               ),

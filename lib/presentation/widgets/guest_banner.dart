@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:quiz_app/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 final _log = Logger();
 
@@ -23,21 +24,21 @@ class GuestBanner extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
         decoration: BoxDecoration(
-          color: const Color(0xFF3D0D6B).withValues(alpha: 0.5),
+          color: AppColors.surfaceDeepPurple.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF7B2FBE)),
+          border: Border.all(color: AppColors.primary),
         ),
         child: Row(
           children: [
-            Icon(Icons.person_outline, color: const Color(0xFFE8B86D), size: 5.w),
+            Icon(Icons.person_outline, color: AppColors.secondary, size: 5.w),
             SizedBox(width: 2.w),
             Expanded(
               child: Text(
                 'Guest Mode — Sign in to save your progress!',
-                style: TextStyle(fontSize: 14.sp, color: const Color(0xFFE8B86D)),
+                style: TextStyle(fontSize: 14.sp, color: AppColors.secondary),
               ),
             ),
-            Icon(Icons.arrow_forward_ios, color: const Color(0xFFE8B86D), size: 4.w),
+            Icon(Icons.arrow_forward_ios, color: AppColors.secondary, size: 4.w),
           ],
         ),
       ),

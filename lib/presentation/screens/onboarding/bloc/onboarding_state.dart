@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:equatable/equatable.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 class OnboardingState extends Equatable {
   final int currentStep;
@@ -15,7 +16,7 @@ class OnboardingState extends Equatable {
   const OnboardingState({
     this.currentStep = 0,
     this.playerName = '',
-    this.avatarColor = const Color(0xFF7B2FBE),
+    this.avatarColor = AppColors.primary,
     this.completed = false,
     this.loading = true,
     this.tutorialSelectedIndex = -1,
@@ -25,12 +26,12 @@ class OnboardingState extends Equatable {
   });
 
   static const List<Color> presetColors = [
-    Color(0xFF7B2FBE),
+    AppColors.primary,
     Color(0xFFFF6B6B),
     Color(0xFF42A5F5),
     Color(0xFF66BB6A),
     Color(0xFFFFA726),
-    Color(0xFFE8B86D),
+    AppColors.secondary,
   ];
 
   int get stepCount => 5;
@@ -65,3 +66,4 @@ class OnboardingState extends Equatable {
     tutorialSelectedIndex, tutorialCorrect, tutorialAnswered, tutorialWrongAttempts,
   ];
 }
+

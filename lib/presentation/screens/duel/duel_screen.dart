@@ -9,6 +9,7 @@ import 'package:quiz_app/presentation/screens/leaderboard/bloc/leaderboard_bloc.
 import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:confetti/confetti.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 final _log = Logger();
 
@@ -29,10 +30,10 @@ class _DuelJoinForm extends StatelessWidget {
                 hintText: 'Enter duel code',
                 hintStyle: const TextStyle(color: Colors.white38),
                 filled: true,
-                fillColor: const Color(0xFF16213E),
+                fillColor: AppColors.surfaceDark,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF7B2FBE)),
+                  borderSide: const BorderSide(color: AppColors.primary),
                 ),
                 contentPadding: EdgeInsets.symmetric(
                     horizontal: 3.w, vertical: 1.5.h),
@@ -44,8 +45,8 @@ class _DuelJoinForm extends StatelessWidget {
           SizedBox(width: 2.w),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE8B86D),
-              foregroundColor: const Color(0xFF0D0D1A),
+              backgroundColor: AppColors.secondary,
+              foregroundColor: AppColors.background,
               padding: EdgeInsets.symmetric(
                   horizontal: 4.w, vertical: 1.8.h),
               shape: RoundedRectangleBorder(
@@ -108,7 +109,7 @@ class _WaitingDotsAnimationState extends State<_WaitingDotsAnimation>
                 height: 2.5.w,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFFE8B86D)
+                  color: AppColors.secondary
                       .withValues(alpha: opacity),
                 ),
               ),
@@ -195,19 +196,19 @@ class DuelScreen extends StatelessWidget {
 
   Widget _buildLoading() {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
-      body: const Center(child: CircularProgressIndicator(color: Color(0xFFE8B86D))),
+      backgroundColor: AppColors.background,
+      body: const Center(child: CircularProgressIndicator(color: AppColors.secondary)),
     );
   }
 
   Widget _buildLobbyEntry(BuildContext context, DuelBlocState state) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Duel Mode',
-            style: TextStyle(color: Color(0xFFE8B86D))),
+            style: TextStyle(color: AppColors.secondary)),
         centerTitle: true,
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: AppColors.surface,
         toolbarHeight: 7.h,
       ),
       body: Padding(
@@ -216,7 +217,7 @@ class DuelScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.sports_esports,
-                color: const Color(0xFFE8B86D), size: 15.h),
+                color: AppColors.secondary, size: 15.h),
             SizedBox(height: 3.h),
             Text(
               'Challenge a friend in real-time!',
@@ -231,7 +232,7 @@ class DuelScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7B2FBE),
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 1.8.h),
                   shape: RoundedRectangleBorder(
@@ -255,12 +256,12 @@ class DuelScreen extends StatelessWidget {
 
   Widget _buildWaitingLobby(BuildContext context, DuelBlocState state) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Waiting for Opponent',
-            style: TextStyle(color: Color(0xFFE8B86D))),
+            style: TextStyle(color: AppColors.secondary)),
         centerTitle: true,
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: AppColors.surface,
         toolbarHeight: 7.h,
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.white),
@@ -277,7 +278,7 @@ class DuelScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.wifi_tethering,
-                  color: const Color(0xFFE8B86D), size: 12.h),
+                  color: AppColors.secondary, size: 12.h),
               SizedBox(height: 2.h),
               Text(
                 'Share this code with your opponent:',
@@ -288,16 +289,16 @@ class DuelScreen extends StatelessWidget {
                 padding:
                     EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.5.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF7B2FBE)),
+                  border: Border.all(color: AppColors.primary),
                 ),
                 child: SelectableText(
                   state.currentDuelId ?? '',
                   style: TextStyle(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFFE8B86D),
+                    color: AppColors.secondary,
                     letterSpacing: 2,
                   ),
                 ),
@@ -329,12 +330,12 @@ class DuelScreen extends StatelessWidget {
     final question = duel.questions[myProg];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Duel',
-            style: TextStyle(color: Color(0xFFE8B86D))),
+            style: TextStyle(color: AppColors.secondary)),
         centerTitle: true,
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: AppColors.surface,
         toolbarHeight: 7.h,
           leading: IconButton(
             icon: const Icon(Icons.close, color: Colors.white),
@@ -353,7 +354,7 @@ class DuelScreen extends StatelessWidget {
                   Icons.timer_outlined,
                   color: state.remainingSeconds <= 10
                       ? Colors.red
-                      : const Color(0xFFE8B86D),
+                      : AppColors.secondary,
                   size: 5.w,
                 ),
                 SizedBox(width: 1.w),
@@ -364,7 +365,7 @@ class DuelScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: state.remainingSeconds <= 10
                         ? Colors.red
-                        : const Color(0xFFE8B86D),
+                        : AppColors.secondary,
                   ),
                 ),
               ],
@@ -380,8 +381,8 @@ class DuelScreen extends StatelessWidget {
             SizedBox(height: 1.5.h),
             LinearProgressIndicator(
               value: (myProg + 1) / duel.questions.length,
-              backgroundColor: const Color(0xFF16213E),
-              color: const Color(0xFFE8B86D),
+              backgroundColor: AppColors.surfaceDark,
+              color: AppColors.secondary,
               minHeight: 1.2.h,
             ),
             SizedBox(height: 1.h),
@@ -391,7 +392,7 @@ class DuelScreen extends StatelessWidget {
             ),
             SizedBox(height: 1.5.h),
             Card(
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.surface,
               elevation: 4,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14)),
@@ -414,7 +415,7 @@ class DuelScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF16213E),
+                      backgroundColor: AppColors.surfaceDark,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 1.5.h),
                       shape: RoundedRectangleBorder(
@@ -444,7 +445,7 @@ class DuelScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -454,12 +455,12 @@ class DuelScreen extends StatelessWidget {
             score: context.read<DuelBloc>().myScore,
             progress: context.read<DuelBloc>().myProgress,
             total: duel.questions.length,
-            color: const Color(0xFF7B2FBE),
+            color: AppColors.primary,
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 2.w),
             child:             Icon(Icons.sports_kabaddi,
-                color: const Color(0xFFE8B86D), size: 5.w),
+                color: AppColors.secondary, size: 5.w),
           ),
           _playerCard(
             label: 'Opponent',
@@ -510,12 +511,12 @@ class DuelScreen extends StatelessWidget {
 
   Widget _buildWaitingOthers() {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Duel',
-            style: TextStyle(color: Color(0xFFE8B86D))),
+            style: TextStyle(color: AppColors.secondary)),
         centerTitle: true,
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: AppColors.surface,
         toolbarHeight: 7.h,
       ),
       body: Center(
@@ -523,7 +524,7 @@ class DuelScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.hourglass_top,
-                color: const Color(0xFFE8B86D), size: 10.h),
+                color: AppColors.secondary, size: 10.h),
             SizedBox(height: 2.h),
             Text(
               'Waiting for opponent to finish...',
@@ -542,7 +543,7 @@ class DuelScreen extends StatelessWidget {
     final isTie = duel.winnerUid == null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       body: Stack(
         children: [
           Center(
@@ -559,7 +560,7 @@ class DuelScreen extends StatelessWidget {
                             : Icons.sentiment_dissatisfied,
                     size: 18.h,
                     color: isWinner
-                        ? const Color(0xFFE8B86D)
+                        ? AppColors.secondary
                         : Colors.white54,
                   ),
                   SizedBox(height: 2.h),
@@ -573,7 +574,7 @@ class DuelScreen extends StatelessWidget {
                       fontSize: 28.sp,
                       fontWeight: FontWeight.bold,
                       color: isWinner
-                          ? const Color(0xFFE8B86D)
+                          ? AppColors.secondary
                           : Colors.white70,
                     ),
                   ),
@@ -591,20 +592,20 @@ class DuelScreen extends StatelessWidget {
                       padding: EdgeInsets.symmetric(
                           horizontal: 4.w, vertical: 1.h),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE8B86D).withValues(alpha: 0.15),
+                        color: AppColors.secondary.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE8B86D)),
+                        border: Border.all(color: AppColors.secondary),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.monetization_on,
-                              color: const Color(0xFFE8B86D), size: 5.w),
+                              color: AppColors.secondary, size: 5.w),
                           SizedBox(width: 2.w),
                           Text('+50 XP',
                               style: TextStyle(
                                   fontSize: 18.sp,
-                                  color: const Color(0xFFE8B86D),
+                                  color: AppColors.secondary,
                                   fontWeight: FontWeight.bold)),
                         ],
                       ),
@@ -614,20 +615,20 @@ class DuelScreen extends StatelessWidget {
                     padding:
                         EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF7B2FBE).withValues(alpha: 0.15),
+                      color: AppColors.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF7B2FBE)),
+                      border: Border.all(color: AppColors.primary),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.monetization_on,
-                            color: const Color(0xFFE8B86D), size: 5.w),
+                            color: AppColors.secondary, size: 5.w),
                         SizedBox(width: 2.w),
                         Text('+20 XP Participation',
                             style: TextStyle(
                                 fontSize: 16.sp,
-                                color: const Color(0xFFE8B86D),
+                                color: AppColors.secondary,
                                 fontWeight: FontWeight.bold)),
                       ],
                     ),
@@ -635,7 +636,7 @@ class DuelScreen extends StatelessWidget {
                   SizedBox(height: 3.h),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7B2FBE),
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(
                           horizontal: 8.w, vertical: 1.8.h),

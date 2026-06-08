@@ -11,6 +11,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'firebase_options.dart';
 import 'domain/entities/leaderboard_period.dart';
 import 'services/notification_service.dart';
+import 'presentation/theme/app_colors.dart';
+import 'presentation/theme/app_theme.dart';
 import 'presentation/screens/auth/bloc/auth_bloc.dart';
 import 'presentation/screens/quiz/bloc/quiz_bloc.dart';
 import 'presentation/screens/power_up/bloc/power_up_bloc.dart';
@@ -165,14 +167,7 @@ class _NotificationListenerWidgetState extends State<_NotificationListenerWidget
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Stamp Quiz',
-          theme: ThemeData.dark().copyWith(
-            scaffoldBackgroundColor: const Color(0xFF0D0D1A),
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF7B2FBE),
-              secondary: Color(0xFFE8B86D),
-              surface: Color(0xFF1A1A2E),
-            ),
-          ),
+          theme: AppTheme.dark,
           home: BlocBuilder<OnboardingBloc, OnboardingState>(
             builder: (context, onboarding) {
               return BlocBuilder<AuthBloc, AuthState>(

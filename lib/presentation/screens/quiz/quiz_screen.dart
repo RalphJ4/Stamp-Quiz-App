@@ -8,6 +8,7 @@ import 'package:quiz_app/presentation/screens/power_up/bloc/power_up_bloc.dart';
 import 'package:quiz_app/presentation/widgets/hint_button.dart';
 import 'package:confetti/confetti.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 final _log = Logger();
 
@@ -51,7 +52,7 @@ class QuizScreen extends StatelessWidget {
             gravity: 0.18,
           ),
           AlertDialog(
-            backgroundColor: const Color(0xFF1A1A2E),
+            backgroundColor: AppColors.surface,
             elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
             content: Column(
@@ -66,8 +67,8 @@ class QuizScreen extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        boxShadow: [BoxShadow(color: const Color(0xFFE8B86D), blurRadius: 40, spreadRadius: 12)],
-                        border: Border.all(color: const Color(0xFF7B2FBE), width: 3),
+                        boxShadow: [BoxShadow(color: AppColors.secondary, blurRadius: 40, spreadRadius: 12)],
+                        border: Border.all(color: AppColors.primary, width: 3),
                         color: Colors.white,
                         image: const DecorationImage(
                           image: AssetImage('assets/images/stamp.png'),
@@ -84,7 +85,7 @@ class QuizScreen extends StatelessWidget {
                 Text(
                   'You Earned a Stamp!',
                   style: TextStyle(
-                    color: const Color(0xFFE8B86D),
+                    color: AppColors.secondary,
                     fontWeight: FontWeight.bold,
                     fontSize: 19.sp,
                   ),
@@ -92,7 +93,7 @@ class QuizScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 IconButton(
-                  icon: Icon(Icons.check_circle, color: const Color(0xFFE8B86D), size: 7.h),
+                  icon: Icon(Icons.check_circle, color: AppColors.secondary, size: 7.h),
                   onPressed: () {
                     _log.i('← pop stamp dialog');
                     Navigator.of(context).pop();
@@ -111,11 +112,11 @@ class QuizScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(Icons.emoji_events, color: const Color(0xFFE8B86D), size: 22.sp),
+            Icon(Icons.emoji_events, color: AppColors.secondary, size: 22.sp),
             SizedBox(width: 2.w),
             Text('Quiz', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: Colors.white)),
           ],
@@ -162,13 +163,13 @@ class QuizScreen extends StatelessWidget {
           ),
         ],
         toolbarHeight: 7.h,
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: AppColors.surface,
         elevation: 2,
       ),
       body: BlocBuilder<QuizBloc, QuizState>(
         builder: (context, state) {
           if (state.questions.isEmpty) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFFE8B86D)));
+            return const Center(child: CircularProgressIndicator(color: AppColors.secondary));
           }
 
           final question = state.questions[state.currentIndex];
@@ -198,8 +199,8 @@ class QuizScreen extends StatelessWidget {
                           child: LinearProgressIndicator(
                             value: (state.currentIndex + 1) / state.questions.length,
                             minHeight: 2.2.h,
-                            backgroundColor: const Color(0xFF16213E),
-                            color: const Color(0xFFE8B86D),
+                            backgroundColor: AppColors.surfaceDark,
+                            color: AppColors.secondary,
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
@@ -207,17 +208,17 @@ class QuizScreen extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF7B2FBE).withValues(alpha: 0.3),
+                            color: AppColors.primary.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF7B2FBE), width: 1),
+                            border: Border.all(color: AppColors.primary, width: 1),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.stars, color: const Color(0xFFE8B86D), size: 16.sp),
+                              Icon(Icons.stars, color: AppColors.secondary, size: 16.sp),
                               SizedBox(width: 1.w),
                               Text(
                                 'Level ${(state.currentIndex + 1)}',
-                                style: TextStyle(color: const Color(0xFFE8B86D), fontWeight: FontWeight.bold, fontSize: 15.sp),
+                                style: TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold, fontSize: 15.sp),
                               ),
                             ],
                           ),
@@ -229,7 +230,7 @@ class QuizScreen extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.timer_outlined,
-                          color: state.remainingSeconds <= 10 ? Colors.red : const Color(0xFFE8B86D),
+                          color: state.remainingSeconds <= 10 ? Colors.red : AppColors.secondary,
                           size: 16.sp,
                         ),
                         SizedBox(width: 1.w),
@@ -238,7 +239,7 @@ class QuizScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.bold,
-                            color: state.remainingSeconds <= 10 ? Colors.red : const Color(0xFFE8B86D),
+                            color: state.remainingSeconds <= 10 ? Colors.red : AppColors.secondary,
                           ),
                         ),
                         SizedBox(width: 3.w),
@@ -268,7 +269,7 @@ class QuizScreen extends StatelessWidget {
                     SizedBox(height: 1.5.h),
                     Card(
                       elevation: 2,
-                      color: const Color(0xFF1A1A2E),
+                      color: AppColors.surface,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       child: Padding(
                         padding: EdgeInsets.all(3.w),
@@ -304,7 +305,7 @@ class QuizScreen extends StatelessWidget {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text('${type.label} activated!'),
-                                        backgroundColor: const Color(0xFF7B2FBE),
+                                        backgroundColor: AppColors.primary,
                                       ),
                                     );
                                   },
@@ -313,7 +314,7 @@ class QuizScreen extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       color: active
                                           ? type.color.withValues(alpha: 0.25)
-                                          : const Color(0xFF1A1A2E),
+                                          : AppColors.surface,
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
                                         color: active ? type.color : Colors.white24,
@@ -374,13 +375,13 @@ class QuizScreen extends StatelessWidget {
                         tileColor = Colors.white10;
                         borderColor = Colors.white10;
                       } else if (isSelected) {
-                        borderColor = const Color(0xFFE8B86D);
+                        borderColor = AppColors.secondary;
                         borderWidth = 2;
                       }
 
                       return Card(
                         elevation: isSelected && !state.answered ? 6 : 2,
-                        color: tileColor ?? const Color(0xFF16213E),
+                        color: tileColor ?? AppColors.surfaceDark,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                           side: BorderSide(
@@ -432,7 +433,7 @@ class QuizScreen extends StatelessWidget {
                           if (state.currentIndex < state.questions.length - 1)
                             ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF7B2FBE),
+                                backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
                                 padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 1.5.h),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -452,14 +453,14 @@ class QuizScreen extends StatelessWidget {
                           if (state.currentIndex == state.questions.length - 1)
                             ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF7B2FBE),
+                                backgroundColor: AppColors.primary,
                                 foregroundColor: Colors.white,
                                 padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 1.5.h),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 textStyle: TextStyle(fontSize: 16.sp),
                                 elevation: 3,
                               ),
-                              icon: Icon(Icons.emoji_events, size: 18.sp, color: const Color(0xFFE8B86D)),
+                              icon: Icon(Icons.emoji_events, size: 18.sp, color: AppColors.secondary),
                               onPressed: () {
                                 context.read<QuizBloc>().add(QuizFinish());
                                 _log.i('← pop QuizScreen (finished)');

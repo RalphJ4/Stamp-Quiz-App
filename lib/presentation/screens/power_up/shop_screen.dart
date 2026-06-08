@@ -5,6 +5,7 @@ import 'package:quiz_app/domain/entities/power_up.dart';
 import 'package:quiz_app/presentation/screens/power_up/bloc/power_up_bloc.dart';
 import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 final _log = Logger();
 
@@ -19,11 +20,11 @@ class ShopScreen extends StatelessWidget {
     final inventory = powerUpState.inventory;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(Icons.shopping_bag, color: const Color(0xFFE8B86D), size: 22.sp),
+            Icon(Icons.shopping_bag, color: AppColors.secondary, size: 22.sp),
             SizedBox(width: 2.w),
             Text('Power-Up Shop',
                 style: TextStyle(
@@ -33,7 +34,7 @@ class ShopScreen extends StatelessWidget {
           ],
         ),
         toolbarHeight: 7.h,
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: AppColors.surface,
         elevation: 2,
       ),
       body: Padding(
@@ -44,14 +45,14 @@ class ShopScreen extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
               decoration: BoxDecoration(
-                color: const Color(0xFF1A1A2E),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF7B2FBE)),
+                border: Border.all(color: AppColors.primary),
               ),
               child: Row(
                 children: [
                   Icon(Icons.monetization_on,
-                      color: const Color(0xFFE8B86D), size: 6.w),
+                      color: AppColors.secondary, size: 6.w),
                   SizedBox(width: 2.w),
                   Text('Balance: ',
                       style: TextStyle(
@@ -61,7 +62,7 @@ class ShopScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFFE8B86D),
+                      color: AppColors.secondary,
                     ),
                   ),
                 ],
@@ -93,7 +94,7 @@ class ShopScreen extends StatelessWidget {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('${type.label} purchased!'),
-                          backgroundColor: const Color(0xFF7B2FBE),
+                          backgroundColor: AppColors.primary,
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -133,8 +134,8 @@ class _PowerUpCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: locked
-            ? const Color(0xFF16213E).withValues(alpha: 0.5)
-            : const Color(0xFF1A1A2E),
+            ? AppColors.surfaceDark.withValues(alpha: 0.5)
+            : AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: locked ? Colors.white12 : color.withValues(alpha: 0.5),
@@ -198,7 +199,7 @@ class _PowerUpCard extends StatelessWidget {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                      locked ? Colors.white12 : const Color(0xFF7B2FBE),
+                      locked ? Colors.white12 : AppColors.primary,
                   foregroundColor: locked ? Colors.white38 : Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 0.8.h),
                   shape: RoundedRectangleBorder(
@@ -212,7 +213,7 @@ class _PowerUpCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.monetization_on,
-                        size: 4.5.w, color: locked ? Colors.white24 : const Color(0xFFE8B86D)),
+                        size: 4.5.w, color: locked ? Colors.white24 : AppColors.secondary),
                     SizedBox(width: 1.w),
                     Text(
                       cost,

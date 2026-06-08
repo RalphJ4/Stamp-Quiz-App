@@ -3,6 +3,7 @@ import 'package:logger/logger.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 final _log = Logger();
 
@@ -29,9 +30,9 @@ class RegisterScreen extends StatelessWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFF0D0D1A),
+        backgroundColor: AppColors.background,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF1A1A2E),
+          backgroundColor: AppColors.surface,
           foregroundColor: Colors.white,
           title: const Text('Register'),
           toolbarHeight: 7.h,
@@ -49,7 +50,7 @@ class RegisterScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: 'Email',
                     labelStyle: const TextStyle(color: Colors.white54),
-                    prefixIcon: const Icon(Icons.email, color: Color(0xFFE8B86D)),
+                    prefixIcon: const Icon(Icons.email, color: AppColors.secondary),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     enabledBorder: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -57,10 +58,10 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     focusedBorder: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
-                      borderSide: BorderSide(color: Color(0xFFE8B86D)),
+                      borderSide: BorderSide(color: AppColors.secondary),
                     ),
                     filled: true,
-                    fillColor: const Color(0xFF1A1A2E),
+                    fillColor: AppColors.surface,
                   ),
                   keyboardType: TextInputType.emailAddress,
                   onChanged: (value) => email = value,
@@ -72,7 +73,7 @@ class RegisterScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: 'Password',
                     labelStyle: const TextStyle(color: Colors.white54),
-                    prefixIcon: const Icon(Icons.lock, color: Color(0xFFE8B86D)),
+                    prefixIcon: const Icon(Icons.lock, color: AppColors.secondary),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     enabledBorder: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -80,10 +81,10 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     focusedBorder: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
-                      borderSide: BorderSide(color: Color(0xFFE8B86D)),
+                      borderSide: BorderSide(color: AppColors.secondary),
                     ),
                     filled: true,
-                    fillColor: const Color(0xFF1A1A2E),
+                    fillColor: AppColors.surface,
                   ),
                   obscureText: true,
                   onChanged: (value) => password = value,
@@ -95,7 +96,7 @@ class RegisterScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
                     labelStyle: const TextStyle(color: Colors.white54),
-                    prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFFE8B86D)),
+                    prefixIcon: const Icon(Icons.lock_outline, color: AppColors.secondary),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     enabledBorder: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
@@ -103,10 +104,10 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     focusedBorder: const OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(12)),
-                      borderSide: BorderSide(color: Color(0xFFE8B86D)),
+                      borderSide: BorderSide(color: AppColors.secondary),
                     ),
                     filled: true,
-                    fillColor: const Color(0xFF1A1A2E),
+                    fillColor: AppColors.surface,
                   ),
                   obscureText: true,
                   onChanged: (value) => confirmPassword = value,
@@ -116,7 +117,7 @@ class RegisterScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7B2FBE),
+                      backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 1.8.h),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

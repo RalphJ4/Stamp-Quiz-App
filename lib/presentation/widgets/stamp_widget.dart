@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 class StampWidget extends StatelessWidget {
   final bool isEarned;
@@ -9,8 +10,8 @@ class StampWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = isEarned ? (color ?? const Color(0xFF7B2FBE)) : const Color(0xFF16213E);
-    final borderColor = isEarned ? (color ?? const Color(0xFFE8B86D)) : Colors.white24;
+    final bgColor = isEarned ? (color ?? AppColors.primary) : AppColors.surfaceDark;
+    final borderColor = isEarned ? (color ?? AppColors.secondary) : Colors.white24;
 
     final container = Container(
       width: 12.w,

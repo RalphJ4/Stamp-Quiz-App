@@ -1,7 +1,8 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/presentation/screens/onboarding/bloc/onboarding_bloc.dart';
 import 'package:confetti/confetti.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 // Purely visual repeating pulse — AnimationController requires TickerProvider (StatefulWidget)
@@ -100,7 +101,7 @@ class GamifiedOnboardingScreen extends StatelessWidget {
     return BlocBuilder<OnboardingBloc, OnboardingState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: const Color(0xFF0D0D1A),
+          backgroundColor: AppColors.background,
           body: SafeArea(
             child: Column(
               children: [
@@ -123,7 +124,7 @@ class GamifiedOnboardingScreen extends StatelessWidget {
                             'Skip',
                             style: TextStyle(
                               fontSize: 14.sp,
-                              color: const Color(0xFFE8B86D),
+                              color: AppColors.secondary,
                             ),
                           ),
                         ),
@@ -157,7 +158,7 @@ class GamifiedOnboardingScreen extends StatelessWidget {
                           height: 1.h,
                           decoration: BoxDecoration(
                             color: state.currentStep >= i
-                                ? const Color(0xFFE8B86D)
+                                ? AppColors.secondary
                                 : Colors.white24,
                             borderRadius: BorderRadius.circular(4),
                           ),
@@ -198,7 +199,7 @@ class _WelcomeStep extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFE8B86D).withValues(alpha: 0.3 * pulse),
+                        color: AppColors.secondary.withValues(alpha: 0.3 * pulse),
                         blurRadius: 40,
                         spreadRadius: 10,
                       ),
@@ -216,7 +217,7 @@ class _WelcomeStep extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 34.sp,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFFE8B86D),
+                  color: AppColors.secondary,
                 ),
               ),
               SizedBox(height: 1.h),
@@ -230,7 +231,7 @@ class _WelcomeStep extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7B2FBE),
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 1.8.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -267,7 +268,7 @@ class _NameStep extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(flex: 2),
-          Icon(Icons.person_outline, color: const Color(0xFFE8B86D), size: 12.h),
+          Icon(Icons.person_outline, color: AppColors.secondary, size: 12.h),
           SizedBox(height: 3.h),
           Text(
             'What should we call you?',
@@ -289,14 +290,14 @@ class _NameStep extends StatelessWidget {
                 hintText: 'Enter your name',
                 hintStyle: const TextStyle(color: Colors.white38),
                 filled: true,
-                fillColor: const Color(0xFF16213E),
+                fillColor: AppColors.surfaceDark,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF7B2FBE)),
+                  borderSide: const BorderSide(color: AppColors.primary),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFFE8B86D), width: 2),
+                  borderSide: const BorderSide(color: AppColors.secondary, width: 2),
                 ),
                 contentPadding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.8.h),
                 counterStyle: const TextStyle(color: Colors.white38),
@@ -311,7 +312,7 @@ class _NameStep extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7B2FBE),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(vertical: 1.8.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -357,7 +358,7 @@ class _AvatarStep extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: state.avatarColor,
-              border: Border.all(color: const Color(0xFFE8B86D), width: 3),
+              border: Border.all(color: AppColors.secondary, width: 3),
               boxShadow: [
                 BoxShadow(
                   color: state.avatarColor.withValues(alpha: 0.4),
@@ -406,7 +407,7 @@ class _AvatarStep extends StatelessWidget {
                     shape: BoxShape.circle,
                     color: color,
                     border: Border.all(
-                      color: selected ? const Color(0xFFE8B86D) : Colors.transparent,
+                      color: selected ? AppColors.secondary : Colors.transparent,
                       width: selected ? 3 : 0,
                     ),
                     boxShadow: selected
@@ -425,7 +426,7 @@ class _AvatarStep extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7B2FBE),
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(vertical: 1.8.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -464,7 +465,7 @@ class _TutorialStep extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(flex: 2),
-          Icon(Icons.school, color: const Color(0xFFE8B86D), size: 8.h),
+          Icon(Icons.school, color: AppColors.secondary, size: 8.h),
           SizedBox(height: 2.h),
           Text(
             'Try a practice question!',
@@ -481,7 +482,7 @@ class _TutorialStep extends StatelessWidget {
           ),
           SizedBox(height: 2.h),
           Card(
-            color: const Color(0xFF1A1A2E),
+            color: AppColors.surface,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             child: Padding(
               padding: EdgeInsets.all(3.w),
@@ -519,11 +520,11 @@ class _TutorialStep extends StatelessWidget {
                       duration: const Duration(milliseconds: 200),
                       padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.5.h),
                       decoration: BoxDecoration(
-                        color: tileColor ?? const Color(0xFF16213E),
+                        color: tileColor ?? AppColors.surfaceDark,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: tileColor ??
-                              (isSelected ? const Color(0xFFE8B86D) : Colors.white24),
+                              (isSelected ? AppColors.secondary : Colors.white24),
                           width: isSelected ? 2 : 1,
                         ),
                       ),
@@ -562,20 +563,20 @@ class _TutorialStep extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.8.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFE8B86D).withValues(alpha: 0.15),
+                color: AppColors.secondary.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE8B86D)),
+                border: Border.all(color: AppColors.secondary),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.monetization_on, color: Color(0xFFE8B86D), size: 20),
+                  const Icon(Icons.monetization_on, color: AppColors.secondary, size: 20),
                   SizedBox(width: 2.w),
                   Text(
                     '+1 XP  \u2022  Streak +1',
                     style: TextStyle(
                       fontSize: 15.sp,
-                      color: const Color(0xFFE8B86D),
+                      color: AppColors.secondary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -587,7 +588,7 @@ class _TutorialStep extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF7B2FBE),
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 1.8.h),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -644,12 +645,12 @@ class _CongratulationsStep extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFE8B86D).withValues(alpha: 0.5),
+                        color: AppColors.secondary.withValues(alpha: 0.5),
                         blurRadius: 50,
                         spreadRadius: 15,
                       ),
                     ],
-                    border: Border.all(color: const Color(0xFF7B2FBE), width: 3),
+                    border: Border.all(color: AppColors.primary, width: 3),
                     color: Colors.white,
                     image: const DecorationImage(
                       image: AssetImage('assets/images/stamp.png'),
@@ -665,7 +666,7 @@ class _CongratulationsStep extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFFE8B86D),
+                  color: AppColors.secondary,
                 ),
               ),
               SizedBox(height: 1.h),
@@ -678,17 +679,17 @@ class _CongratulationsStep extends StatelessWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _statItem(Icons.monetization_on, '1 XP', const Color(0xFFE8B86D)),
+                    _statItem(Icons.monetization_on, '1 XP', AppColors.secondary),
                     Container(width: 1, height: 4.h, color: Colors.white12),
                     _statItem(Icons.local_fire_department, 'Streak 1', Colors.orange),
                     Container(width: 1, height: 4.h, color: Colors.white12),
-                    _statItem(Icons.emoji_events, '1 Stamp', const Color(0xFFE8B86D)),
+                    _statItem(Icons.emoji_events, '1 Stamp', AppColors.secondary),
                   ],
                 ),
               ),
@@ -697,7 +698,7 @@ class _CongratulationsStep extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7B2FBE),
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 1.8.h),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -740,3 +741,4 @@ class _CongratulationsStep extends StatelessWidget {
     );
   }
 }
+

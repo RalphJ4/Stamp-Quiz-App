@@ -2,6 +2,7 @@ export 'onboarding_event.dart';
 export 'onboarding_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'onboarding_event.dart';
 import 'onboarding_state.dart';
@@ -27,7 +28,7 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     final completed = prefs.getBool(_doneKey) ?? false;
     final playerName = prefs.getString(_nameKey) ?? '';
     final colorVal = prefs.getInt(_colorKey);
-    final avatarColor = colorVal != null ? Color(colorVal) : const Color(0xFF7B2FBE);
+    final avatarColor = colorVal != null ? Color(colorVal) : AppColors.primary;
 
     emit(OnboardingState(
       completed: completed,
@@ -69,3 +70,4 @@ class OnboardingBloc extends Bloc<OnboardingEvent, OnboardingState> {
     emit(state.copyWith(completed: true));
   }
 }
+

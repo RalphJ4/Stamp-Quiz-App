@@ -1,10 +1,11 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/domain/entities/question.dart';
 import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
 import 'package:quiz_app/presentation/screens/quiz/quiz_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 final _log = Logger();
 
@@ -40,11 +41,11 @@ class CategorySelectionScreen extends StatelessWidget {
     final bloc = context.read<QuizBloc>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Choose a Category', style: TextStyle(color: Color(0xFFE8B86D))),
+        title: const Text('Choose a Category', style: TextStyle(color: AppColors.secondary)),
         centerTitle: true,
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: AppColors.surface,
         elevation: 0,
         toolbarHeight: 7.h,
       ),
@@ -59,7 +60,7 @@ class CategorySelectionScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFFE8B86D),
+                color: AppColors.secondary,
               ),
             ),
             SizedBox(height: 1.h),

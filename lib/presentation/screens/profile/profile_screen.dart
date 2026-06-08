@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
 import 'package:quiz_app/presentation/screens/auth/bloc/auth_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 class _AvatarPreset {
   final String name;
@@ -15,14 +16,14 @@ class _AvatarPreset {
 }
 
 const _avatarPresets = [
-  _AvatarPreset(name: 'Hero', emoji: '\u{1F9B8}', color: Color(0xFF7B2FBE)),
-  _AvatarPreset(name: 'Wizard', emoji: '\u{1F9D9}', color: Color(0xFF42A5F5)),
-  _AvatarPreset(name: 'Archer', emoji: '\u{1F3F9}', color: Color(0xFF43A047)),
-  _AvatarPreset(name: 'Knight', emoji: '\u{2694}\u{FE0F}', color: Color(0xFFE8B86D)),
-  _AvatarPreset(name: 'Dragon', emoji: '\u{1F409}', color: Color(0xFFE53935)),
-  _AvatarPreset(name: 'Fox', emoji: '\u{1F98A}', color: Color(0xFFFF9800)),
-  _AvatarPreset(name: 'Eagle', emoji: '\u{1F985}', color: Color(0xFF795548)),
-  _AvatarPreset(name: 'Wolf', emoji: '\u{1F43A}', color: Color(0xFF9E9E9E)),
+  _AvatarPreset(name: 'Hero', emoji: '\u{1F9B8}', color: AppColors.primary),
+  _AvatarPreset(name: 'Wizard', emoji: '\u{1F9D9}', color: AppColors.categoryGeography),
+  _AvatarPreset(name: 'Archer', emoji: '\u{1F3F9}', color: AppColors.difficultyEasy),
+  _AvatarPreset(name: 'Knight', emoji: '\u{2694}\u{FE0F}', color: AppColors.secondary),
+  _AvatarPreset(name: 'Dragon', emoji: '\u{1F409}', color: AppColors.difficultyHard),
+  _AvatarPreset(name: 'Fox', emoji: '\u{1F98A}', color: AppColors.difficultyMedium),
+  _AvatarPreset(name: 'Eagle', emoji: '\u{1F985}', color: AppColors.avatarEagle),
+  _AvatarPreset(name: 'Wolf', emoji: '\u{1F43A}', color: AppColors.avatarWolf),
 ];
 
 class _Badge {
@@ -49,7 +50,7 @@ final _badges = [
     name: 'First Stamp',
     icon: Icons.emoji_events,
     description: 'Earn your first XP',
-    color: Color(0xFFE8B86D),
+    color: AppColors.secondary,
     unlocked: (qp) => qp.stamps >= 1,
   ),
   _Badge(
@@ -57,7 +58,7 @@ final _badges = [
     name: 'On Fire',
     icon: Icons.local_fire_department,
     description: 'Reach a streak of 3',
-    color: Color(0xFFFF6B6B),
+    color: AppColors.categoryAnimals,
     unlocked: (qp) => qp.bestStreak >= 3,
   ),
   _Badge(
@@ -65,7 +66,7 @@ final _badges = [
     name: 'Streak Master',
     icon: Icons.whatshot,
     description: 'Reach a streak of 5',
-    color: Color(0xFFFF9800),
+    color: AppColors.difficultyMedium,
     unlocked: (qp) => qp.bestStreak >= 5,
   ),
   _Badge(
@@ -73,7 +74,7 @@ final _badges = [
     name: 'Double Digits',
     icon: Icons.whatshot,
     description: 'Reach a streak of 10',
-    color: Color(0xFFE53935),
+    color: AppColors.difficultyHard,
     unlocked: (qp) => qp.bestStreak >= 10,
   ),
   _Badge(
@@ -81,7 +82,7 @@ final _badges = [
     name: 'Century',
     icon: Icons.monetization_on,
     description: 'Earn 100 total XP',
-    color: Color(0xFFE8B86D),
+    color: AppColors.secondary,
     unlocked: (qp) => qp.stamps >= 100,
   ),
   _Badge(
@@ -89,7 +90,7 @@ final _badges = [
     name: 'Quiz Whiz',
     icon: Icons.school,
     description: 'Answer 50 questions',
-    color: Color(0xFF42A5F5),
+    color: AppColors.categoryGeography,
     unlocked: (qp) => qp.totalAnswered >= 50,
   ),
   _Badge(
@@ -97,7 +98,7 @@ final _badges = [
     name: 'Scholar',
     icon: Icons.menu_book,
     description: 'Earn 500 total XP',
-    color: Color(0xFF7B2FBE),
+    color: AppColors.primary,
     unlocked: (qp) => qp.stamps >= 500,
   ),
   _Badge(
@@ -105,7 +106,7 @@ final _badges = [
     name: 'Legend',
     icon: Icons.auto_awesome,
     description: 'Earn 1000 total XP',
-    color: Color(0xFFFFD700),
+    color: AppColors.badgeGold,
     unlocked: (qp) => qp.stamps >= 1000,
   ),
   _Badge(
@@ -113,7 +114,7 @@ final _badges = [
     name: 'Sharpshooter',
     icon: Icons.track_changes,
     description: '80%+ accuracy over 20+ answers',
-    color: Color(0xFF43A047),
+    color: AppColors.difficultyEasy,
     unlocked: (qp) => qp.totalAnswered >= 20 && qp.totalCorrect / qp.totalAnswered >= 0.8,
   ),
   _Badge(
@@ -121,7 +122,7 @@ final _badges = [
     name: 'Grinder',
     icon: Icons.hourglass_bottom,
     description: 'Answer 100 questions',
-    color: Color(0xFF795548),
+    color: AppColors.avatarEagle,
     unlocked: (qp) => qp.totalAnswered >= 100,
   ),
   _Badge(
@@ -129,7 +130,7 @@ final _badges = [
     name: 'Rising Star',
     icon: Icons.trending_up,
     description: 'Earn 250 total XP',
-    color: Color(0xFFFF9800),
+    color: AppColors.difficultyMedium,
     unlocked: (qp) => qp.stamps >= 250,
   ),
   _Badge(
@@ -137,7 +138,7 @@ final _badges = [
     name: 'Perfectionist',
     icon: Icons.star,
     description: 'Perfect accuracy over 10+ answers',
-    color: Color(0xFFE8B86D),
+    color: AppColors.secondary,
     unlocked: (qp) => qp.totalAnswered >= 10 && qp.totalCorrect == qp.totalAnswered,
   ),
   _Badge(
@@ -145,7 +146,7 @@ final _badges = [
     name: 'Eagle Eye',
     icon: Icons.visibility,
     description: '90%+ accuracy over 30+ answers',
-    color: Color(0xFF42A5F5),
+    color: AppColors.categoryGeography,
     unlocked: (qp) => qp.totalAnswered >= 30 && qp.totalCorrect / qp.totalAnswered >= 0.9,
   ),
   _Badge(
@@ -153,7 +154,7 @@ final _badges = [
     name: 'Legendary Streak',
     icon: Icons.local_fire_department,
     description: 'Reach a streak of 20',
-    color: Color(0xFFE53935),
+    color: AppColors.difficultyHard,
     unlocked: (qp) => qp.bestStreak >= 20,
   ),
   _Badge(
@@ -161,7 +162,7 @@ final _badges = [
     name: 'Marathon Runner',
     icon: Icons.directions_run,
     description: 'Answer 500 questions',
-    color: Color(0xFF7B2FBE),
+    color: AppColors.primary,
     unlocked: (qp) => qp.totalAnswered >= 500,
   ),
   _Badge(
@@ -169,7 +170,7 @@ final _badges = [
     name: 'High Roller',
     icon: Icons.diamond,
     description: 'Earn 5000 total XP',
-    color: Color(0xFFFFD700),
+    color: AppColors.badgeGold,
     unlocked: (qp) => qp.stamps >= 5000,
   ),
 ];
@@ -220,11 +221,11 @@ class ProfileScreen extends StatelessWidget {
     final lockedBadges = _badges.where((b) => !b.unlocked(quiz)).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Profile', style: TextStyle(color: Color(0xFFE8B86D))),
+        title: const Text('Profile', style: TextStyle(color: AppColors.secondary)),
         centerTitle: true,
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: AppColors.surface,
         toolbarHeight: 7.h,
       ),
       body: SingleChildScrollView(
@@ -276,13 +277,13 @@ class ProfileScreen extends StatelessWidget {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.3.h),
           decoration: BoxDecoration(
-            color: const Color(0xFF7B2FBE).withValues(alpha: 0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFF7B2FBE)),
+            border: Border.all(color: AppColors.primary),
           ),
           child: Text(
             title,
-            style: TextStyle(fontSize: 14.sp, color: const Color(0xFFE8B86D), fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 14.sp, color: AppColors.secondary, fontWeight: FontWeight.bold),
           ),
         ),
         if (auth.user?.email != null && auth.user!.email!.isNotEmpty) ...[
@@ -297,7 +298,7 @@ class ProfileScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
@@ -305,7 +306,7 @@ class ProfileScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Level $level', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: const Color(0xFFE8B86D))),
+              Text('Level $level', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.secondary)),
               Text('$xp / $xpForNext XP', style: TextStyle(fontSize: 13.sp, color: Colors.white54)),
             ],
           ),
@@ -315,8 +316,8 @@ class ProfileScreen extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress.clamp(0.0, 1.0),
               minHeight: 1.8.h,
-              backgroundColor: const Color(0xFF16213E),
-              color: const Color(0xFF7B2FBE),
+              backgroundColor: AppColors.surfaceDark,
+              color: AppColors.primary,
             ),
           ),
           SizedBox(height: 0.5.h),
@@ -332,13 +333,13 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildStatsRow(int xp, QuizState quiz, double accuracy) {
     return Row(
       children: [
-        _statCard(Icons.monetization_on, '$xp', 'Total XP', const Color(0xFFE8B86D)),
+        _statCard(Icons.monetization_on, '$xp', 'Total XP', AppColors.secondary),
         SizedBox(width: 2.w),
-        _statCard(Icons.check_circle, '${quiz.totalCorrect}', 'Correct', const Color(0xFF43A047)),
+        _statCard(Icons.check_circle, '${quiz.totalCorrect}', 'Correct', AppColors.difficultyEasy),
         SizedBox(width: 2.w),
-        _statCard(Icons.school, '${quiz.totalAnswered}', 'Answered', const Color(0xFF42A5F5)),
+        _statCard(Icons.school, '${quiz.totalAnswered}', 'Answered', AppColors.categoryGeography),
         SizedBox(width: 2.w),
-        _statCard(Icons.track_changes, '${(accuracy * 100).toStringAsFixed(0)}%', 'Accuracy', const Color(0xFFFF6B6B)),
+        _statCard(Icons.track_changes, '${(accuracy * 100).toStringAsFixed(0)}%', 'Accuracy', AppColors.categoryAnimals),
       ],
     );
   }
@@ -348,7 +349,7 @@ class ProfileScreen extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 1.h),
         decoration: BoxDecoration(
-          color: const Color(0xFF1A1A2E),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
@@ -368,19 +369,19 @@ class ProfileScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1A2E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFFF6B6B).withValues(alpha: 0.3)),
+        border: Border.all(color: AppColors.categoryAnimals.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           Container(
             padding: EdgeInsets.all(2.w),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF6B6B).withValues(alpha: 0.15),
+              color: AppColors.categoryAnimals.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(Icons.local_fire_department, color: const Color(0xFFFF6B6B), size: 8.w),
+            child: Icon(Icons.local_fire_department, color: AppColors.categoryAnimals, size: 8.w),
           ),
           SizedBox(width: 3.w),
           Column(
@@ -400,11 +401,11 @@ class ProfileScreen extends StatelessWidget {
               Text('Best Streak', style: TextStyle(fontSize: 13.sp, color: Colors.white54)),
               Row(
                 children: [
-                  Icon(Icons.whatshot, color: const Color(0xFFE8B86D), size: 5.w),
+                  Icon(Icons.whatshot, color: AppColors.secondary, size: 5.w),
                   SizedBox(width: 1.w),
                   Text(
                     '${quiz.bestStreak}',
-                    style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: const Color(0xFFE8B86D)),
+                    style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: AppColors.secondary),
                   ),
                 ],
               ),
@@ -421,17 +422,17 @@ class ProfileScreen extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text('Achievements', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: const Color(0xFFE8B86D))),
+            Text('Achievements', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: AppColors.secondary)),
             SizedBox(width: 2.w),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.2.h),
               decoration: BoxDecoration(
-                color: const Color(0xFF7B2FBE).withValues(alpha: 0.3),
+                color: AppColors.primary.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 '${unlocked.length}/${_badges.length}',
-                style: TextStyle(fontSize: 12.sp, color: const Color(0xFFE8B86D), fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 12.sp, color: AppColors.secondary, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -442,7 +443,7 @@ class ProfileScreen extends StatelessWidget {
             width: double.infinity,
             padding: EdgeInsets.all(3.w),
             decoration: BoxDecoration(
-              color: const Color(0xFF1A1A2E),
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -471,7 +472,7 @@ class ProfileScreen extends StatelessWidget {
         width: 20.w,
         padding: EdgeInsets.symmetric(vertical: 1.h),
         decoration: BoxDecoration(
-          color: unlocked ? badge.color.withValues(alpha: 0.15) : const Color(0xFF16213E),
+          color: unlocked ? badge.color.withValues(alpha: 0.15) : AppColors.surfaceDark,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: unlocked ? badge.color : Colors.white12,
@@ -507,7 +508,7 @@ class ProfileScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Avatar', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: const Color(0xFFE8B86D))),
+        Text('Avatar', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: AppColors.secondary)),
         SizedBox(height: 1.h),
         _buildAvatarPicker(context),
         SizedBox(height: 3.h),
@@ -536,7 +537,7 @@ class ProfileScreen extends StatelessWidget {
             width: 19.w,
             padding: EdgeInsets.symmetric(vertical: 0.8.h),
             decoration: BoxDecoration(
-              color: selected ? p.color.withValues(alpha: 0.25) : const Color(0xFF16213E),
+              color: selected ? p.color.withValues(alpha: 0.25) : AppColors.surfaceDark,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: selected ? p.color : Colors.white12,
@@ -562,7 +563,7 @@ class ProfileScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Display Name', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: const Color(0xFFE8B86D))),
+        Text('Display Name', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: AppColors.secondary)),
         SizedBox(height: 1.h),
         Form(
           key: _nameFormKey,
@@ -600,7 +601,7 @@ class ProfileScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Change Password', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: const Color(0xFFE8B86D))),
+        Text('Change Password', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: AppColors.secondary)),
         SizedBox(height: 1.h),
         Form(
           key: _passwordFormKey,
@@ -653,7 +654,7 @@ class ProfileScreen extends StatelessWidget {
               final authBloc = context.read<AuthBloc>();
               messenger.showSnackBar(SnackBar(
                 content: const Text('Updating password...'),
-                backgroundColor: const Color(0xFF7B2FBE),
+                backgroundColor: AppColors.primary,
                 duration: const Duration(seconds: 30),
                 behavior: SnackBarBehavior.floating,
               ));
@@ -700,7 +701,7 @@ class ProfileScreen extends StatelessWidget {
           final confirmed = await showDialog<bool>(
             context: context,
             builder: (ctx) => AlertDialog(
-              backgroundColor: const Color(0xFF1A1A2E),
+              backgroundColor: AppColors.surface,
               title: const Text('Sign Out', style: TextStyle(color: Colors.white)),
               content: const Text('Are you sure you want to sign out?', style: TextStyle(color: Colors.white70)),
               actions: [
@@ -730,10 +731,10 @@ class ProfileScreen extends StatelessWidget {
       hintText: hint,
       hintStyle: const TextStyle(color: Colors.white38),
       filled: true,
-      fillColor: const Color(0xFF16213E),
+      fillColor: AppColors.surfaceDark,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF7B2FBE)),
+        borderSide: const BorderSide(color: AppColors.primary),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -745,7 +746,7 @@ class ProfileScreen extends StatelessWidget {
 
   ButtonStyle _buttonStyle() {
     return ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFF7B2FBE),
+      backgroundColor: AppColors.primary,
       foregroundColor: Colors.white,
       padding: EdgeInsets.symmetric(vertical: 1.5.h),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -757,7 +758,7 @@ class ProfileScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor: isError ? Colors.red.shade800 : const Color(0xFF7B2FBE),
+        backgroundColor: isError ? Colors.red.shade800 : AppColors.primary,
         behavior: SnackBarBehavior.floating,
       ),
     );

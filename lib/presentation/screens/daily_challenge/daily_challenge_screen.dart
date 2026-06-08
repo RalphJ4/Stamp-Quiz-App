@@ -2,6 +2,7 @@
 import 'package:logger/logger.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:quiz_app/presentation/theme/app_colors.dart';
 import 'bloc/daily_challenge_bloc.dart';
 import '../../../domain/entities/question.dart';
 
@@ -38,18 +39,18 @@ class DailyChallengeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D0D1A),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Daily Challenge'),
         centerTitle: true,
-        backgroundColor: const Color(0xFF1A1A2E),
+        backgroundColor: AppColors.surface,
         foregroundColor: Colors.white,
         toolbarHeight: 7.h,
       ),
       body: BlocBuilder<DailyChallengeBloc, DailyChallengeState>(
         builder: (context, state) {
           if (state.loading) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFFE8B86D)));
+            return const Center(child: CircularProgressIndicator(color: AppColors.secondary));
           }
 
           if (state.completed) {
@@ -68,8 +69,8 @@ class DailyChallengeScreen extends StatelessWidget {
               children: [
                 LinearProgressIndicator(
                   value: (state.currentIndex + 1) / (state.challenge?.questions.length ?? 5),
-                  backgroundColor: const Color(0xFF16213E),
-                  color: const Color(0xFFE8B86D),
+                  backgroundColor: AppColors.surfaceDark,
+                  color: AppColors.secondary,
                   minHeight: 1.5.h,
                 ),
                 SizedBox(height: 1.5.h),
@@ -100,7 +101,7 @@ class DailyChallengeScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 2.h),
                 Card(
-                  color: const Color(0xFF1A1A2E),
+                  color: AppColors.surface,
                   elevation: 4,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   child: Padding(
@@ -123,7 +124,7 @@ class DailyChallengeScreen extends StatelessWidget {
                     }
                   }
                   return Card(
-                    color: tileColor ?? const Color(0xFF16213E),
+                    color: tileColor ?? AppColors.surfaceDark,
                     elevation: isSelected ? 6 : 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -155,8 +156,8 @@ class DailyChallengeScreen extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE8B86D),
-                        foregroundColor: const Color(0xFF0D0D1A),
+                        backgroundColor: AppColors.secondary,
+                        foregroundColor: AppColors.background,
                         padding: EdgeInsets.symmetric(vertical: 1.8.h),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         textStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
@@ -187,14 +188,14 @@ class DailyChallengeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.emoji_events, size: 20.h, color: const Color(0xFFE8B86D)),
+            Icon(Icons.emoji_events, size: 20.h, color: AppColors.secondary),
             SizedBox(height: 2.h),
             Text(
               'Challenge Complete!',
               style: TextStyle(
                 fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFFE8B86D),
+                color: AppColors.secondary,
               ),
             ),
             SizedBox(height: 1.h),
@@ -213,18 +214,18 @@ class DailyChallengeScreen extends StatelessWidget {
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE8B86D).withValues(alpha: 0.2),
+                    color: AppColors.secondary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE8B86D)),
+                    border: Border.all(color: AppColors.secondary),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.military_tech, color: Color(0xFFE8B86D), size: 20),
+                      const Icon(Icons.military_tech, color: AppColors.secondary, size: 20),
                       SizedBox(width: 2.w),
                       Text(
                         'Daily Devotee Badge',
-                        style: TextStyle(fontSize: 14.sp, color: const Color(0xFFE8B86D), fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 14.sp, color: AppColors.secondary, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
