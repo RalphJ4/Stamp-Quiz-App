@@ -23,6 +23,14 @@ class LoginScreen extends StatelessWidget {
             SnackBar(content: Text(authState.error!), backgroundColor: Colors.red.shade800),
           );
           context.read<AuthBloc>().add(AuthClearError());
+        } else if (authState.passwordResetSent) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Password reset email sent! Check your inbox.'),
+              backgroundColor: AppColors.successSnackbar,
+            ),
+          );
+          context.read<AuthBloc>().add(AuthClearSuccess());
         } else if (authState.mode == AuthMode.loggedIn) {
           _log.i('\u2190 popUntil root \u2192 HomeScreen (signed in)');
           Navigator.of(context).popUntil((route) => route.isFirst);
@@ -88,7 +96,20 @@ class LoginScreen extends StatelessWidget {
                   obscureText: true,
                   onChanged: (value) => password = value,
                 ),
-                SizedBox(height: 3.h),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => _showForgotPasswordDialog(context),
+                    child: Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: AppColors.secondary,
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 1.h),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -140,6 +161,51 @@ class LoginScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showForgotPasswordDialog(BuildContext context) {
+    String email = '';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Reset Password', style: TextStyle(color: Colors.white)),
+        content: TextField(
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            labelText: 'Email',
+            labelStyle: const TextStyle(color: Colors.white54),
+            prefixIcon: const Icon(Icons.email, color: AppColors.secondary),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            enabledBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderSide: BorderSide(color: Colors.white24),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderSide: BorderSide(color: AppColors.secondary),
+            ),
+            filled: true,
+            fillColor: AppColors.surfaceDark,
+          ),
+          keyboardType: TextInputType.emailAddress,
+          onChanged: (value) => email = value,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.read<AuthBloc>().add(AuthSendPasswordReset(email: email.trim()));
+            },
+            child: const Text('Send', style: TextStyle(color: AppColors.secondary)),
+          ),
+        ],
       ),
     );
   }

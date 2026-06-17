@@ -78,6 +78,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthUpdatePassword>(_onUpdatePassword);
     on<AuthUpdateAvatarColor>(_onUpdateAvatarColor);
     on<AuthGetAvatarColor>(_onGetAvatarColor);
+    on<AuthSendPasswordReset>(_onSendPasswordReset);
     on<AuthClearError>(_onClearError);
     on<AuthClearSuccess>(_onClearSuccess);
     if (!skipInit) {
@@ -222,7 +223,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   void _onClearSuccess(AuthClearSuccess event, Emitter<AuthState> emit) {
-    emit(state.copyWith(passwordUpdateSuccess: false));
+    emit(state.copyWith(passwordUpdateSuccess: false, passwordResetSent: false));
+  }
+
+  void _onSendPasswordReset(AuthSendPasswordReset event, Emitter<AuthState> emit) async {
+    emit(state.copyWith(clearError: true));
+    if (event.email.trim().isEmpty) {
+      emit(state.copyWith(error: 'Please enter your email address.'));
+      return;
+    }
+    try {
+      await _authService.sendPasswordReset(event.email.trim());
+      emit(state.copyWith(passwordResetSent: true));
+    } on auth.FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        emit(state.copyWith(error: 'No account found with this email.'));
+      } else if (e.code == 'invalid-email') {
+        emit(state.copyWith(error: 'Please enter a valid email address.'));
+      } else if (e.code == 'network-request-failed') {
+        emit(state.copyWith(error: 'No internet connection. Please check your network.'));
+      } else {
+        emit(state.copyWith(error: _friendlyAuthError(e)));
+      }
+    } catch (e) {
+      emit(state.copyWith(error: 'Something went wrong. Please try again.'));
+    }
   }
 
   void _onSignInWithEmail(AuthSignInWithEmail event, Emitter<AuthState> emit) async {

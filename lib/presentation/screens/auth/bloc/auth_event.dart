@@ -40,4 +40,9 @@ final class AuthGetAvatarColor extends AuthEvent {}
 
 final class AuthClearError extends AuthEvent {}
 
+final class AuthSendPasswordReset extends AuthEvent {
+  final String email;
+  AuthSendPasswordReset({required this.email});
+}
+
 final class AuthClearSuccess extends AuthEvent {}
