@@ -4,7 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/domain/entities/question.dart';
 import 'package:quiz_app/presentation/screens/daily_challenge/bloc/daily_challenge_bloc.dart';
 import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
-import 'package:quiz_app/presentation/screens/quiz/category_selection_screen.dart';
+import 'package:quiz_app/presentation/screens/quiz/quiz_screen.dart';
+import 'package:quiz_app/presentation/screens/quiz/jlpt_selection_screen.dart';
 import 'package:quiz_app/presentation/screens/daily_challenge/daily_challenge_screen.dart';
 import 'package:quiz_app/presentation/screens/onboarding/onboarding_screen.dart';
 import 'package:quiz_app/presentation/screens/duel/duel_screen.dart';
@@ -41,6 +42,7 @@ class HomeScreen extends StatelessWidget {
     QuestionCategory.history: Color(0xFFFFA726),
     QuestionCategory.science: Color(0xFF66BB6A),
     QuestionCategory.geography: Color(0xFF42A5F5),
+    QuestionCategory.japanese: Color(0xFFFF4081),
   };
 
   static const categoryIcons = {
@@ -49,6 +51,7 @@ class HomeScreen extends StatelessWidget {
     QuestionCategory.history: Icons.history_edu,
     QuestionCategory.science: Icons.science,
     QuestionCategory.geography: Icons.public,
+    QuestionCategory.japanese: Icons.language,
   };
 
   static const categoryLabels = {
@@ -57,6 +60,7 @@ class HomeScreen extends StatelessWidget {
     QuestionCategory.history: 'History',
     QuestionCategory.science: 'Science',
     QuestionCategory.geography: 'Geography',
+    QuestionCategory.japanese: 'Japanese',
   };
 
   @override
@@ -311,12 +315,14 @@ class HomeScreen extends StatelessWidget {
                     width: (100.w - 3.w * 2 - 2.w) / 2,
                     child: GestureDetector(
                       onTap: () {
-                        _log.i('→ CategorySelectionScreen ($label)');
                         context.read<QuizBloc>().add(QuizSelectCategory(category: cat));
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const CategorySelectionScreen()),
-                        );
+                        if (cat == QuestionCategory.japanese) {
+                          _log.i('→ JlptSelectionScreen');
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const JlptSelectionScreen()));
+                        } else {
+                          _log.i('→ QuizScreen ($label)');
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreen()));
+                        }
                       },
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.5.h),
@@ -363,10 +369,11 @@ class HomeScreen extends StatelessWidget {
                     elevation: 4,
                   ),
                   onPressed: () {
-                    _log.i('→ CategorySelectionScreen');
+                    context.read<QuizBloc>().add(QuizSelectCategory(category: QuestionCategory.space));
+                    _log.i('→ QuizScreen');
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const CategorySelectionScreen()),
+                      MaterialPageRoute(builder: (_) => const QuizScreen()),
                     );
                   },
                   icon: const Icon(Icons.play_arrow, size: 28),

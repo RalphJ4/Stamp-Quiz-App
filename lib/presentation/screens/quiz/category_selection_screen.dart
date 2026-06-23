@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/domain/entities/question.dart';
 import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
 import 'package:quiz_app/presentation/screens/quiz/quiz_screen.dart';
+import 'package:quiz_app/presentation/screens/quiz/jlpt_selection_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:quiz_app/presentation/theme/app_colors.dart';
 
@@ -18,6 +19,7 @@ class CategorySelectionScreen extends StatelessWidget {
     QuestionCategory.history: Color(0xFFFFA726),
     QuestionCategory.science: Color(0xFF66BB6A),
     QuestionCategory.geography: Color(0xFF42A5F5),
+    QuestionCategory.japanese: Color(0xFFFF4081),
   };
 
   static const categoryIcons = {
@@ -26,6 +28,7 @@ class CategorySelectionScreen extends StatelessWidget {
     QuestionCategory.history: Icons.history_edu,
     QuestionCategory.science: Icons.science,
     QuestionCategory.geography: Icons.public,
+    QuestionCategory.japanese: Icons.language,
   };
 
   static const categoryLabels = {
@@ -34,6 +37,7 @@ class CategorySelectionScreen extends StatelessWidget {
     QuestionCategory.history: 'History',
     QuestionCategory.science: 'Science',
     QuestionCategory.geography: 'Geography',
+    QuestionCategory.japanese: 'Japanese',
   };
 
   @override
@@ -87,9 +91,15 @@ class CategorySelectionScreen extends StatelessWidget {
 
                   return GestureDetector(
                     onTap: () {
-                      bloc.add(QuizSelectCategory(category: category));
-                      _log.i('→ QuizScreen ($label)');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreen()));
+                      if (category == QuestionCategory.japanese) {
+                        bloc.add(QuizSelectCategory(category: category));
+                        _log.i('→ JlptSelectionScreen');
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const JlptSelectionScreen()));
+                      } else {
+                        bloc.add(QuizSelectCategory(category: category));
+                        _log.i('→ QuizScreen ($label)');
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const QuizScreen()));
+                      }
                     },
                     child: Container(
                       decoration: BoxDecoration(

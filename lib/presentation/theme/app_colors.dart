@@ -19,6 +19,7 @@ abstract final class AppColors {
   static const categoryHistory = Color(0xFFFFA726);
   static const categoryScience = Color(0xFF66BB6A);
   static const categoryGeography = Color(0xFF42A5F5);
+  static const categoryJapanese = Color(0xFFFF4081);
 
   // ── Avatar colors ──
   static const avatarHero = Color(0xFF7B2FBE);

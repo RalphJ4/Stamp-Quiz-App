@@ -1,4 +1,4 @@
-enum QuestionCategory { space, animals, history, science, geography }
+enum QuestionCategory { space, animals, history, science, geography, japanese }
 
 enum QuestionDifficulty { easy, medium, hard }
 
@@ -9,6 +9,7 @@ class Question {
   final int correctIndex;
   final QuestionCategory category;
   final QuestionDifficulty difficulty;
+  final String? jlptLevel;
 
   Question({
     required this.id,
@@ -17,6 +18,7 @@ class Question {
     required this.correctIndex,
     this.category = QuestionCategory.space,
     this.difficulty = QuestionDifficulty.easy,
+    this.jlptLevel,
   });
 
   int get stampReward {

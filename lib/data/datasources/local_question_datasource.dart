@@ -1,4 +1,5 @@
 import '../models/question_model.dart';
+import 'jlpt_vocab_data.dart';
 
 class LocalQuestionDataSource {
   Future<List<QuestionModel>> getLocalQuestions() async {
@@ -2683,6 +2684,7 @@ class LocalQuestionDataSource {
         'category': 'geography',
         'difficulty': 'medium',
       },
+      ..._generateJlptQuestions(),
     ];
 
     await Future.delayed(const Duration(milliseconds: 200));
@@ -2703,5 +2705,52 @@ class LocalQuestionDataSource {
       );
     }
     return questions;
+  }
+
+  static List<Map<String, dynamic>> _generateJlptQuestions() {
+    final questions = <Map<String, dynamic>>[];
+    for (final entry in jlptVocabLevels) {
+      final vocab = entry.vocab;
+      final level = entry.level;
+      final difficulty = entry.difficulty;
+      var id = 1;
+      for (final v in vocab) {
+        final readings = vocab.map((e) => e.reading).toList();
+        final readingDists = _pickDistractors(readings, v.reading, 3);
+        questions.add({
+          'id': 'jp_${level}_$id',
+          'question': '「${v.kanji}」の読み方は？',
+          'options': [v.reading, ...readingDists],
+          'correctIndex': 0,
+          'category': 'japanese',
+          'difficulty': difficulty,
+          'jlptLevel': level,
+        });
+        id++;
+        final meanings = vocab.map((e) => e.meaning).toList();
+        final meaningDists = _pickDistractors(meanings, v.meaning, 3);
+        questions.add({
+          'id': 'jp_${level}_$id',
+          'question': '「${v.kanji}」の意味は？',
+          'options': [v.meaning, ...meaningDists],
+          'correctIndex': 0,
+          'category': 'japanese',
+          'difficulty': difficulty,
+          'jlptLevel': level,
+        });
+        id++;
+      }
+    }
+    return questions;
+  }
+
+  static List<String> _pickDistractors(List<String> pool, String correct, int count) {
+    final available = pool.where((s) => s != correct).toList();
+    available.shuffle();
+    if (available.length < count) {
+      final fill = List.generate(count - available.length, (_) => '---');
+      return [...available, ...fill];
+    }
+    return available.take(count).toList();
   }
 }

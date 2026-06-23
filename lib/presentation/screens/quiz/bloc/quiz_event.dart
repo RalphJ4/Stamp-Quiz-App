@@ -9,6 +9,11 @@ final class QuizSelectCategory extends QuizEvent {
   QuizSelectCategory({required this.category});
 }
 
+final class QuizSelectJlptLevel extends QuizEvent {
+  final String level;
+  QuizSelectJlptLevel({required this.level});
+}
+
 final class QuizStartTimer extends QuizEvent {}
 
 final class QuizPauseTimer extends QuizEvent {}

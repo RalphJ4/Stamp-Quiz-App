@@ -26,6 +26,7 @@ class QuizState extends Equatable {
   final bool quizStarted;
   final int remainingSeconds;
   final QuestionCategory selectedCategory;
+  final String? jlptLevel;
   final int currentStreak;
   final int bestStreak;
   final int totalCorrect;
@@ -46,6 +47,7 @@ class QuizState extends Equatable {
     this.quizStarted = false,
     this.remainingSeconds = 30,
     this.selectedCategory = QuestionCategory.space,
+    this.jlptLevel,
     this.currentStreak = 0,
     this.bestStreak = 0,
     this.totalCorrect = 0,
@@ -70,6 +72,7 @@ class QuizState extends Equatable {
     bool? quizStarted,
     int? remainingSeconds,
     QuestionCategory? selectedCategory,
+    String? jlptLevel,
     int? currentStreak,
     int? bestStreak,
     int? totalCorrect,
@@ -90,6 +93,7 @@ class QuizState extends Equatable {
       quizStarted: quizStarted ?? this.quizStarted,
       remainingSeconds: remainingSeconds ?? this.remainingSeconds,
       selectedCategory: selectedCategory ?? this.selectedCategory,
+      jlptLevel: jlptLevel ?? this.jlptLevel,
       currentStreak: currentStreak ?? this.currentStreak,
       bestStreak: bestStreak ?? this.bestStreak,
       totalCorrect: totalCorrect ?? this.totalCorrect,
@@ -101,7 +105,7 @@ class QuizState extends Equatable {
   List<Object?> get props => [
     allQuestions, questions, currentIndex, stamps, answered, selectedOption,
     animateStamp, isQuizFinished, hintsRemaining, usedHint, eliminatedOptions,
-    quizStarted, remainingSeconds, selectedCategory, currentStreak, bestStreak,
+    quizStarted, remainingSeconds, selectedCategory, jlptLevel, currentStreak, bestStreak,
     totalCorrect, totalAnswered,
   ];
 }

@@ -30,6 +30,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
 
     on<QuizLoadQuestions>(_onLoadQuestions);
     on<QuizSelectCategory>(_onSelectCategory);
+    on<QuizSelectJlptLevel>(_onSelectJlptLevel);
     on<QuizStartTimer>(_onStartTimer);
     on<QuizPauseTimer>(_onPauseTimer);
     on<QuizTimerTick>(_onTimerTick);
@@ -80,16 +81,69 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
     QuestionCategory.history: 6,
     QuestionCategory.science: 6,
     QuestionCategory.geography: 6,
+    QuestionCategory.japanese: 10,
+  };
+
+  static const _jlptQuestionCounts = {
+    'N5': 10,
+    'N4': 10,
+    'N3': 10,
+    'N2': 10,
+    'N1': 10,
   };
 
   void _onSelectCategory(QuizSelectCategory event, Emitter<QuizState> emit) {
     _cancelTimer();
+    if (event.category == QuestionCategory.japanese) {
+      emit(state.copyWith(
+        selectedCategory: event.category,
+        jlptLevel: null,
+        questions: [],
+        currentIndex: 0,
+        answered: false,
+        clearSelectedOption: true,
+        animateStamp: false,
+        isQuizFinished: false,
+        quizStarted: false,
+        hintsRemaining: 3,
+        usedHint: false,
+        eliminatedOptions: {},
+        remainingSeconds: 30,
+      ));
+      return;
+    }
     var filtered = state.allQuestions.where((q) => q.category == event.category).toList();
     filtered.shuffle();
     final count = _questionCounts[event.category]!;
     filtered = filtered.take(min(count, filtered.length)).toList();
     emit(state.copyWith(
       selectedCategory: event.category,
+      questions: filtered,
+      currentIndex: 0,
+      answered: false,
+      clearSelectedOption: true,
+      animateStamp: false,
+      isQuizFinished: false,
+      quizStarted: false,
+      hintsRemaining: 3,
+      usedHint: false,
+      eliminatedOptions: {},
+      remainingSeconds: 30,
+    ));
+    add(QuizStartTimer());
+  }
+
+  void _onSelectJlptLevel(QuizSelectJlptLevel event, Emitter<QuizState> emit) {
+    _cancelTimer();
+    final category = QuestionCategory.japanese;
+    var filtered = state.allQuestions.where((q) =>
+      q.category == category && q.jlptLevel == event.level).toList();
+    filtered.shuffle();
+    final count = _jlptQuestionCounts[event.level] ?? 10;
+    filtered = filtered.take(min(count, filtered.length)).toList();
+    emit(state.copyWith(
+      selectedCategory: category,
+      jlptLevel: event.level,
       questions: filtered,
       currentIndex: 0,
       answered: false,
