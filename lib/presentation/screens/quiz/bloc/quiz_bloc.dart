@@ -71,7 +71,31 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
 
   void _onLoadQuestions(QuizLoadQuestions event, Emitter<QuizState> emit) async {
     final allQuestions = await _getQuestions.execute();
-    final filtered = allQuestions.where((q) => q.category == state.selectedCategory).toList();
+    var filtered = allQuestions.where((q) => q.category == state.selectedCategory).toList();
+    if (state.selectedCategory == QuestionCategory.japanese && state.jlptLevel != null) {
+      filtered = filtered.where((q) => q.jlptLevel == state.jlptLevel).toList();
+      filtered.shuffle();
+      final count = _jlptQuestionCounts[state.jlptLevel] ?? 10;
+      filtered = filtered.take(min(count, filtered.length)).toList();
+      emit(state.copyWith(
+        allQuestions: allQuestions,
+        questions: filtered,
+        currentIndex: 0,
+        answered: false,
+        clearSelectedOption: true,
+        animateStamp: false,
+        isQuizFinished: false,
+        quizStarted: false,
+        usedHint: false,
+        eliminatedOptions: {},
+        remainingSeconds: 30,
+        userAnswers: List<int?>.generate(filtered.length, (_) => null),
+      ));
+      if (filtered.isNotEmpty) {
+        add(QuizStartTimer());
+      }
+      return;
+    }
     emit(state.copyWith(allQuestions: allQuestions, questions: filtered));
   }
 
@@ -137,6 +161,28 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
   void _onSelectJlptLevel(QuizSelectJlptLevel event, Emitter<QuizState> emit) {
     _cancelTimer();
     final category = QuestionCategory.japanese;
+
+    if (state.allQuestions.isEmpty) {
+      emit(state.copyWith(
+        selectedCategory: category,
+        jlptLevel: event.level,
+        questions: [],
+        currentIndex: 0,
+        answered: false,
+        clearSelectedOption: true,
+        animateStamp: false,
+        isQuizFinished: false,
+        quizStarted: false,
+        hintsRemaining: 3,
+        usedHint: false,
+        eliminatedOptions: {},
+        remainingSeconds: 30,
+        userAnswers: [],
+      ));
+      add(QuizLoadQuestions());
+      return;
+    }
+
     var filtered = state.allQuestions.where((q) =>
       q.category == category && q.jlptLevel == event.level).toList();
     filtered.shuffle();

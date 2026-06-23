@@ -1,5 +1,5 @@
 import '../models/question_model.dart';
-import 'jlpt_vocab_data.dart';
+import 'jlpt_quiz_data.dart';
 
 class LocalQuestionDataSource {
   Future<List<QuestionModel>> getLocalQuestions() async {
@@ -2684,7 +2684,7 @@ class LocalQuestionDataSource {
         'category': 'geography',
         'difficulty': 'medium',
       },
-      ..._generateJlptQuestions(),
+      ..._convertJlptQuizData(),
     ];
 
     await Future.delayed(const Duration(milliseconds: 200));
@@ -2702,38 +2702,30 @@ class LocalQuestionDataSource {
         correctIndex: newCorrectIndex,
         category: q.category,
         difficulty: q.difficulty,
+        jlptLevel: q.jlptLevel,
       );
     }
     return questions;
   }
 
-  static List<Map<String, dynamic>> _generateJlptQuestions() {
+  static List<Map<String, dynamic>> _convertJlptQuizData() {
+    const difficultyMap = {
+      'N5': 'easy',
+      'N4': 'easy',
+      'N3': 'medium',
+      'N2': 'hard',
+      'N1': 'hard',
+    };
     final questions = <Map<String, dynamic>>[];
-    for (final entry in jlptVocabLevels) {
-      final vocab = entry.vocab;
-      final level = entry.level;
-      final difficulty = entry.difficulty;
-      var id = 1;
-      for (final v in vocab) {
-        final readings = vocab.map((e) => e.reading).toList();
-        final readingDists = _pickDistractors(readings, v.reading, 3);
+    var id = 1;
+    for (final level in jlptQuizData.keys) {
+      final difficulty = difficultyMap[level] ?? 'medium';
+      for (final q in jlptQuizData[level]!) {
         questions.add({
           'id': 'jp_${level}_$id',
-          'question': '「${v.kanji}」の読み方は？',
-          'options': [v.reading, ...readingDists],
-          'correctIndex': 0,
-          'category': 'japanese',
-          'difficulty': difficulty,
-          'jlptLevel': level,
-        });
-        id++;
-        final meanings = vocab.map((e) => e.meaning).toList();
-        final meaningDists = _pickDistractors(meanings, v.meaning, 3);
-        questions.add({
-          'id': 'jp_${level}_$id',
-          'question': '「${v.kanji}」の意味は？',
-          'options': [v.meaning, ...meaningDists],
-          'correctIndex': 0,
+          'question': q.question,
+          'options': q.options,
+          'correctIndex': q.correctIndex,
           'category': 'japanese',
           'difficulty': difficulty,
           'jlptLevel': level,
@@ -2742,15 +2734,5 @@ class LocalQuestionDataSource {
       }
     }
     return questions;
-  }
-
-  static List<String> _pickDistractors(List<String> pool, String correct, int count) {
-    final available = pool.where((s) => s != correct).toList();
-    available.shuffle();
-    if (available.length < count) {
-      final fill = List.generate(count - available.length, (_) => '---');
-      return [...available, ...fill];
-    }
-    return available.take(count).toList();
   }
 }
