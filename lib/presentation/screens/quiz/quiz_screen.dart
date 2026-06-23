@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quiz_app/domain/entities/power_up.dart';
 import 'package:quiz_app/domain/entities/question.dart';
 import 'package:quiz_app/presentation/screens/quiz/bloc/quiz_bloc.dart';
+import 'package:quiz_app/presentation/screens/quiz/result_screen.dart';
 import 'package:quiz_app/presentation/screens/power_up/bloc/power_up_bloc.dart';
 import 'package:quiz_app/presentation/widgets/hint_button.dart';
 import 'package:confetti/confetti.dart';
@@ -12,8 +13,8 @@ import 'package:quiz_app/presentation/theme/app_colors.dart';
 
 final _log = Logger();
 
-class _QuizAutoPop extends StatelessWidget {
-  const _QuizAutoPop();
+class _ResultNavigator extends StatelessWidget {
+  const _ResultNavigator();
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,11 @@ class _QuizAutoPop extends StatelessWidget {
       listenWhen: (prev, curr) => !prev.isQuizFinished && curr.isQuizFinished,
       listener: (context, state) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (context.mounted) Navigator.of(context).pop();
+          if (context.mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const ResultScreen()),
+            );
+          }
         });
       },
       child: const SizedBox.shrink(),
@@ -463,8 +468,7 @@ class QuizScreen extends StatelessWidget {
                               icon: Icon(Icons.emoji_events, size: 18.sp, color: AppColors.secondary),
                               onPressed: () {
                                 context.read<QuizBloc>().add(QuizFinish());
-                                _log.i('← pop QuizScreen (finished)');
-                                Navigator.of(context).pop();
+                                _log.i('→ finish quiz, navigating to results');
                               },
                               label: const Text('Finish'),
                             ),
@@ -481,7 +485,7 @@ class QuizScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const _QuizAutoPop(),
+              const _ResultNavigator(),
             ],
           );
         },

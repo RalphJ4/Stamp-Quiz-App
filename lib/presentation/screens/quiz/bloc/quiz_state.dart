@@ -31,6 +31,7 @@ class QuizState extends Equatable {
   final int bestStreak;
   final int totalCorrect;
   final int totalAnswered;
+  final List<int?> userAnswers;
 
   const QuizState({
     this.allQuestions = const [],
@@ -52,6 +53,7 @@ class QuizState extends Equatable {
     this.bestStreak = 0,
     this.totalCorrect = 0,
     this.totalAnswered = 0,
+    this.userAnswers = const [],
   });
 
   bool get isQuizInProgress => quizStarted && !isQuizFinished;
@@ -77,6 +79,7 @@ class QuizState extends Equatable {
     int? bestStreak,
     int? totalCorrect,
     int? totalAnswered,
+    List<int?>? userAnswers,
   }) {
     return QuizState(
       allQuestions: allQuestions ?? this.allQuestions,
@@ -98,6 +101,7 @@ class QuizState extends Equatable {
       bestStreak: bestStreak ?? this.bestStreak,
       totalCorrect: totalCorrect ?? this.totalCorrect,
       totalAnswered: totalAnswered ?? this.totalAnswered,
+      userAnswers: userAnswers ?? this.userAnswers,
     );
   }
 
@@ -106,6 +110,6 @@ class QuizState extends Equatable {
     allQuestions, questions, currentIndex, stamps, answered, selectedOption,
     animateStamp, isQuizFinished, hintsRemaining, usedHint, eliminatedOptions,
     quizStarted, remainingSeconds, selectedCategory, jlptLevel, currentStreak, bestStreak,
-    totalCorrect, totalAnswered,
+    totalCorrect, totalAnswered, userAnswers,
   ];
 }

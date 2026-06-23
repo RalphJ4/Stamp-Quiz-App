@@ -129,6 +129,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
       usedHint: false,
       eliminatedOptions: {},
       remainingSeconds: 30,
+      userAnswers: List<int?>.generate(filtered.length, (_) => null),
     ));
     add(QuizStartTimer());
   }
@@ -155,6 +156,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
       usedHint: false,
       eliminatedOptions: {},
       remainingSeconds: 30,
+      userAnswers: List<int?>.generate(filtered.length, (_) => null),
     ));
     add(QuizStartTimer());
   }
@@ -216,6 +218,11 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
       newStreak = 0;
     }
 
+    final newUserAnswers = List<int?>.from(state.userAnswers);
+    if (state.currentIndex < newUserAnswers.length) {
+      newUserAnswers[state.currentIndex] = event.index;
+    }
+
     emit(state.copyWith(
       selectedOption: event.index,
       answered: true,
@@ -225,11 +232,16 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
       totalCorrect: newTotalCorrect,
       totalAnswered: newTotalAnswered,
       animateStamp: newAnimateStamp,
+      userAnswers: newUserAnswers,
     ));
   }
 
   void _onNextQuestion(QuizNextQuestion event, Emitter<QuizState> emit) {
     if (state.currentIndex < state.questions.length - 1) {
+      final newUserAnswers = List<int?>.from(state.userAnswers);
+      if (!state.answered && state.currentIndex < newUserAnswers.length) {
+        newUserAnswers[state.currentIndex] = null;
+      }
       emit(state.copyWith(
         currentIndex: state.currentIndex + 1,
         answered: false,
@@ -238,6 +250,7 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
         usedHint: false,
         eliminatedOptions: {},
         remainingSeconds: 30,
+        userAnswers: newUserAnswers,
       ));
       add(QuizStartTimer());
     }
@@ -245,7 +258,11 @@ class QuizBloc extends Bloc<QuizEvent, QuizState> {
 
   void _onFinish(QuizFinish event, Emitter<QuizState> emit) {
     _cancelTimer();
-    emit(state.copyWith(isQuizFinished: true));
+    final newUserAnswers = List<int?>.from(state.userAnswers);
+    if (!state.answered && state.currentIndex < newUserAnswers.length) {
+      newUserAnswers[state.currentIndex] = null;
+    }
+    emit(state.copyWith(isQuizFinished: true, userAnswers: newUserAnswers));
   }
 
   static const int hintCost = 5;
