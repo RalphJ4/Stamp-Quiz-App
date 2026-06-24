@@ -9,6 +9,8 @@ class QuestionModel extends Question {
     super.category,
     super.difficulty,
     super.jlptLevel,
+    super.subCategory,
+    super.explanation,
   });
 
   factory QuestionModel.fromMap(Map<String, dynamic> map) {
@@ -26,6 +28,8 @@ class QuestionModel extends Question {
         orElse: () => QuestionDifficulty.easy,
       ),
       jlptLevel: map['jlptLevel'] as String?,
+      subCategory: map['subCategory'] as String?,
+      explanation: map['explanation'] as String?,
     );
   }
 
@@ -37,5 +41,7 @@ class QuestionModel extends Question {
     'category': category.name,
     'difficulty': difficulty.name,
     if (jlptLevel != null) 'jlptLevel': jlptLevel,
+    if (subCategory != null) 'subCategory': subCategory,
+    if (explanation != null) 'explanation': explanation,
   };
 }

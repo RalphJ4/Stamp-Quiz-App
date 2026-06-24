@@ -179,6 +179,10 @@ class ResultScreen extends StatelessWidget {
                           if (userAnswer != null)
                             SizedBox(height: 0.5.h),
                           _answerRow(Icons.check_circle, 'Correct answer', correctAnswer, Colors.green[300]!),
+                          if (question.explanation != null) ...[
+                            SizedBox(height: 0.5.h),
+                            _answerRow(Icons.lightbulb_outline, 'Explanation', question.explanation!, Colors.orange[300]!),
+                          ],
                         ],
                       ),
                     );

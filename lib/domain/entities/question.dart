@@ -10,6 +10,8 @@ class Question {
   final QuestionCategory category;
   final QuestionDifficulty difficulty;
   final String? jlptLevel;
+  final String? subCategory;
+  final String? explanation;
 
   Question({
     required this.id,
@@ -19,6 +21,8 @@ class Question {
     this.category = QuestionCategory.space,
     this.difficulty = QuestionDifficulty.easy,
     this.jlptLevel,
+    this.subCategory,
+    this.explanation,
   });
 
   int get stampReward {

@@ -2684,7 +2684,7 @@ class LocalQuestionDataSource {
         'category': 'geography',
         'difficulty': 'medium',
       },
-      ..._convertJlptQuizData(),
+      ...await _convertJlptQuizData(),
     ];
 
     await Future.delayed(const Duration(milliseconds: 200));
@@ -2703,34 +2703,29 @@ class LocalQuestionDataSource {
         category: q.category,
         difficulty: q.difficulty,
         jlptLevel: q.jlptLevel,
+        subCategory: q.subCategory,
+        explanation: q.explanation,
       );
     }
     return questions;
   }
 
-  static List<Map<String, dynamic>> _convertJlptQuizData() {
-    const difficultyMap = {
-      'N5': 'easy',
-      'N4': 'easy',
-      'N3': 'medium',
-      'N2': 'hard',
-      'N1': 'hard',
-    };
+  static Future<List<Map<String, dynamic>>> _convertJlptQuizData() async {
+    final data = await JlptQuizDataLoader.load();
     final questions = <Map<String, dynamic>>[];
-    var id = 1;
-    for (final level in jlptQuizData.keys) {
-      final difficulty = difficultyMap[level] ?? 'medium';
-      for (final q in jlptQuizData[level]!) {
+    for (final level in data.keys) {
+      for (final q in data[level]!) {
         questions.add({
-          'id': 'jp_${level}_$id',
+          'id': q.id,
           'question': q.question,
           'options': q.options,
           'correctIndex': q.correctIndex,
           'category': 'japanese',
-          'difficulty': difficulty,
+          'difficulty': q.difficulty,
           'jlptLevel': level,
+          'subCategory': q.subCategory,
+          'explanation': q.explanation,
         });
-        id++;
       }
     }
     return questions;
