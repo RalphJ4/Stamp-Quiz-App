@@ -357,30 +357,6 @@ class HomeScreen extends StatelessWidget {
               ),
 
               SizedBox(height: 2.h),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 1.8.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 4,
-                  ),
-                  onPressed: () {
-                    context.read<QuizBloc>().add(QuizSelectCategory(category: QuestionCategory.space));
-                    _log.i('→ QuizScreen');
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const QuizScreen()),
-                    );
-                  },
-                  icon: const Icon(Icons.play_arrow, size: 28),
-                  label: Text('Start Quiz', style: TextStyle(fontSize: 18.sp)),
-                ),
-              ),
-              SizedBox(height: 2.h),
             ],
           ),
         ),
