@@ -6,6 +6,7 @@ void main() {
   final file = File('../assets/data/jlpt_questions.json');
   final encoder = JsonEncoder.withIndent('  ');
   file.writeAsStringSync(encoder.convert(json));
+  // ignore: avoid_print
   print('Generated jlpt_questions.json with ${countQuestions(json)} questions!');
 }
 
